@@ -6,6 +6,9 @@ import 'package:trip_planner/services/auth_service.dart';
 // THEME //
 import 'package:trip_planner/theme/text_style.dart';
 
+// UTILS //
+import 'package:trip_planner/utils/validators.dart';
+
 // WIDGETS //
 import 'package:trip_planner/widgets/authflashbars/error_flushbar.dart';
 import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
@@ -85,14 +88,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
                     textCapitalization: TextCapitalization.none,
-                    validator: (value) {
-                      if (value == null ||
-                          value.trim().isEmpty ||
-                          !value.contains('@')) {
-                        return 'Niepoprawny e-mail.';
-                      }
-                      return null;
-                    },
+                    validator: Validators.validateEmail,
                     onSaved: (value) {
                       _enteredEmail = value!;
                     },
@@ -102,12 +98,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                       labelText: 'Hasło',
                     ),
                     obscureText: true,
-                    validator: (value) {
-                      if (value == null || value.trim().length < 6) {
-                        return 'Hasło musi zawierać minimum 6 znaków';
-                      }
-                      return null;
-                    },
+                    validator: Validators.validatePassword,
                     onSaved: (value) {
                       _enteredPassword = value!;
                     },
