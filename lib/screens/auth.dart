@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:trip_planner/widgets/bottomsheets/login_bottom_sheet.dart';
-import 'package:trip_planner/widgets/bottomsheets/signup_bottom_sheet.dart';
 import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
+import 'package:trip_planner/widgets/triggers/login_bottom_sheet_trigger.dart';
+import 'package:trip_planner/widgets/triggers/signup_bottom_sheet_trigger.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});

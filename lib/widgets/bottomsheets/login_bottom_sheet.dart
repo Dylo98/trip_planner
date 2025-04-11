@@ -1,27 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trip_planner/widgets/authflashbars/error_flushbar.dart';
+import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
 
-void showLoginBottomSheet(BuildContext context) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    builder: (ctx) {
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(ctx).viewInsets.bottom,
-        ),
-        child: FractionallySizedBox(
-          heightFactor: 0.6,
-          child: SingleChildScrollView(
-            child: const LoginBottomSheet(),
-          ),
-        ),
-      );
-    },
-  );
-}
+final _firebase = FirebaseAuth.instance;
 
 class LoginBottomSheet extends StatefulWidget {
-  const LoginBottomSheet({super.key});
+  const LoginBottomSheet(this.mainContext, {super.key});
+
+  final BuildContext mainContext;
 
   @override
   State<LoginBottomSheet> createState() => _LoginBottomSheetState();
@@ -33,13 +20,31 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
   var _enteredEmail = '';
   var _enteredPassword = '';
 
-  void _submit() {
+  void _submit() async {
     final isValid = _form.currentState!.validate();
 
-    if (isValid) {
-      _form.currentState!.save();
-      print('Email: $_enteredEmail');
-      print('Password: $_enteredPassword');
+    if (!isValid) {
+      return;
+    }
+    _form.currentState!.save();
+    try {
+      final userCredential = await _firebase.signInWithEmailAndPassword(
+          email: _enteredEmail, password: _enteredPassword);
+      if (widget.mainContext.mounted) {
+        Navigator.of(widget.mainContext).pop();
+      }
+    } on FirebaseAuthException catch (error) {
+      var errorMessage = 'Nieudana próba zalogowania.';
+      if (error.code == 'invalid-email') {
+        errorMessage = 'Błędny adres e-mail';
+      } else if (error.code == 'user-not-found') {
+        errorMessage = 'Niepoprawne dane logowania';
+      }
+      if (!widget.mainContext.mounted) return;
+      ErrorFlushbar.show(
+        context: widget.mainContext,
+        message: errorMessage,
+      );
     }
   }
 
@@ -57,7 +62,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                 children: [
                   TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Email Address',
+                      labelText: 'E-mail',
                     ),
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
@@ -76,7 +81,7 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                   ),
                   TextFormField(
                     decoration: const InputDecoration(
-                      labelText: 'Password',
+                      labelText: 'Hasło',
                     ),
                     obscureText: true,
                     validator: (value) {
@@ -90,18 +95,11 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
                     },
                   ),
                   const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: _submit,
-                    child: Text('Log in'),
-                  )
+                  FormAuthBtn(onPressed: _submit, text: 'Zaloguj się'),
                 ],
               ),
             ),
           ),
-        ),
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Close BottomSheet'),
         ),
       ],
     );
