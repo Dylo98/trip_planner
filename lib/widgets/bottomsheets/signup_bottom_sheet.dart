@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // SERVICES IMPORT //
 import 'package:trip_planner/services/auth_service.dart';
@@ -46,20 +45,11 @@ class _SignupBottomSheetState extends State<SignupBottomSheet> {
         message: 'Utworzono konto!',
       );
       // showLoginBottomSheet(widget.mainContext);
-    } on FirebaseAuthException catch (error) {
-      var errorMessage = 'Wystąpił błąd podczas rejestracji.';
-      if (error.code == 'email-already-in-use') {
-        errorMessage = 'Adres e-mail jest już zajęty.';
-      } else if (error.code == 'invalid-email') {
-        errorMessage = 'Adres e-mail jest nie poprawny.';
-      } else if (error.code == 'weak-password') {
-        errorMessage = 'Hasło jest zbyt słabe';
-      }
-
+    } on AuthException catch (error) {
       if (!widget.mainContext.mounted) return;
       ErrorFlushbar.show(
         context: widget.mainContext,
-        message: errorMessage,
+        message: error.message,
       );
     }
   }

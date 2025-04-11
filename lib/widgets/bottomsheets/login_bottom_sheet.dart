@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 // SERVICES //
 import 'package:trip_planner/services/auth_service.dart';
@@ -40,17 +39,11 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
       if (widget.mainContext.mounted) {
         Navigator.of(widget.mainContext).pop();
       }
-    } on FirebaseAuthException catch (error) {
-      var errorMessage = 'Nieudana próba zalogowania.';
-      if (error.code == 'invalid-email') {
-        errorMessage = 'Błędny adres e-mail';
-      } else if (error.code == 'user-not-found') {
-        errorMessage = 'Niepoprawne dane logowania';
-      }
+    } on AuthException catch (error) {
       if (!widget.mainContext.mounted) return;
       ErrorFlushbar.show(
         context: widget.mainContext,
-        message: errorMessage,
+        message: error.message,
       );
     }
   }
