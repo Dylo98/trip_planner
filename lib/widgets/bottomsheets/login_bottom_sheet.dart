@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 // SERVICES //
 import 'package:trip_planner/services/auth_service.dart';
 
+// THEME //
+import 'package:trip_planner/theme/text_style.dart';
+
 // WIDGETS //
 import 'package:trip_planner/widgets/authflashbars/error_flushbar.dart';
 import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
@@ -51,7 +54,22 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Padding(
+          padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
+          child: Text(
+            'Login',
+            style: AppTextStyles.heading1,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 5, left: 15, bottom: 5),
+          child: Text(
+            'Wtiaj ponownie',
+            style: AppTextStyles.bodyText,
+          ),
+        ),
         Card(
           margin: const EdgeInsets.all(20),
           child: Padding(

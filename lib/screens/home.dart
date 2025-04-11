@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 // FIREBASE //
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:trip_planner/theme/colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,7 +17,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               FirebaseAuth.instance.signOut();
             },
-            icon: Icon(Icons.exit_to_app, color: Colors.blueGrey),
+            icon: Icon(Icons.exit_to_app, color: AppColors.red),
           )
         ],
       ),

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 
+// THEME //
+import 'package:trip_planner/theme/colors.dart';
+import 'package:trip_planner/theme/text_style.dart';
+import 'package:trip_planner/theme/button_style.dart';
+
 class FormAuthBtn extends StatelessWidget {
   const FormAuthBtn({
     super.key,
@@ -16,31 +21,15 @@ class FormAuthBtn extends StatelessWidget {
       width: 200,
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFa3b43a),
-              Color(0xFFc7fd1d),
-              Color(0xFFc4fc45),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(10),
+          gradient: AppColors.primaryGradient,
+          borderRadius: BorderRadius.circular(25),
         ),
         child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.transparent,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
-            ),
-          ),
+          style: AppButtonStyles.primaryButton,
           onPressed: onPressed,
           child: Text(
             text,
-            style: TextStyle(
-                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            style: AppTextStyles.buttonText,
           ),
         ),
       ),

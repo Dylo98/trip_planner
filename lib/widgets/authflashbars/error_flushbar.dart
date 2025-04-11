@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 // EXTERNAL PACKAGES //
 import 'package:another_flushbar/flushbar.dart';
 
+// THEME //
+import 'package:trip_planner/theme/colors.dart';
+
 class ErrorFlushbar {
   static void show({
     required BuildContext context,
@@ -11,7 +14,7 @@ class ErrorFlushbar {
     Flushbar(
       margin: const EdgeInsets.all(16),
       borderRadius: BorderRadius.circular(12),
-      backgroundColor: Colors.redAccent,
+      backgroundColor: AppColors.red,
       message: message,
       duration: const Duration(seconds: 3),
       flushbarPosition: FlushbarPosition.TOP,
