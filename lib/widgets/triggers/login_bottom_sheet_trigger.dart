@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+// WIDGETS //
 import 'package:trip_planner/widgets/bottomsheets/login_bottom_sheet.dart';
 
 void showLoginBottomSheet(BuildContext context) {

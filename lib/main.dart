@@ -1,12 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
+// FIREBASE //
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// SCREENS //
 import 'package:trip_planner/screens/home.dart';
 import 'package:trip_planner/screens/splash.dart';
-import 'firebase_options.dart';
-
 import 'package:trip_planner/screens/auth.dart';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
+// SERVICES //
+import 'package:trip_planner/services/auth_service.dart';
+
+// WIDGETS //
 import 'package:trip_planner/widgets/authflashbars/error_flushbar.dart';
 import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
 
-final _firebase = FirebaseAuth.instance;
+final _authService = AuthService();
 
 class LoginBottomSheet extends StatefulWidget {
   const LoginBottomSheet(this.mainContext, {super.key});
@@ -28,8 +33,10 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
     }
     _form.currentState!.save();
     try {
-      final userCredential = await _firebase.signInWithEmailAndPassword(
-          email: _enteredEmail, password: _enteredPassword);
+      await _authService.login(
+        email: _enteredEmail,
+        password: _enteredPassword,
+      );
       if (widget.mainContext.mounted) {
         Navigator.of(widget.mainContext).pop();
       }

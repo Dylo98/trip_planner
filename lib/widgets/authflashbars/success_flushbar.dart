@@ -1,5 +1,7 @@
-import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
+
+// EXTERNAL PACKAGES //
+import 'package:another_flushbar/flushbar.dart';
 
 class SuccessFlushbar {
   static void show({
