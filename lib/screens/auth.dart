@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 
 // WIDGETS //
 import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
@@ -16,18 +17,23 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage("assets/images/background_image1.jpg"),
-            // colorFilter: ColorFilter.mode(
-            //   Colors.black.withValues(alpha: 0.3),
-            //   BlendMode.darken,
-            // ),
-            fit: BoxFit.cover,
+      body: Stack(children: [
+        Image.asset(
+          'assets/images/background_image1.jpg',
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: 1.5,
+            sigmaY: 1.5,
+          ),
+          child: Container(
+            color: Colors.black.withValues(alpha: 0.2),
           ),
         ),
-        child: Center(
+        Center(
           child: Column(
             children: [
               Image.asset("assets/images/logo.png"),
@@ -45,7 +51,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ],
           ),
         ),
-      ),
+      ]),
     );
   }
 }
