@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 // FIREBASE //
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:trip_planner/theme/colors.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

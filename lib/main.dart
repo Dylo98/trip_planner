@@ -5,12 +5,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 // SCREENS //
-import 'package:trip_planner/screens/home.dart';
-import 'package:trip_planner/screens/splash.dart';
-import 'package:trip_planner/screens/auth.dart';
+import 'package:trip_planner/features/home/screens/home.dart';
+import 'package:trip_planner/features/splash/screens/splash.dart';
+import 'package:trip_planner/features/auth/screens/auth.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:trip_planner/theme/app_theme.dart';
+import 'package:trip_planner/core/theme/app_theme.dart';
 import 'firebase_options.dart';
 
 void main() async {

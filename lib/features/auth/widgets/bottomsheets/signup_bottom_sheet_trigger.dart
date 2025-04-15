@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // WIDGETS //
-import 'package:trip_planner/widgets/bottomsheets/signup_bottom_sheet.dart';
+import 'package:trip_planner/features/auth/widgets/bottomsheets/signup_bottom_sheet.dart';
 
 void showSignupBottomSheet(BuildContext context) {
   showModalBottomSheet(

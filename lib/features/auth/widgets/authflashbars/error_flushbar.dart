@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
 
 // THEME //
-import 'package:trip_planner/theme/colors.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 
 class ErrorFlushbar {
   static void show({

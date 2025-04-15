@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
 // SERVICES IMPORT //
-import 'package:trip_planner/services/auth_service.dart';
+import 'package:trip_planner/data/services/auth_service.dart';
 
 // UTILS //
-import 'package:trip_planner/utils/validators.dart';
+import 'package:trip_planner/core/utils/validators.dart';
 
 // WIDGETS IMPORT //
-import 'package:trip_planner/widgets/authflashbars/error_flushbar.dart';
-import 'package:trip_planner/widgets/authflashbars/success_flushbar.dart';
-import 'package:trip_planner/widgets/buttons/form_auth_btn.dart';
+import 'package:trip_planner/features/auth/widgets/authflashbars/success_flushbar.dart';
+import 'package:trip_planner/features/auth/widgets/authflashbars/error_flushbar.dart';
+import 'package:trip_planner/core/widgets/buttons/form_auth_btn.dart';
 
 final _authService = AuthService();
 
