@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 
+// RIVER POD / PROVIDER //
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/features/auth/controller/auth_provider.dart';
+
 // SERVICES //
 import 'package:trip_planner/data/services/auth_service.dart';
 
@@ -13,18 +17,16 @@ import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/features/auth/widgets/authflashbars/error_flushbar.dart';
 import 'package:trip_planner/core/widgets/buttons/form_auth_btn.dart';
 
-final _authService = AuthService();
-
-class LoginBottomSheet extends StatefulWidget {
+class LoginBottomSheet extends ConsumerStatefulWidget {
   const LoginBottomSheet(this.mainContext, {super.key});
 
   final BuildContext mainContext;
 
   @override
-  State<LoginBottomSheet> createState() => _LoginBottomSheetState();
+  ConsumerState<LoginBottomSheet> createState() => _LoginBottomSheetState();
 }
 
-class _LoginBottomSheetState extends State<LoginBottomSheet> {
+class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
   final _form = GlobalKey<FormState>();
 
   var _enteredEmail = '';
@@ -37,8 +39,10 @@ class _LoginBottomSheetState extends State<LoginBottomSheet> {
       return;
     }
     _form.currentState!.save();
+
+    final authService = ref.read(authProvider);
     try {
-      await _authService.login(
+      await authService.login(
         email: _enteredEmail,
         password: _enteredPassword,
       );
