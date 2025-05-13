@@ -12,7 +12,7 @@ class AddTripBox extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.secondary,
+        gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -25,7 +25,10 @@ class AddTripBox extends StatelessWidget {
       child: const Center(
         child: Text(
           'DODAJ NOWĄ PODRÓŻ',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.black),
         ),
       ),
     );
