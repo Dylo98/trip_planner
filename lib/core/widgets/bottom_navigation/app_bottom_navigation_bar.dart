@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 // NAVIGATION //
-import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
+import 'package:trip_planner/core/navigation/home_navigation.dart';
 
 class AppBottomNavigationBar extends StatelessWidget {
   const AppBottomNavigationBar({super.key});
@@ -11,20 +11,21 @@ class AppBottomNavigationBar extends StatelessWidget {
     return BottomNavigationBar(
       items: [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
+          icon: IconButton(
+            onPressed: () {
+              navigateToHome(context);
+            },
+            icon: Icon(Icons.home),
+          ),
           label: '',
         ),
         BottomNavigationBarItem(
           icon: IconButton(
             onPressed: () {
-              navigateToAddTrip(context);
+              navigateToHome(context);
             },
-            icon: Icon(Icons.add),
+            icon: Icon(Icons.home),
           ),
-          label: '',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.settings),
           label: '',
         ),
       ],

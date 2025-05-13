@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/widgets/bottom_navigation/app_bottom_navigation_bar.dart';
 
 class NewTripScreen extends StatelessWidget {
   const NewTripScreen({super.key});
@@ -12,6 +13,7 @@ class NewTripScreen extends StatelessWidget {
       body: Center(
         child: Text('Ekran dodawania nowej podróży'),
       ),
+      bottomNavigationBar: AppBottomNavigationBar(),
     );
   }
 }
