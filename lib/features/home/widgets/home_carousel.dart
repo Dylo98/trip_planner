@@ -1,20 +1,18 @@
 import 'package:flutter/material.dart';
+
+// EXTERNAL PACKAGES //
 import 'package:carousel_slider/carousel_slider.dart';
+
+// WIDGETS //
 import 'package:trip_planner/features/home/widgets/build_carousel_image.dart';
 
 class HomeCarousel extends StatelessWidget {
-  const HomeCarousel({super.key});
+  const HomeCarousel({super.key, required this.userTrips});
+
+  final List<String> userTrips;
 
   @override
   Widget build(BuildContext context) {
-    final List<String> originalImages = [
-      'https://picsum.photos/200/300?random=1',
-      'https://picsum.photos/200/300?random=2',
-      'https://picsum.photos/200/300?random=3',
-      'https://picsum.photos/200/300?random=4',
-      'https://picsum.photos/200/300?random=5',
-    ];
-
     return SizedBox(
       height: 200,
       child: CarouselSlider.builder(
@@ -26,9 +24,9 @@ class HomeCarousel extends StatelessWidget {
           autoPlayCurve: Curves.fastOutSlowIn,
           enlargeCenterPage: true,
         ),
-        itemCount: originalImages.length,
+        itemCount: userTrips.length,
         itemBuilder: (context, index, realIndex) {
-          final urlImage = originalImages[index];
+          final urlImage = userTrips[index];
           return BuildCarouselImage(urlImage: urlImage);
         },
       ),

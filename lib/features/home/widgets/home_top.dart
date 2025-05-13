@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+// WIDGETS //
 import 'package:trip_planner/features/home/widgets/build_cover_image.dart';
 import 'package:trip_planner/features/home/widgets/build_profile_image.dart';
 

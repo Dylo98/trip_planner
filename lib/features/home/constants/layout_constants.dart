@@ -1,2 +1,2 @@
-final double coverHeight = 240;
+final double coverHeight = 140;
 final double profileHeight = 144;

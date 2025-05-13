@@ -11,12 +11,17 @@ import 'package:trip_planner/features/home/widgets/home_top.dart';
 import 'package:trip_planner/features/home/widgets/home_content.dart';
 import 'package:trip_planner/features/home/widgets/add_trip_box.dart';
 import 'package:trip_planner/features/home/widgets/home_carousel.dart';
+import 'package:trip_planner/features/home/widgets/home_empty_carousel.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final List<String> userTrips = [
+      // 'https://picsum.photos/200/300?random=1',
+      // 'https://picsum.photos/200/300?random=2',
+    ];
     return Scaffold(
       appBar: AppBar(
         title: const Text('TripPlanner'),
@@ -40,7 +45,9 @@ class HomeScreen extends StatelessWidget {
             child: AddTripBox(),
           ),
           const SizedBox(height: 20),
-          HomeCarousel(),
+          userTrips.isNotEmpty
+              ? HomeCarousel(userTrips: userTrips)
+              : HomeEmptyCarousel(),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
