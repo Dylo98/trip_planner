@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+// FIREBASE //
+import 'package:firebase_auth/firebase_auth.dart';
+
+// NAVIGATION //
+import 'package:trip_planner/core/navigation/my_trips_navigation.dart';
+import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
+
 // THEME //
 import 'package:trip_planner/core/theme/colors.dart';
 
@@ -51,12 +58,16 @@ class AppDrawer extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.add, color: AppColors.primary),
                   title: const Text('Dodaj nową podróż'),
-                  onTap: () {},
+                  onTap: () {
+                    navigateToAddTrip(context);
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.book, color: Colors.blue),
                   title: const Text('Moje podróże'),
-                  onTap: () {},
+                  onTap: () {
+                    navigateToMyTrips(context);
+                  },
                 ),
                 ListTile(
                   leading: const Icon(Icons.person, color: Colors.pink),
@@ -71,7 +82,9 @@ class AppDrawer extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.exit_to_app, color: AppColors.red),
                   title: const Text('Wyloguj się'),
-                  onTap: () {},
+                  onTap: () {
+                    FirebaseAuth.instance.signOut();
+                  },
                 ),
               ],
             ),

@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 // FIREBASE //
 import 'package:firebase_auth/firebase_auth.dart';
 
+// NAVIGATION //
+import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
+
 // THEME //
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/widgets/bottom_navigation/app_bottom_navigation_bar.dart';
@@ -15,9 +18,14 @@ import 'package:trip_planner/features/home/widgets/add_trip_box.dart';
 import 'package:trip_planner/features/home/widgets/home_carousel.dart';
 import 'package:trip_planner/features/home/widgets/home_empty_carousel.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final List<String> userTrips = [
@@ -44,7 +52,9 @@ class HomeScreen extends StatelessWidget {
           HomeContent(),
           const SizedBox(height: 20),
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              navigateToAddTrip(context);
+            },
             child: AddTripBox(),
           ),
           const SizedBox(height: 20),
