@@ -5,6 +5,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // THEME //
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/widgets/bottom_navigation/app_bottom_navigation_bar.dart';
+import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
 
 // WIDGETS //
 import 'package:trip_planner/features/home/widgets/home_top.dart';
@@ -34,6 +36,7 @@ class HomeScreen extends StatelessWidget {
           )
         ],
       ),
+      drawer: AppDrawer(),
       body: ListView(
         children: <Widget>[
           HomeTop(),
@@ -50,22 +53,7 @@ class HomeScreen extends StatelessWidget {
               : HomeEmptyCarousel(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: '',
-          ),
-        ],
-      ),
+      bottomNavigationBar: AppBottomNavigationBar(),
     );
   }
 }

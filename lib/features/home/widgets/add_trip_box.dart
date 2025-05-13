@@ -26,9 +26,10 @@ class AddTripBox extends StatelessWidget {
         child: Text(
           'DODAJ NOWĄ PODRÓŻ',
           style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.black),
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.black,
+          ),
         ),
       ),
     );
