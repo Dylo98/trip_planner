@@ -1,4 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+final _firestore = FirebaseFirestore.instance;
 
 class AuthException implements Exception {
   AuthException(this.message);
@@ -32,12 +35,21 @@ class AuthService {
   Future<void> signup({
     required String email,
     required String password,
+    required String name,
   }) async {
     try {
-      await _firebase.createUserWithEmailAndPassword(
+      final credential = await _firebase.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      final user = credential.user;
+
+      await _firestore.collection('users').doc(user!.uid).set({
+        'avatar': '',
+        'email': email,
+        'name': name,
+      });
     } on FirebaseAuthException catch (error) {
       if (error.code == 'email-already-in-use') {
         throw AuthException('Adres e-mail jest już zajęty.');

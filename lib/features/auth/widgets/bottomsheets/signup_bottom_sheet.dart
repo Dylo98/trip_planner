@@ -29,6 +29,7 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
 
   var _enteredEmail = '';
   var _enteredPassword = '';
+  var _enteredName = '';
 
   void _submit() async {
     final isValid = _form.currentState!.validate();
@@ -44,6 +45,7 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
       await authService.signup(
         email: _enteredEmail,
         password: _enteredPassword,
+        name: _enteredName,
       );
       if (!widget.mainContext.mounted) return;
       Navigator.of(widget.mainContext).pop();
@@ -75,6 +77,14 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
                 key: _form,
                 child: Column(
                   children: [
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: 'Imię',
+                      ),
+                      onSaved: (value) {
+                        _enteredName = value!;
+                      },
+                    ),
                     TextFormField(
                       decoration: const InputDecoration(
                         labelText: 'E-mail',
