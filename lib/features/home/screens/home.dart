@@ -5,11 +5,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 // NAVIGATION //
 import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
+import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
 
 // THEME //
 import 'package:trip_planner/core/theme/colors.dart';
-import 'package:trip_planner/core/widgets/bottom_navigation/app_bottom_navigation_bar.dart';
-import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
 
 // WIDGETS //
 import 'package:trip_planner/features/home/widgets/home_top.dart';
@@ -63,7 +62,6 @@ class _HomeScreenState extends State<HomeScreen> {
               : HomeEmptyCarousel(),
         ],
       ),
-      bottomNavigationBar: AppBottomNavigationBar(),
     );
   }
 }
