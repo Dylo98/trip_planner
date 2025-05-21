@@ -1,17 +1,28 @@
-import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:trip_planner/features/trip/widgets/transform_latlng.dart';
 
-class NewTripMapScreen extends StatefulWidget {
+/* SERVICES */
+import 'package:trip_planner/features/trip/services/current_location.dart';
+
+/* MODEL */
+import 'package:trip_planner/features/trip/model/marker_point_model.dart';
+
+/* CONTROLLER */
+import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
+
+/* WIDGETS */
+import 'package:trip_planner/features/trip/widgets/search_location.dart';
+
+class NewTripMapScreen extends ConsumerStatefulWidget {
   const NewTripMapScreen({super.key});
 
   @override
-  State<NewTripMapScreen> createState() => _NewTripMapScreenState();
+  ConsumerState<NewTripMapScreen> createState() => _NewTripMapScreenState();
 }
 
-class _NewTripMapScreenState extends State<NewTripMapScreen> {
+class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
@@ -20,69 +31,35 @@ class _NewTripMapScreenState extends State<NewTripMapScreen> {
     zoom: 12,
   );
 
-  final List<Marker> myMarker = [];
-  final List<Marker> markerList = const [];
-
-  @override
-  void initState() {
-    super.initState();
-    myMarker.addAll(markerList);
-  }
-
-  Future<Position> _getCurrentPosition() async {
-    await Geolocator.requestPermission()
-        .then((value) {})
-        .onError((error, stackTrace) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Nie można uzyskać dostępu do lokalizacji. Sprawdź ustawienia lokalizacji.',
-          ),
-        ),
-      );
-    });
-    return await Geolocator.getCurrentPosition();
-  }
-
-  packData() {
-    _getCurrentPosition().then((value) async {
-      CameraPosition cameraPosition = CameraPosition(
-        target: LatLng(value.latitude, value.longitude),
-        zoom: 14,
-      );
-
-      myMarker.add(
-        Marker(
-          markerId: const MarkerId('currentLocation'),
-          position: LatLng(value.latitude, value.longitude),
-          infoWindow: const InfoWindow(
-            title: 'Twoja lokalizacja',
-          ),
-        ),
-      );
-
-      final GoogleMapController controller = await _controller.future;
-      controller.animateCamera(
-        CameraUpdate.newCameraPosition(cameraPosition),
-      );
-      setState(() {});
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final markers = ref.watch(tripMarkersProvider.notifier).toGoogleMarkers();
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              TransformLatlng(),
+              SearchLocation(
+                onPlaceSelected: (LatLng position, String name) async {
+                  final controller = await _controller.future;
+                  ref.read(tripMarkersProvider.notifier).addMarker(
+                        MarkerPoint(
+                          id: name,
+                          position: position,
+                          name: name,
+                        ),
+                      );
+                  controller.animateCamera(
+                    CameraUpdate.newLatLngZoom(position, 15),
+                  );
+                },
+              ),
               SizedBox(
                 height: 400,
                 child: GoogleMap(
                   mapType: MapType.normal,
-                  markers: Set<Marker>.of(myMarker),
+                  markers: Set<Marker>.from(markers),
                   initialCameraPosition: _initialPosition,
                   onMapCreated: (GoogleMapController controller) {
                     _controller.complete(controller);
@@ -94,8 +71,23 @@ class _NewTripMapScreenState extends State<NewTripMapScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          packData();
+        onPressed: () async {
+          final position = await CurrentLocation.getCurrentPosition();
+          final cameraPosition = CameraPosition(
+            target: LatLng(position.latitude, position.longitude),
+            zoom: 14,
+          );
+          ref.read(tripMarkersProvider.notifier).addMarker(
+                MarkerPoint(
+                  id: 'currentLocation',
+                  position: LatLng(position.latitude, position.longitude),
+                  name: 'Twoja lokalizacja',
+                ),
+              );
+          final controller = await _controller.future;
+          controller.animateCamera(
+            CameraUpdate.newCameraPosition(cameraPosition),
+          );
         },
         child: const Icon(Icons.my_location),
       ),

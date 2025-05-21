@@ -26,6 +26,14 @@ class _MainNewTripScreenState extends State<MainNewTripScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nowa podróż'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.check),
+            onPressed: () {
+              // Handle save action
+            },
+          ),
+        ],
       ),
       body: IndexedStack(
         index: _selectedIndex,
