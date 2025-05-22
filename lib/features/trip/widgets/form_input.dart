@@ -25,6 +25,8 @@ class FormInput extends StatelessWidget {
       controller: controller,
       maxLength: maxCharacters,
       decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
         prefixIcon: Container(
           margin: const EdgeInsets.only(left: 12, right: 8),
           decoration: BoxDecoration(

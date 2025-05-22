@@ -100,23 +100,28 @@ class _SearchLocation extends State<SearchLocation> {
                   labelText: 'Punkt podróży',
                   icon: Icons.place,
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _suggestions.length,
-                    itemBuilder: (context, index) {
-                      return ListTile(
-                        title: Text(_suggestions[index]['description']),
-                        onTap: () {
-                          _handlePlaceSelected(index);
-                          setState(() {
-                            _suggestions = [];
-                            _addressController.text = '';
-                          });
+                if (_suggestions.isNotEmpty)
+                  Expanded(
+                    child: Material(
+                      elevation: 4,
+                      color: Colors.white,
+                      child: ListView.builder(
+                        itemCount: _suggestions.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(_suggestions[index]['description']),
+                            onTap: () {
+                              _handlePlaceSelected(index);
+                              setState(() {
+                                _suggestions = [];
+                                _addressController.text = '';
+                              });
+                            },
+                          );
                         },
-                      );
-                    },
+                      ),
+                    ),
                   ),
-                ),
               ],
             ),
           ),

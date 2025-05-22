@@ -46,40 +46,37 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
         )
         .toSet();
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              SearchLocation(
-                onPlaceSelected: (LatLng position, String name) async {
-                  final controller = await _controller.future;
-                  ref.read(tripMarkersProvider.notifier).addMarker(
-                        MarkerPoint(
-                          id: name,
-                          position: position,
-                          name: name,
-                        ),
-                      );
-                  controller.animateCamera(
-                    CameraUpdate.newLatLngZoom(position, 15),
-                  );
-                },
-              ),
-              SizedBox(
-                height: 400,
-                child: GoogleMap(
-                  mapType: MapType.normal,
-                  markers: Set<Marker>.from(markers),
-                  initialCameraPosition: _initialPosition,
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                ),
-              ),
-            ],
+      body: Stack(
+        children: [
+          GoogleMap(
+            mapType: MapType.normal,
+            markers: Set<Marker>.from(markers),
+            initialCameraPosition: _initialPosition,
+            onMapCreated: (GoogleMapController controller) {
+              _controller.complete(controller);
+            },
           ),
-        ),
+          Positioned(
+            top: 16,
+            left: 16,
+            right: 16,
+            child: SearchLocation(
+              onPlaceSelected: (LatLng position, String name) async {
+                final controller = await _controller.future;
+                ref.read(tripMarkersProvider.notifier).addMarker(
+                      MarkerPoint(
+                        id: name,
+                        position: position,
+                        name: name,
+                      ),
+                    );
+                controller.animateCamera(
+                  CameraUpdate.newLatLngZoom(position, 15),
+                );
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
