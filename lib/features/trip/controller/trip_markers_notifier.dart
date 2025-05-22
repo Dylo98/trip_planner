@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../model/marker_point_model.dart';
 
 class TripMarkersNotifier extends StateNotifier<List<MarkerPoint>> {
@@ -12,14 +11,9 @@ class TripMarkersNotifier extends StateNotifier<List<MarkerPoint>> {
   void clear() {
     state = [];
   }
-
-  List<Marker> toGoogleMarkers() {
-    return state.map((marker) {
-      return Marker(
-        markerId: MarkerId(marker.id),
-        position: marker.position,
-        infoWindow: InfoWindow(title: marker.name ?? 'Punkt'),
-      );
-    }).toList();
-  }
 }
+
+final tripMarkersProvider =
+    StateNotifierProvider<TripMarkersNotifier, List<MarkerPoint>>(
+  (ref) => TripMarkersNotifier(),
+);

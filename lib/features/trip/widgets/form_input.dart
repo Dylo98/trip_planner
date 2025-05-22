@@ -9,6 +9,7 @@ class FormInput extends StatelessWidget {
     this.onTap,
     this.controller,
     this.maxCharacters,
+    this.onChanged,
   });
 
   final String labelText;
@@ -16,6 +17,7 @@ class FormInput extends StatelessWidget {
   final Function()? onTap;
   final TextEditingController? controller;
   final int? maxCharacters;
+  final Function(String)? onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class FormInput extends StatelessWidget {
       ),
       readOnly: onTap != null,
       onTap: onTap,
+      onChanged: onChanged,
     );
   }
 }

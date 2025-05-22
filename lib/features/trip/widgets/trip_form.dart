@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/features/trip/controller/trip_form_notifier.dart';
 import 'package:trip_planner/features/trip/widgets/form_input.dart';
 
-class TripForm extends StatefulWidget {
+class TripForm extends ConsumerStatefulWidget {
   const TripForm({super.key});
 
   @override
-  State<TripForm> createState() => _TripFormState();
+  ConsumerState<TripForm> createState() => _TripFormState();
 }
 
-class _TripFormState extends State<TripForm> {
+class _TripFormState extends ConsumerState<TripForm> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
@@ -55,6 +57,9 @@ class _TripFormState extends State<TripForm> {
             labelText: 'Nazwa podróży',
             icon: Icons.title,
             maxCharacters: 40,
+            onChanged: (value) {
+              ref.read(tripFormProvider.notifier).setName(value);
+            },
           ),
           const SizedBox(height: 20),
           FormInput(
@@ -62,6 +67,9 @@ class _TripFormState extends State<TripForm> {
             labelText: 'Opis podróży',
             icon: Icons.description,
             maxCharacters: 100,
+            onChanged: (value) {
+              ref.read(tripFormProvider.notifier).setDescription(value);
+            },
           ),
           const SizedBox(height: 20),
           Container(
@@ -107,6 +115,9 @@ class _TripFormState extends State<TripForm> {
                               _startDateController.text =
                                   DateFormat('yyyy.MM.dd').format(pickedDate);
                             });
+                            ref
+                                .read(tripFormProvider.notifier)
+                                .setStartDate(pickedDate);
                           }
                         },
                       ),
@@ -130,6 +141,9 @@ class _TripFormState extends State<TripForm> {
                               _endDateController.text =
                                   DateFormat('yyyy.MM.dd').format(pickedDate);
                             });
+                            ref
+                                .read(tripFormProvider.notifier)
+                                .setEndDate(pickedDate);
                           }
                         },
                       ),

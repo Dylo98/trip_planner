@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/features/trip/controller/trip_form_notifier.dart';
+import 'package:trip_planner/features/trip/controller/trip_markers_notifier.dart';
 import 'package:trip_planner/features/trip/screens/new_trip.dart';
 import 'package:trip_planner/features/trip/screens/new_trip_map.dart';
 
-class MainNewTripScreen extends StatefulWidget {
+class MainNewTripScreen extends ConsumerStatefulWidget {
   const MainNewTripScreen({super.key});
 
   @override
-  State<MainNewTripScreen> createState() => _MainNewTripScreenState();
+  ConsumerState<MainNewTripScreen> createState() => _MainNewTripScreenState();
 }
 
-class _MainNewTripScreenState extends State<MainNewTripScreen> {
+class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
   int _selectedIndex = 0;
   final List<Widget> _screens = [
     const NewTripScreen(),
@@ -29,8 +32,12 @@ class _MainNewTripScreenState extends State<MainNewTripScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: () {
-              // Handle save action
+            onPressed: () async {
+              final markers = ref.read(tripMarkersProvider);
+              await ref.read(tripFormProvider.notifier).save(markers);
+
+              ref.read(tripMarkersProvider.notifier).clear();
+              Navigator.pop(context);
             },
           ),
         ],

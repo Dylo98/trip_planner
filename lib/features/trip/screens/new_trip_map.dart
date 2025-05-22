@@ -9,8 +9,8 @@ import 'package:trip_planner/features/trip/services/current_location.dart';
 /* MODEL */
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
-/* CONTROLLER */
-import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
+/* PROVIDERS */
+import 'package:trip_planner/features/trip/controller/trip_markers_notifier.dart';
 
 /* WIDGETS */
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
@@ -33,7 +33,18 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final markers = ref.watch(tripMarkersProvider.notifier).toGoogleMarkers();
+    final markersPoints = ref.watch(tripMarkersProvider);
+    final markers = markersPoints
+        .map(
+          (markerPoint) => Marker(
+            markerId: MarkerId(markerPoint.id),
+            position: markerPoint.position,
+            infoWindow: InfoWindow(
+              title: markerPoint.name,
+            ),
+          ),
+        )
+        .toSet();
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
