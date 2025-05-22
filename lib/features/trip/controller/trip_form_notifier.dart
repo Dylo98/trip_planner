@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
@@ -43,11 +45,19 @@ class TripFormNotifier extends StateNotifier<Trip> {
     state = state.copyWith(tripPhotoUrl: tripPhotoUrl);
   }
 
-  Future<void> save(List<MarkerPoint> markers) async {
+  Future<void> save(File? image, List<MarkerPoint> markers) async {
+    final tripId = const Uuid().v4();
+
+    String? tripPhotoUrl;
+    if (image != null) {
+      tripPhotoUrl = await _tripService.uploadTripImage(image, tripId);
+    }
+
     final trip = state.copyWith(
-      id: const Uuid().v4(),
+      id: tripId,
       startDate: state.startDate,
       markerPoints: markers,
+      tripPhotoUrl: tripPhotoUrl,
     );
 
     await _tripService.saveTrip(trip);

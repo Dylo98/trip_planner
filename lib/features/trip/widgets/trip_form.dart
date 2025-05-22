@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/trip/controller/trip_form_notifier.dart';
+import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/widgets/form_input.dart';
 
 class TripForm extends ConsumerStatefulWidget {
@@ -31,9 +32,11 @@ class _TripFormState extends ConsumerState<TripForm> {
     );
 
     if (pickedFile != null) {
+      final image = File(pickedFile.path);
       setState(() {
-        _selectedImage = File(pickedFile.path);
+        _selectedImage = image;
       });
+      ref.read(tripPhotoProvider.notifier).state = image;
     }
   }
 
