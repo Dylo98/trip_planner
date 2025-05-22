@@ -36,11 +36,15 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
             onPressed: () async {
               final image = ref.read(tripPhotoProvider);
               final markers = ref.read(tripMarkersProvider);
+
               await ref.read(tripFormProvider.notifier).save(image, markers);
 
               ref.read(tripMarkersProvider.notifier).clear();
               ref.read(tripPhotoProvider.notifier).state = null;
-              Navigator.pop(context);
+
+              if (context.mounted) {
+                Navigator.of(context).pop();
+              }
             },
           ),
         ],

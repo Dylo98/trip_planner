@@ -5,11 +5,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 
 // WIDGETS //
 import 'package:trip_planner/features/home/widgets/build_carousel_image.dart';
+import 'package:trip_planner/features/trip/model/trip_model.dart';
 
 class HomeCarousel extends StatelessWidget {
   const HomeCarousel({super.key, required this.userTrips});
 
-  final List<String> userTrips;
+  final List<Trip> userTrips;
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +27,9 @@ class HomeCarousel extends StatelessWidget {
         ),
         itemCount: userTrips.length,
         itemBuilder: (context, index, realIndex) {
-          final urlImage = userTrips[index];
-          return BuildCarouselImage(urlImage: urlImage);
+          final trip = userTrips[index];
+          return BuildCarouselImage(
+              urlImage: trip.tripPhotoUrl ?? 'Brak zdjęcia', title: trip.name);
         },
       ),
     );

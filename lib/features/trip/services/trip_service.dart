@@ -31,6 +31,28 @@ class TripService {
     final downloadUrl = await ref.getDownloadURL();
     return downloadUrl;
   }
+
+  Future<Trip> getTrip(String tripId) async {
+    final uid = _auth.currentUser?.uid;
+    final doc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
+    return Trip.fromJson(doc.data()!);
+  }
+
+  Stream<List<Trip>> getTrips() {
+    final uid = _auth.currentUser?.uid;
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Trip.fromJson(doc.data())).toList());
+  }
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {
