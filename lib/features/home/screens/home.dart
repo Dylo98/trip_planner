@@ -58,7 +58,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             const SizedBox(height: 20),
             userTrips.isNotEmpty
-                ? HomeCarousel(userTrips: userTrips)
+                ? HomeCarousel(userTrips: userTrips.take(3).toList())
                 : HomeEmptyCarousel(),
           ],
         ),
