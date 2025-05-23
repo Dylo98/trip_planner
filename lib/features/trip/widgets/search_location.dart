@@ -1,11 +1,13 @@
 import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'package:trip_planner/features/trip/widgets/form_input.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:uuid/uuid.dart';
+
+/* THEME */
+import 'package:trip_planner/core/theme/input_style.dart';
 
 class SearchLocation extends StatefulWidget {
   const SearchLocation({super.key, this.onPlaceSelected});
@@ -95,10 +97,12 @@ class _SearchLocation extends State<SearchLocation> {
           Expanded(
             child: Column(
               children: [
-                FormInput(
+                TextFormField(
                   controller: _addressController,
-                  labelText: 'Punkt podróży',
-                  icon: Icons.place,
+                  decoration: AppInputStyle.inputDecoration(
+                    icon: Icons.place,
+                    labelText: 'Punkt podróży',
+                  ),
                 ),
                 if (_suggestions.isNotEmpty)
                   Expanded(
@@ -131,14 +135,3 @@ class _SearchLocation extends State<SearchLocation> {
     );
   }
 }
-
-
-/*
-
-          IconButton.filled(
-            onPressed: () {},
-            icon: const Icon(Icons.add),
-            style: IconButton.styleFrom(backgroundColor: AppColors.primary),
-          ),
-
-          */

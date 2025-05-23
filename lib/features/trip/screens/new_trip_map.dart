@@ -10,7 +10,7 @@ import 'package:trip_planner/features/trip/services/current_location.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 /* PROVIDERS */
-import 'package:trip_planner/features/trip/controller/trip_markers_notifier.dart';
+import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 
 /* WIDGETS */
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
@@ -28,7 +28,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
 
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(52.2297, 21.0122),
-    zoom: 12,
+    zoom: 1,
   );
 
   @override

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/controller/trip_form_notifier.dart';
-import 'package:trip_planner/features/trip/controller/trip_markers_notifier.dart';
+
+/* PROVIDERS */
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
+import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
+import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
+
+/* SCREENS */
 import 'package:trip_planner/features/trip/screens/new_trip.dart';
 import 'package:trip_planner/features/trip/screens/new_trip_map.dart';
 
@@ -25,6 +29,19 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
     });
   }
 
+  void _saveTrip() async {
+    final image = ref.read(tripPhotoProvider);
+    final markers = ref.read(tripMarkersProvider);
+
+    await ref.read(tripFormProvider.notifier).save(image, markers);
+
+    ref.read(tripMarkersProvider.notifier).clear();
+    ref.read(tripPhotoProvider.notifier).state = null;
+
+    if (!mounted) return;
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,19 +50,7 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.check),
-            onPressed: () async {
-              final image = ref.read(tripPhotoProvider);
-              final markers = ref.read(tripMarkersProvider);
-
-              await ref.read(tripFormProvider.notifier).save(image, markers);
-
-              ref.read(tripMarkersProvider.notifier).clear();
-              ref.read(tripPhotoProvider.notifier).state = null;
-
-              if (context.mounted) {
-                Navigator.of(context).pop();
-              }
-            },
+            onPressed: _saveTrip,
           ),
         ],
       ),

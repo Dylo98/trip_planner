@@ -1,10 +1,13 @@
 import 'dart:io';
-
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+/* SERVICE */
+import 'package:trip_planner/features/trip/services/trip_service.dart';
+
+/* MODEL */
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/services/trip_service.dart';
 
 class TripFormNotifier extends StateNotifier<Trip> {
   TripFormNotifier(this._tripService)

@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/core/theme/colors.dart';
-import 'package:trip_planner/features/trip/controller/trip_form_notifier.dart';
+import 'package:trip_planner/core/theme/input_style.dart';
+import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
-import 'package:trip_planner/features/trip/widgets/form_input.dart';
 
 class TripForm extends ConsumerStatefulWidget {
   const TripForm({super.key});
@@ -55,24 +55,22 @@ class _TripFormState extends ConsumerState<TripForm> {
       key: _formKey,
       child: Column(
         children: [
-          FormInput(
+          TextFormField(
             controller: _nameController,
-            labelText: 'Nazwa podróży',
-            icon: Icons.title,
-            maxCharacters: 40,
-            onChanged: (value) {
-              ref.read(tripFormProvider.notifier).setName(value);
-            },
+            maxLength: 40,
+            decoration: AppInputStyle.inputDecoration(
+                icon: Icons.title, labelText: 'Nazwa podróży'),
+            onChanged: (value) =>
+                ref.read(tripFormProvider.notifier).setName(value),
           ),
           const SizedBox(height: 20),
-          FormInput(
+          TextFormField(
             controller: _descriptionController,
-            labelText: 'Opis podróży',
-            icon: Icons.description,
-            maxCharacters: 100,
-            onChanged: (value) {
-              ref.read(tripFormProvider.notifier).setDescription(value);
-            },
+            maxLength: 100,
+            decoration: AppInputStyle.inputDecoration(
+                icon: Icons.description, labelText: 'Opis podróży'),
+            onChanged: (value) =>
+                ref.read(tripFormProvider.notifier).setDescription(value),
           ),
           const SizedBox(height: 20),
           Container(
@@ -101,10 +99,12 @@ class _TripFormState extends ConsumerState<TripForm> {
                 Row(
                   children: [
                     Expanded(
-                      child: FormInput(
+                      child: TextFormField(
                         controller: _startDateController,
-                        labelText: 'Data rozpoczęcia',
-                        icon: Icons.calendar_today,
+                        decoration: AppInputStyle.inputDecoration(
+                          icon: Icons.calendar_today,
+                          labelText: 'Data rozpoczęcia',
+                        ),
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());
                           DateTime? pickedDate = await showDatePicker(
@@ -127,10 +127,12 @@ class _TripFormState extends ConsumerState<TripForm> {
                     ),
                     Icon(Icons.arrow_right_alt_outlined),
                     Expanded(
-                      child: FormInput(
+                      child: TextFormField(
                         controller: _endDateController,
-                        labelText: 'Data zakończenia',
-                        icon: Icons.calendar_today,
+                        decoration: AppInputStyle.inputDecoration(
+                          icon: Icons.calendar_today,
+                          labelText: 'Data zakończenia',
+                        ),
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());
                           DateTime? pickedDate = await showDatePicker(
