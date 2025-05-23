@@ -19,7 +19,7 @@ class _HomeContentState extends State<HomeContent> {
     ];
 
     const colorizeTextStyle = TextStyle(
-      fontSize: 20,
+      fontSize: 30,
       fontFamily: 'Horizon',
       fontWeight: FontWeight.bold,
     );
