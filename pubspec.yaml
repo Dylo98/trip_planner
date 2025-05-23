@@ -51,6 +51,7 @@ dependencies:
   another_flushbar: ^1.10.24
   carousel_slider: ^5.0.0
   lottie: ^3.0.0
+  animated_text_kit: ^4.2.3
 
 dev_dependencies:
   flutter_test:
