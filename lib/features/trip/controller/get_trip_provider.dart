@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/features/auth/controller/auth_state_provider.dart';
 
 /* MODEL*/
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 
-final getTripProvider = StreamProvider<List<Trip>>((ref) {
+final getTripProvider = StreamProvider.autoDispose<List<Trip>>((ref) {
+  final user = ref.watch(authStateProvider).value;
   final tripService = ref.watch(tripServiceProvider);
-  return tripService.getTrips();
+  if (user == null) return const Stream.empty();
+  return tripService.getTrips(user.uid);
 });

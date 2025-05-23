@@ -47,8 +47,7 @@ class TripService {
     return Trip.fromJson(doc.data()!);
   }
 
-  Stream<List<Trip>> getTrips() {
-    final uid = _auth.currentUser?.uid;
+  Stream<List<Trip>> getTrips(String uid) {
     return _firestore
         .collection('users')
         .doc(uid)
