@@ -1,5 +1,3 @@
-import 'package:trip_planner/features/trip/model/trip_model.dart';
-
 class Validators {
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty || !value.contains('@')) {
