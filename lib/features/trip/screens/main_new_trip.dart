@@ -10,6 +10,8 @@ import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/screens/new_trip.dart';
 import 'package:trip_planner/features/trip/screens/new_trip_map.dart';
 
+import 'package:trip_planner/features/trip/services/trip_form_service.dart';
+
 class MainNewTripScreen extends ConsumerStatefulWidget {
   const MainNewTripScreen({super.key});
 
@@ -37,51 +39,49 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
     });
   }
 
-  void _saveTrip() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-    final image = ref.read(tripPhotoProvider);
-    final markers = ref.read(tripMarkersProvider);
-
-    await ref.read(tripFormProvider.notifier).save(image, markers);
-
-    ref.read(tripMarkersProvider.notifier).clear();
-    ref.read(tripPhotoProvider.notifier).state = null;
-
-    if (!mounted) return;
-    Navigator.of(context).pop();
+  void _saveTrip() {
+    TripFormService(ref: ref, context: context).saveTrip(_formKey);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Nowa podróż'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.check),
-            onPressed: _saveTrip,
-          ),
-        ],
-      ),
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onTabSelected,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add),
-            label: 'Dodaj',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-        ],
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          ref.invalidate(tripFormProvider);
+          ref.invalidate(tripPhotoProvider);
+          ref.read(tripMarkersProvider.notifier).clear();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Nowa podróż'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.check),
+              onPressed: _saveTrip,
+            ),
+          ],
+        ),
+        body: IndexedStack(
+          index: _selectedIndex,
+          children: _screens,
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onTabSelected,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add),
+              label: 'Dodaj',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.map),
+              label: 'Mapa',
+            ),
+          ],
+        ),
       ),
     );
   }

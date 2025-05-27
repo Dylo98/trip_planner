@@ -14,7 +14,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
       : super(Trip(
           id: '',
           name: '',
-          startDate: DateTime.now(),
+          startDate: null,
           endDate: null,
           description: '',
           imageUrl: [],

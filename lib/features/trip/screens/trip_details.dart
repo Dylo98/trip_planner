@@ -55,7 +55,7 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                   children: [
                     Text('Nazwa: ${widget.trip.name}'),
                     Text(
-                      'Data: ${DateFormat('dd-MM-yyyy').format(widget.trip.startDate)}',
+                      'Data: ${DateFormat('dd-MM-yyyy').format(widget.trip.startDate!)}',
                     ),
                   ],
                 ),

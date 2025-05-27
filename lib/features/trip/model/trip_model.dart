@@ -3,7 +3,7 @@ import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 class Trip {
   final String id;
   final String name;
-  final DateTime startDate;
+  final DateTime? startDate;
   final DateTime? endDate;
   final String? description;
   final List<String>? imageUrl;
@@ -25,7 +25,7 @@ class Trip {
     return {
       'id': id,
       'name': name,
-      'startDate': startDate.toIso8601String(),
+      'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
       'description': description,
       'imageUrl': imageUrl,

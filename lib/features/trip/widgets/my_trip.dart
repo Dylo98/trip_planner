@@ -34,7 +34,7 @@ class _MyTripState extends ConsumerState<MyTrip> {
         String urlImage = trip.tripPhotoUrl ?? '';
         String tripName = trip.name;
         String formattedStartDate =
-            DateFormat('dd-MM-yyyy').format(trip.startDate);
+            DateFormat('dd-MM-yyyy').format(trip.startDate!);
         return OpenContainer(
           key: Key('openContainer_${trip.id}'),
           transitionType: ContainerTransitionType.fadeThrough,
