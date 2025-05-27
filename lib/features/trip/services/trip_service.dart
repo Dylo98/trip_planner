@@ -56,6 +56,17 @@ class TripService {
         .map((snapshot) =>
             snapshot.docs.map((doc) => Trip.fromJson(doc.data())).toList());
   }
+
+  Stream<Trip> watchTrip(String tripId) {
+    final uid = _auth.currentUser?.uid;
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .snapshots()
+        .map((doc) => Trip.fromJson(doc.data()!));
+  }
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {

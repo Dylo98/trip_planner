@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/widgets/trip_form.dart';
 
 class NewTripScreen extends StatelessWidget {
-  const NewTripScreen({super.key});
+  const NewTripScreen({super.key, required this.formKey});
+
+  final GlobalKey<FormState> formKey;
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +17,9 @@ class NewTripScreen extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              TripForm(),
+              TripForm(
+                formKey: formKey,
+              ),
             ],
           ),
         ),

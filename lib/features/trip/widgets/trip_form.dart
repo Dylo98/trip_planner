@@ -5,19 +5,20 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
+import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
 
 class TripForm extends ConsumerStatefulWidget {
-  const TripForm({super.key});
+  const TripForm({super.key, required this.formKey});
+
+  final GlobalKey<FormState> formKey;
 
   @override
   ConsumerState<TripForm> createState() => _TripFormState();
 }
 
 class _TripFormState extends ConsumerState<TripForm> {
-  final _formKey = GlobalKey<FormState>();
-
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _startDateController = TextEditingController();
@@ -52,7 +53,7 @@ class _TripFormState extends ConsumerState<TripForm> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
+      key: widget.formKey,
       child: Column(
         children: [
           TextFormField(
@@ -60,6 +61,7 @@ class _TripFormState extends ConsumerState<TripForm> {
             maxLength: 40,
             decoration: AppInputStyle.inputDecoration(
                 icon: Icons.title, labelText: 'Nazwa podróży'),
+            validator: Validators.validateTripName,
             onChanged: (value) =>
                 ref.read(tripFormProvider.notifier).setName(value),
           ),

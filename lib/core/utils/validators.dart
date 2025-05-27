@@ -12,4 +12,11 @@ class Validators {
     }
     return null;
   }
+
+  static String? validateTripName(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return "Musisz podać nazwę";
+    }
+    return null;
+  }
 }

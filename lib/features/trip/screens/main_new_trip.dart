@@ -18,11 +18,19 @@ class MainNewTripScreen extends ConsumerStatefulWidget {
 }
 
 class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   int _selectedIndex = 0;
-  final List<Widget> _screens = [
-    const NewTripScreen(),
-    const NewTripMapScreen(),
-  ];
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    _screens = [
+      NewTripScreen(formKey: _formKey),
+      NewTripMapScreen(),
+    ];
+  }
+
   void _onTabSelected(int index) {
     setState(() {
       _selectedIndex = index;
@@ -30,6 +38,9 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
   }
 
   void _saveTrip() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
     final image = ref.read(tripPhotoProvider);
     final markers = ref.read(tripMarkersProvider);
 
