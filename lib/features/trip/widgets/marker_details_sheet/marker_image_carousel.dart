@@ -33,7 +33,10 @@ class MarkerImageCarousel extends StatelessWidget {
                   builder: (_) => Dialog(
                     backgroundColor: Colors.black,
                     child: InteractiveViewer(
-                      child: Image.network(url, fit: BoxFit.contain),
+                      child: Image.network(
+                        url,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 );

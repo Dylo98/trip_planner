@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/screens/trip_details.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_map.dart';
+import 'package:trip_planner/features/trip/screens/trip_details_timeline.dart';
 
 class MainTripDetailsScreen extends StatefulWidget {
   const MainTripDetailsScreen({super.key, required this.trip});
@@ -20,6 +21,9 @@ class _MainTripDetailsScreenState extends State<MainTripDetailsScreen> {
     _screens = [
       TripDetailsScreen(trip: widget.trip),
       TripDetailsMapScreen(
+        tripId: widget.trip.id,
+      ),
+      TripDetailsTimelineScreen(
         tripId: widget.trip.id,
       ),
     ];
