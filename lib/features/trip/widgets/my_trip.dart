@@ -5,7 +5,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
 import 'package:trip_planner/features/trip/screens/main_trip_details.dart';
-import 'package:trip_planner/features/trip/screens/trip_details.dart';
 
 class MyTrip extends ConsumerStatefulWidget {
   const MyTrip({super.key});

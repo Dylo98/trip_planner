@@ -109,6 +109,22 @@ class TripService {
     final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
     await saveTrip(updatedTrip);
   }
+
+  Future<void> addMarkerToTrip(String tripId, MarkerPoint marker) async {
+    final uid = _auth.currentUser?.uid;
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
+    final doc = await tripRef.get();
+    final trip = Trip.fromJson(doc.data()!);
+
+    final updatedMarkers = [...trip.markerPoints, marker];
+
+    await tripRef.update({
+      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
+    });
+    print(
+        'Dodawanie markera do tripId: $tripId z uid: $_auth.currentUser?.uid');
+  }
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {
