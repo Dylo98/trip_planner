@@ -35,7 +35,7 @@ class _MainTripDetailsScreenState extends State<MainTripDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('21412421'),
+        title: Text(widget.trip.name),
       ),
       body: IndexedStack(
         index: _selectedIndex,
@@ -52,6 +52,10 @@ class _MainTripDetailsScreenState extends State<MainTripDetailsScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.map),
             label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.timeline),
+            label: 'Podróż',
           ),
         ],
       ),

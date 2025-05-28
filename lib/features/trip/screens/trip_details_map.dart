@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet.dart';
 
 class TripDetailsMapScreen extends ConsumerStatefulWidget {
   const TripDetailsMapScreen({super.key, required this.tripId});
@@ -56,6 +58,16 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
                 markerId: MarkerId(marker.id),
                 position: marker.position,
                 infoWindow: InfoWindow(title: marker.name),
+                onTap: () {
+                  showMaterialModalBottomSheet(
+                    context: context,
+                    builder: (context) => SingleChildScrollView(
+                      controller: ModalScrollController.of(context),
+                      child: MarkerDetailsSheet(
+                          marker: marker, tripId: widget.tripId),
+                    ),
+                  );
+                },
               ),
           },
           polylines: _polylines,

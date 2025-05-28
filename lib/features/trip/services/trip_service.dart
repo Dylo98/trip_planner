@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 /* MODEL */
 import 'package:trip_planner/features/trip/model/trip_model.dart';
@@ -66,6 +67,47 @@ class TripService {
         .doc(tripId)
         .snapshots()
         .map((doc) => Trip.fromJson(doc.data()!));
+  }
+
+  Future<void> addImageToMarker({
+    required String tripId,
+    required String markerId,
+    required File image,
+  }) async {
+    final uid = _auth.currentUser?.uid;
+
+    final storageRef = _storage
+        .ref()
+        .child('users/$uid/trips/$tripId/markers/$markerId/${DateTime.now()}');
+    await storageRef.putFile(image);
+    final imageUrl = await storageRef.getDownloadURL();
+
+    final tripDoc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
+
+    final trip = Trip.fromJson(tripDoc.data()!);
+
+    final updatedMarkers = trip.markerPoints.map((marker) {
+      if (marker.id == markerId) {
+        final updatedUrls = List<String>.from(marker.imageUrl ?? [])
+          ..add(imageUrl);
+        return MarkerPoint(
+          id: marker.id,
+          position: marker.position,
+          name: marker.name,
+          description: marker.description,
+          imageUrl: updatedUrls,
+        );
+      }
+      return marker;
+    }).toList();
+
+    final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
+    await saveTrip(updatedTrip);
   }
 }
 
