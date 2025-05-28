@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -11,6 +12,7 @@ import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 /* PROVIDERS */
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
+import 'package:trip_planner/features/trip/services/direction_service.dart';
 
 /* WIDGETS */
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
@@ -25,6 +27,17 @@ class NewTripMapScreen extends ConsumerStatefulWidget {
 class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
+
+  Set<Polyline> _polylines = {};
+
+  Future<void> _drawPolylines() async {
+    final newPolylines = await DirectionService.drawRouteBetweenMarkers(
+        ref.read(tripMarkersProvider), dotenv.env['GOOGLE_PLACES_API_KEY']!);
+
+    setState(() {
+      _polylines = {..._polylines, ...newPolylines};
+    });
+  }
 
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(52.2297, 21.0122),
@@ -51,6 +64,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           GoogleMap(
             mapType: MapType.normal,
             markers: Set<Marker>.from(markers),
+            polylines: _polylines,
             initialCameraPosition: _initialPosition,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
@@ -73,6 +87,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
                 controller.animateCamera(
                   CameraUpdate.newLatLngZoom(position, 15),
                 );
+                await _drawPolylines();
               },
             ),
           ),
@@ -96,6 +111,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           controller.animateCamera(
             CameraUpdate.newCameraPosition(cameraPosition),
           );
+          await _drawPolylines();
         },
         child: const Icon(Icons.my_location),
       ),

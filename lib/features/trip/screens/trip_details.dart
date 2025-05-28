@@ -19,9 +19,6 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
   Widget build(BuildContext context) {
     final tripAsync = ref.watch(watchTripProvider(widget.trip.id));
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.trip.name),
-      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
