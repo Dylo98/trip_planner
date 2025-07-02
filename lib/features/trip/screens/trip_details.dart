@@ -1,7 +1,8 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:timeline_tile/timeline_tile.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -47,12 +48,24 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
                   children: [
-                    Text(widget.trip.name,
-                        style: TextStyle(
-                          fontSize: 32,
-                        )),
-                    Text(DateFormat('dd-MM-yyyy')
-                        .format(widget.trip.startDate!)),
+                    Text(widget.trip.name, style: AppTextStyles.heading1),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          DateFormat('dd-MM-yyyy')
+                              .format(widget.trip.startDate!),
+                          style: AppTextStyles.bodyText,
+                        ),
+                        Icon(Icons.arrow_right),
+                        Text(
+                            widget.trip.endDate != null
+                                ? DateFormat('dd-MM-yyyy')
+                                    .format(widget.trip.endDate!)
+                                : '...',
+                            style: AppTextStyles.bodyText)
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -92,15 +105,27 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                             borderRadius: BorderRadius.circular(8),
                             child: GestureDetector(
                               onTap: () {
-                                showDialog(
+                                showGeneralDialog(
                                   context: context,
-                                  builder: (_) => Dialog(
-                                    backgroundColor: Colors.black,
+                                  barrierDismissible: true,
+                                  barrierLabel: "Dismiss",
+                                  barrierColor:
+                                      Colors.black.withValues(alpha: 0.8),
+                                  transitionDuration:
+                                      const Duration(milliseconds: 300),
+                                  pageBuilder: (_, __, ___) => Center(
                                     child: InteractiveViewer(
                                       child: Image.network(imageUrl,
                                           fit: BoxFit.contain),
                                     ),
                                   ),
+                                  transitionBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    return FadeScaleTransition(
+                                      animation: animation,
+                                      child: child,
+                                    );
+                                  },
                                 );
                               },
                               child: Image.network(

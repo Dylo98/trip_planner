@@ -122,8 +122,6 @@ class TripService {
     await tripRef.update({
       'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
     });
-    print(
-        'Dodawanie markera do tripId: $tripId z uid: $_auth.currentUser?.uid');
   }
 }
 

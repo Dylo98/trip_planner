@@ -88,7 +88,10 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                         AddImageButton(onPressed: _onPickImageAndSave),
                       ],
                     ),
-                  Text(widget.marker.name!)
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(widget.marker.name!),
+                  ),
                 ],
               ),
             ),

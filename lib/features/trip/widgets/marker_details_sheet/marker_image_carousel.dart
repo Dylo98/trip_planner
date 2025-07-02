@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
@@ -28,21 +29,30 @@ class MarkerImageCarousel extends StatelessWidget {
           items: imageUrls.map((url) {
             return GestureDetector(
               onTap: () {
-                showDialog(
+                showGeneralDialog(
                   context: context,
-                  builder: (_) => Dialog(
-                    backgroundColor: Colors.black,
+                  barrierDismissible: true,
+                  barrierLabel: "Dismiss",
+                  barrierColor: Colors.black.withValues(alpha: 0.8),
+                  transitionDuration: const Duration(milliseconds: 300),
+                  pageBuilder: (_, __, ___) => Center(
                     child: InteractiveViewer(
-                      child: Image.network(
-                        url,
-                        fit: BoxFit.contain,
-                      ),
+                      child: Image.network(url, fit: BoxFit.contain),
                     ),
                   ),
+                  transitionBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeScaleTransition(
+                      animation: animation,
+                      child: child,
+                    );
+                  },
                 );
               },
-              child:
-                  Image.network(url, fit: BoxFit.cover, width: double.infinity),
+              child: Image.network(
+                url,
+                fit: BoxFit.cover,
+              ),
             );
           }).toList(),
         ),

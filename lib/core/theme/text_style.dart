@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTextStyles {
   static const heading1 = TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
+    fontSize: 32,
     fontFamily: "Oswald",
     color: AppColors.black,
   );
@@ -18,6 +16,7 @@ class AppTextStyles {
 
   static const bodyText = TextStyle(
     fontSize: 16,
+    fontFamily: "Oswald",
     color: AppColors.black,
   );
 
