@@ -31,6 +31,50 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   int _currentImageIndex = 0;
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
+  final _formKey = GlobalKey<FormState>();
+
+  DateTime? _startDate;
+  DateTime? _endDate;
+  DateTime? _arrivalDateTime;
+  DateTime? _departureDateTime;
+
+  Future<DateTime?> _pickDateTime(DateTime? initial) async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initial ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+
+    if (pickedDate == null) return null;
+
+    final pickedTime = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial ?? DateTime.now()),
+    );
+
+    if (pickedTime == null) return null;
+
+    return DateTime(
+      pickedDate.year,
+      pickedDate.month,
+      pickedDate.day,
+      pickedTime.hour,
+      pickedTime.minute,
+    );
+  }
+
+  Future<void> _updateMarkerDateTime({
+    required DateTime arrival,
+    required DateTime departure,
+  }) async {
+    await ref.read(tripServiceProvider).updateMarkerDates(
+          tripId: widget.tripId,
+          markerId: widget.marker.id,
+          arrival: arrival,
+          departure: departure,
+        );
+  }
 
   Future<void> _onPickImageAndSave() async {
     final XFile? pickedFile =
@@ -42,7 +86,16 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
           tripId: widget.tripId,
           markerId: widget.marker.id,
           image: image,
+          arrival: _arrivalDateTime,
+          departure: _departureDateTime,
         );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _arrivalDateTime = widget.marker.arrivalDateTime;
+    _departureDateTime = widget.marker.departureDateTime;
   }
 
   @override
@@ -92,6 +145,71 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                     padding: const EdgeInsets.all(8.0),
                     child: Text(widget.marker.name!),
                   ),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              children: [
+                                ListTile(
+                                  title: const Text('Data i godzina przyjazdu'),
+                                  subtitle: Text(
+                                    _arrivalDateTime != null
+                                        ? '${_arrivalDateTime!.day}.${_arrivalDateTime!.month}.${_arrivalDateTime!.year} '
+                                            '${_arrivalDateTime!.hour.toString().padLeft(2, '0')}:${_arrivalDateTime!.minute.toString().padLeft(2, '0')}'
+                                        : 'Wybierz datę i godzinę',
+                                  ),
+                                  trailing: const Icon(Icons.access_time),
+                                  onTap: () async {
+                                    final result =
+                                        await _pickDateTime(_arrivalDateTime);
+                                    if (result != null) {
+                                      setState(() {
+                                        _arrivalDateTime = result;
+                                      });
+
+                                      if (_departureDateTime != null) {
+                                        await _updateMarkerDateTime(
+                                          arrival: result,
+                                          departure: _departureDateTime!,
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                                ListTile(
+                                  title: const Text('Data i godzina odjazdu'),
+                                  subtitle: Text(
+                                    _departureDateTime != null
+                                        ? '${_departureDateTime!.day}.${_departureDateTime!.month}.${_departureDateTime!.year} '
+                                            '${_departureDateTime!.hour.toString().padLeft(2, '0')}:${_departureDateTime!.minute.toString().padLeft(2, '0')}'
+                                        : 'Wybierz datę i godzinę',
+                                  ),
+                                  trailing: const Icon(Icons.access_time),
+                                  onTap: () async {
+                                    final result =
+                                        await _pickDateTime(_departureDateTime);
+                                    if (result != null) {
+                                      setState(() {
+                                        _departureDateTime = result;
+                                      });
+
+                                      if (_arrivalDateTime != null) {
+                                        await _updateMarkerDateTime(
+                                          arrival: _arrivalDateTime!,
+                                          departure: result,
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                              ],
+                            ))
+                      ],
+                    ),
+                  )
                 ],
               ),
             ),

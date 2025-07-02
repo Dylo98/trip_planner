@@ -40,6 +40,42 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
     });
   }
 
+  Future<String?> showTransportDialog(BuildContext context) async {
+    return await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Wybierz środek transportu'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.flight),
+                title: const Text('Samolot'),
+                onTap: () => Navigator.pop(context, 'plane'),
+              ),
+              ListTile(
+                leading: Icon(Icons.directions_walk),
+                title: const Text('Pieszo'),
+                onTap: () => Navigator.pop(context, 'walk'),
+              ),
+              ListTile(
+                leading: Icon(Icons.directions_car),
+                title: const Text('Samochodem'),
+                onTap: () => Navigator.pop(context, 'car'),
+              ),
+              ListTile(
+                leading: Icon(Icons.directions_bus),
+                title: const Text('Inne'),
+                onTap: () => Navigator.pop(context, 'other'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tripAsync = ref.watch(watchTripProvider(widget.tripId));
@@ -94,6 +130,26 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
               child: SearchLocation(
                 onPlaceSelected: (LatLng position, String name) async {
                   final controller = await _controller.future;
+                  final transport = await showTransportDialog(context);
+                  if (transport == null) return;
+
+                  final trip =
+                      ref.read(watchTripProvider(widget.tripId)).asData?.value;
+                  final previousMarkers = trip?.markerPoints ?? [];
+
+                  if (previousMarkers.isNotEmpty) {
+                    final lastMarker = previousMarkers.last.copyWith(
+                      transportMode: transport,
+                    );
+
+                    await ref
+                        .read(tripServiceProvider)
+                        .updateMarkerTransportMode(
+                          tripId: widget.tripId,
+                          markerId: lastMarker.id,
+                          transportMode: transport,
+                        );
+                  }
 
                   final newMarker = MarkerPoint(
                     id: name,
