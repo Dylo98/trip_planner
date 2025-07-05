@@ -13,6 +13,10 @@ import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_a
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
 
+import 'package:trip_planner/features/trip/services/place_suggestion_service.dart';
+
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 class MarkerDetailsSheet extends ConsumerStatefulWidget {
   const MarkerDetailsSheet({
     super.key,
@@ -33,8 +37,9 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
-  DateTime? _startDate;
-  DateTime? _endDate;
+  List<PlaceSuggestion> _nearbyPlaces = [];
+  bool _isLoadingPlaces = true;
+
   DateTime? _arrivalDateTime;
   DateTime? _departureDateTime;
 
@@ -91,11 +96,58 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
         );
   }
 
+  Future<void> _deleteMarker() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Usuń punkt podróży'),
+        content: const Text('Czy na pewno chcesz usunąć ten punkt podróży?'),
+        actions: [
+          TextButton(
+            child: const Text('Anuluj'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: const Text('Usuń'),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final nav = Navigator.of(context);
+
+      await ref
+          .read(tripServiceProvider)
+          .deleteMarkerFromTrip(widget.tripId, widget.marker.id);
+
+      nav.pop(true);
+    }
+  }
+
+  Future<void> _fetchNearbyPlaces() async {
+    try {
+      final places = await PlaceSuggestionService.fetchSuggestions(
+          widget.marker.position, dotenv.env['GOOGLE_PLACES_API_KEY']!);
+      setState(() {
+        _nearbyPlaces = places;
+        _isLoadingPlaces = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingPlaces = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     _arrivalDateTime = widget.marker.arrivalDateTime;
     _departureDateTime = widget.marker.departureDateTime;
+
+    _fetchNearbyPlaces();
   }
 
   @override
@@ -150,63 +202,177 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                     child: Column(
                       children: [
                         Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                              children: [
-                                ListTile(
-                                  title: const Text('Data i godzina przyjazdu'),
-                                  subtitle: Text(
-                                    _arrivalDateTime != null
-                                        ? '${_arrivalDateTime!.day}.${_arrivalDateTime!.month}.${_arrivalDateTime!.year} '
-                                            '${_arrivalDateTime!.hour.toString().padLeft(2, '0')}:${_arrivalDateTime!.minute.toString().padLeft(2, '0')}'
-                                        : 'Wybierz datę i godzinę',
-                                  ),
-                                  trailing: const Icon(Icons.access_time),
-                                  onTap: () async {
-                                    final result =
-                                        await _pickDateTime(_arrivalDateTime);
-                                    if (result != null) {
-                                      setState(() {
-                                        _arrivalDateTime = result;
-                                      });
-
-                                      if (_departureDateTime != null) {
-                                        await _updateMarkerDateTime(
-                                          arrival: result,
-                                          departure: _departureDateTime!,
-                                        );
-                                      }
-                                    }
-                                  },
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Column(
+                            children: [
+                              ListTile(
+                                title: const Text('Data i godzina przyjazdu'),
+                                subtitle: Text(
+                                  _arrivalDateTime != null
+                                      ? '${_arrivalDateTime!.day}.${_arrivalDateTime!.month}.${_arrivalDateTime!.year} '
+                                          '${_arrivalDateTime!.hour.toString().padLeft(2, '0')}:${_arrivalDateTime!.minute.toString().padLeft(2, '0')}'
+                                      : 'Wybierz datę i godzinę',
                                 ),
-                                ListTile(
-                                  title: const Text('Data i godzina odjazdu'),
-                                  subtitle: Text(
-                                    _departureDateTime != null
-                                        ? '${_departureDateTime!.day}.${_departureDateTime!.month}.${_departureDateTime!.year} '
-                                            '${_departureDateTime!.hour.toString().padLeft(2, '0')}:${_departureDateTime!.minute.toString().padLeft(2, '0')}'
-                                        : 'Wybierz datę i godzinę',
-                                  ),
-                                  trailing: const Icon(Icons.access_time),
-                                  onTap: () async {
-                                    final result =
-                                        await _pickDateTime(_departureDateTime);
-                                    if (result != null) {
-                                      setState(() {
-                                        _departureDateTime = result;
-                                      });
+                                trailing: const Icon(Icons.access_time),
+                                onTap: () async {
+                                  final result =
+                                      await _pickDateTime(_arrivalDateTime);
+                                  if (result != null) {
+                                    setState(() {
+                                      _arrivalDateTime = result;
+                                    });
 
-                                      if (_arrivalDateTime != null) {
-                                        await _updateMarkerDateTime(
-                                          arrival: _arrivalDateTime!,
-                                          departure: result,
-                                        );
-                                      }
+                                    if (_departureDateTime != null) {
+                                      await _updateMarkerDateTime(
+                                        arrival: result,
+                                        departure: _departureDateTime!,
+                                      );
                                     }
-                                  },
+                                  }
+                                },
+                              ),
+                              ListTile(
+                                title: const Text('Data i godzina odjazdu'),
+                                subtitle: Text(
+                                  _departureDateTime != null
+                                      ? '${_departureDateTime!.day}.${_departureDateTime!.month}.${_departureDateTime!.year} '
+                                          '${_departureDateTime!.hour.toString().padLeft(2, '0')}:${_departureDateTime!.minute.toString().padLeft(2, '0')}'
+                                      : 'Wybierz datę i godzinę',
+                                ),
+                                trailing: const Icon(Icons.access_time),
+                                onTap: () async {
+                                  final result =
+                                      await _pickDateTime(_departureDateTime);
+                                  if (result != null) {
+                                    setState(() {
+                                      _departureDateTime = result;
+                                    });
+
+                                    if (_arrivalDateTime != null) {
+                                      await _updateMarkerDateTime(
+                                        arrival: _arrivalDateTime!,
+                                        departure: result,
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (_isLoadingPlaces)
+                          const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: CircularProgressIndicator(),
+                          )
+                        else if (_nearbyPlaces.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 16),
+                                  child: Text(
+                                    'Ciekawe miejsca w pobliżu:',
+                                    style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 200,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: _nearbyPlaces.length,
+                                    itemBuilder: (context, index) {
+                                      final place = _nearbyPlaces[index];
+                                      return GestureDetector(
+                                        onTap: () async {
+                                          final newMarker = MarkerPoint(
+                                            id: UniqueKey().toString(),
+                                            name: place.name,
+                                            position: place.location,
+                                            arrivalDateTime: null,
+                                            departureDateTime: null,
+                                            imageUrl: [],
+                                            transportMode: 'walk',
+                                          );
+
+                                          await ref
+                                              .read(tripServiceProvider)
+                                              .addMarkerToTrip(
+                                                  widget.tripId, newMarker);
+                                          if (mounted) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        },
+                                        child: Container(
+                                          width: 200,
+                                          margin: const EdgeInsets.all(8),
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.white,
+                                            border: Border.all(
+                                                color: Colors.grey.shade300),
+                                            borderRadius:
+                                                BorderRadius.circular(12),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.shade300,
+                                                blurRadius: 5,
+                                                offset: const Offset(2, 2),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (place.photoReference != null)
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.network(
+                                                    'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${place.photoReference}&key=${dotenv.env['GOOGLE_PLACES_API_KEY']}',
+                                                    height: 100,
+                                                    width: double.infinity,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                place.name,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              if (place.address != null)
+                                                Text(
+                                                  place.address!,
+                                                  style: const TextStyle(
+                                                      fontSize: 12),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ],
-                            ))
+                            ),
+                          ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 16),
+                          child: IconButton(
+                            icon: const Icon(Icons.delete,
+                                color: Colors.red, size: 32),
+                            tooltip: 'Usuń punkt podróży',
+                            onPressed: _deleteMarker,
+                          ),
+                        ),
                       ],
                     ),
                   )

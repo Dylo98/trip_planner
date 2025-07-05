@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
@@ -29,15 +30,32 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  Future<void> _drawPolylines(List<MarkerPoint> markerPoints) async {
-    final newPolylines = await DirectionService.drawRouteBetweenMarkers(
-      markerPoints,
-      dotenv.env['GOOGLE_PLACES_API_KEY']!,
-    );
+  late final ProviderSubscription _tripListener;
 
-    setState(() {
-      _polylines = {..._polylines, ...newPolylines};
-    });
+  @override
+  void initState() {
+    super.initState();
+
+    _tripListener = ref.listenManual<AsyncValue>(
+      watchTripProvider(widget.tripId),
+      (previous, next) async {
+        if (next is AsyncData) {
+          final newPolylines = await DirectionService.drawRouteBetweenMarkers(
+            next.value.markerPoints,
+            dotenv.env['GOOGLE_PLACES_API_KEY']!,
+          );
+          setState(() {
+            _polylines = newPolylines.toSet();
+          });
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _tripListener.close();
+    super.dispose();
   }
 
   Future<String?> showTransportDialog(BuildContext context) async {
@@ -84,10 +102,6 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
       data: (trip) {
         final markers = trip.markerPoints;
 
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          _drawPolylines(markers);
-        });
-
         return Stack(
           children: [
             GoogleMap(
@@ -103,13 +117,15 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
                     markerId: MarkerId(marker.id),
                     position: marker.position,
                     infoWindow: InfoWindow(title: marker.name),
-                    onTap: () {
-                      showMaterialModalBottomSheet(
+                    onTap: () async {
+                      final result = await showMaterialModalBottomSheet(
                         context: context,
                         builder: (context) => SingleChildScrollView(
                           controller: ModalScrollController.of(context),
                           child: MarkerDetailsSheet(
-                              marker: marker, tripId: widget.tripId),
+                            marker: marker,
+                            tripId: widget.tripId,
+                          ),
                         ),
                       );
                     },

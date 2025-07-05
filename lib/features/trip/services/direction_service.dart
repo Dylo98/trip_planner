@@ -66,40 +66,54 @@ class DirectionService {
           break;
       }
 
-      final url =
-          'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey';
-
-      final response = await http.get(Uri.parse(url));
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-
-        if (data['status'] == 'ZERO_RESULTS') {
-          newPolylines.add(
-            Polyline(
-              polylineId: PolylineId('route_$i'),
-              points: [origin, destination],
-              color: lineColor,
-              width: 4,
-              patterns: pattern,
-            ),
-          );
-          continue;
-        }
-
-        final encodedPoints = data['routes'][0]['overview_polyline']['points'];
-        final points = decodePolyline(encodedPoints);
-
+      if (transport == 'plane') {
+        // Prosta linia między origin a destination – bez API
         newPolylines.add(
           Polyline(
             polylineId: PolylineId('route_$i'),
-            points: points,
+            points: [origin, destination],
             color: lineColor,
             width: 5,
             patterns: pattern,
           ),
         );
       } else {
-        debugPrint('Błąd pobierania trasy $i: ${response.body}');
+        final url =
+            'https://maps.googleapis.com/maps/api/directions/json?origin=${origin.latitude},${origin.longitude}&destination=${destination.latitude},${destination.longitude}&key=$apiKey';
+
+        final response = await http.get(Uri.parse(url));
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+
+          if (data['status'] == 'ZERO_RESULTS') {
+            newPolylines.add(
+              Polyline(
+                polylineId: PolylineId('route_$i'),
+                points: [origin, destination],
+                color: lineColor,
+                width: 4,
+                patterns: pattern,
+              ),
+            );
+            continue;
+          }
+
+          final encodedPoints =
+              data['routes'][0]['overview_polyline']['points'];
+          final points = decodePolyline(encodedPoints);
+
+          newPolylines.add(
+            Polyline(
+              polylineId: PolylineId('route_$i'),
+              points: points,
+              color: lineColor,
+              width: 5,
+              patterns: pattern,
+            ),
+          );
+        } else {
+          debugPrint('Błąd pobierania trasy $i: ${response.body}');
+        }
       }
     }
 

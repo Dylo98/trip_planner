@@ -198,6 +198,25 @@ class TripService {
     final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
     await saveTrip(updatedTrip);
   }
+
+  // =============================
+  // MARKERY – USUWANIE
+  // ==========
+  Future<void> deleteMarkerFromTrip(String tripId, String markerId) async {
+    final uid = _auth.currentUser?.uid;
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
+
+    final doc = await tripRef.get();
+    final trip = Trip.fromJson(doc.data()!);
+
+    final updatedMarkers =
+        trip.markerPoints.where((marker) => marker.id != markerId).toList();
+
+    await tripRef.update({
+      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
+    });
+  }
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {
