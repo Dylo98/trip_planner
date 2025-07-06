@@ -28,16 +28,16 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
-  Set<Polyline> _polylines = {};
+  // Set<Polyline> _polylines = {};
 
-  Future<void> _drawPolylines() async {
-    final newPolylines = await DirectionService.drawRouteBetweenMarkers(
-        ref.read(tripMarkersProvider), dotenv.env['GOOGLE_PLACES_API_KEY']!);
+  // Future<void> _drawPolylines() async {
+  //   final newPolylines =
+  //       DirectionService.drawLocalPolylines(next.value.markerPoints);
 
-    setState(() {
-      _polylines = {..._polylines, ...newPolylines};
-    });
-  }
+  //   setState(() {
+  //     _polylines = {..._polylines, ...newPolylines};
+  //   });
+  // }
 
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(52.2297, 21.0122),
@@ -64,7 +64,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           GoogleMap(
             mapType: MapType.normal,
             markers: Set<Marker>.from(markers),
-            polylines: _polylines,
+            // polylines: _polylines,
             initialCameraPosition: _initialPosition,
             onMapCreated: (GoogleMapController controller) {
               _controller.complete(controller);
@@ -87,7 +87,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
                 controller.animateCamera(
                   CameraUpdate.newLatLngZoom(position, 15),
                 );
-                await _drawPolylines();
+                // await _drawPolylines();
               },
             ),
           ),
@@ -111,7 +111,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           controller.animateCamera(
             CameraUpdate.newCameraPosition(cameraPosition),
           );
-          await _drawPolylines();
+          // await _drawPolylines();
         },
         child: const Icon(Icons.my_location),
       ),
