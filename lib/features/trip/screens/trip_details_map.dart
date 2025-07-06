@@ -6,12 +6,12 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
-import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
-import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet.dart';
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
-import 'package:trip_planner/features/trip/widgets/select_transport.dart';
+
+import 'package:trip_planner/features/trip/utils/handle_place_selected.dart';
+import 'package:trip_planner/features/trip/utils/generate_polylines.dart';
 
 class TripDetailsMapScreen extends ConsumerStatefulWidget {
   const TripDetailsMapScreen({super.key, required this.tripId});
@@ -24,20 +24,12 @@ class TripDetailsMapScreen extends ConsumerStatefulWidget {
 }
 
 class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
-  late GoogleMapController _mapController;
   late final ProviderSubscription _tripListener;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
 
   bool _hasDrawnPolylines = false;
   Set<Polyline> _polylines = {};
-
-  void _generatePolylines(List<MarkerPoint> markers) {
-    final newPolylines = DirectionService.drawPolylines(markers);
-    setState(() {
-      _polylines = newPolylines.toSet();
-    });
-  }
 
   @override
   void initState() {
@@ -73,9 +65,12 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
         final markers = trip.markerPoints;
 
         if (!_hasDrawnPolylines) {
+          final newPolylines = generatePolylines(markers);
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            _generatePolylines(markers);
-            _hasDrawnPolylines = true;
+            setState(() {
+              _polylines = newPolylines;
+              _hasDrawnPolylines = true;
+            });
           });
         }
 
@@ -95,7 +90,7 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
                     position: marker.position,
                     infoWindow: InfoWindow(title: marker.name),
                     onTap: () async {
-                      final result = await showMaterialModalBottomSheet(
+                      await showMaterialModalBottomSheet(
                         context: context,
                         builder: (context) => SingleChildScrollView(
                           controller: ModalScrollController.of(context),
@@ -110,7 +105,6 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
               },
               polylines: _polylines,
               onMapCreated: (controller) {
-                _mapController = controller;
                 if (!_controller.isCompleted) {
                   _controller.complete(controller);
                 }
@@ -123,50 +117,17 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
               child: SearchLocation(
                 onPlaceSelected: (LatLng position, String name) async {
                   final controller = await _controller.future;
-                  final transport = await selectTransport(context);
-                  if (transport == null) return;
-
-                  final trip =
-                      ref.read(watchTripProvider(widget.tripId)).asData?.value;
-                  final previousMarkers = trip?.markerPoints ?? [];
-
-                  if (previousMarkers.isNotEmpty) {
-                    final lastMarker = previousMarkers.last.copyWith(
-                      transportMode: transport,
-                    );
-
-                    await ref
-                        .read(tripServiceProvider)
-                        .updateMarkerTransportMode(
-                          tripId: widget.tripId,
-                          markerId: lastMarker.id,
-                          transportMode: transport,
-                        );
-                  }
-
-                  final newMarker = MarkerPoint(
-                    id: name,
-                    name: name,
+                  await handlePlaceSelected(
+                    context: context,
+                    ref: ref,
+                    tripId: widget.tripId,
                     position: position,
-                  );
-
-                  await ref.read(tripServiceProvider).addMarkerToTrip(
-                        widget.tripId,
-                        newMarker,
-                      );
-
-                  controller.animateCamera(
-                    CameraUpdate.newLatLngZoom(position, 15),
-                  );
-
-                  final updatedTrip =
-                      ref.read(watchTripProvider(widget.tripId)).asData?.value;
-                  final newPolylines = DirectionService.drawPolylines(
-                    updatedTrip?.markerPoints ?? [],
-                  );
-                  setState(
-                    () {
-                      _polylines = newPolylines.toSet();
+                    name: name,
+                    controller: controller,
+                    updatePolylines: (newPolylines) {
+                      setState(() {
+                        _polylines = newPolylines;
+                      });
                     },
                   );
                 },

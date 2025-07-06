@@ -19,7 +19,7 @@ class _MyTripState extends ConsumerState<MyTrip> {
     final tripData = ref.watch(getTripProvider).value ?? [];
     if (tripData.isEmpty) {
       return const Center(
-        // TODO: Add a widget to display when there are no trips
+        // TODO: Mszę poprawić widok jeśli nie ma żadnych podróży
         child: Text(
           'Nie masz jeszcze żadnych podróży',
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),

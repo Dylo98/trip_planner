@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -12,7 +12,7 @@ import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 /* PROVIDERS */
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
-import 'package:trip_planner/features/trip/services/direction_service.dart';
+// import 'package:trip_planner/features/trip/services/direction_service.dart';
 
 /* WIDGETS */
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
