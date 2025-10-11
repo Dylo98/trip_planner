@@ -11,15 +11,20 @@ class BuildProfileImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final photoUrl = FirebaseAuth.instance.currentUser?.photoURL;
+
     return CircleAvatar(
       radius: profileHeight / 2,
       backgroundColor: Colors.white,
       child: CircleAvatar(
         radius: profileHeight / 2 - 10,
-        backgroundImage: NetworkImage(
-          FirebaseAuth.instance.currentUser?.photoURL ??
-              'https://i.pravatar.cc/150?img=5',
-        ),
+        backgroundColor: Colors.grey.shade300,
+        backgroundImage: photoUrl != null && photoUrl.isNotEmpty
+            ? NetworkImage(photoUrl)
+            : null,
+        child: photoUrl == null || photoUrl.isEmpty
+            ? const Icon(Icons.person, size: 40, color: Colors.white70)
+            : null,
       ),
     );
   }

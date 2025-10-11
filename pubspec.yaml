@@ -82,6 +82,7 @@ flutter:
     - assets/images/background_image1.jpg
     - assets/images/logo.png
     - assets/images/image_home.jpg
+    - assets/images/no_profile.jpg
     - assets/lottie/LottieAnimation.json
     - .env
 
