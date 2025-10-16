@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/auth/controller/auth_state_provider.dart';
+import 'package:trip_planner/features/auth/controller/user_provider.dart';
 
 /* MODEL*/
 import 'package:trip_planner/features/trip/model/trip_model.dart';

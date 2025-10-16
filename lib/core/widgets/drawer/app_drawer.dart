@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // FIREBASE //
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 // NAVIGATION //
 import 'package:trip_planner/core/navigation/my_trips_navigation.dart';
@@ -11,7 +11,10 @@ import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
 // THEME //
 import 'package:trip_planner/core/theme/colors.dart';
 
-class AppDrawer extends StatelessWidget {
+// USER //
+import 'package:trip_planner/features/auth/controller/user_provider.dart';
+
+class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});
 
   String _deriveName(User? user) {
@@ -26,9 +29,10 @@ class AppDrawer extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final authUser = FirebaseAuth.instance.currentUser;
     final uid = authUser?.uid;
+    final meAsync = ref.watch(meProvider);
 
     return Drawer(
       child: Column(
@@ -37,29 +41,16 @@ class AppDrawer extends StatelessWidget {
             decoration: BoxDecoration(gradient: AppColors.primaryGradient),
             child: Center(child: Image.asset("assets/images/logo.png")),
           ),
-
-          // ======== SEKCJA PROFILU ========
           if (uid != null)
-            StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
-              stream: FirebaseFirestore.instance
-                  .collection('users')
-                  .doc(uid)
-                  .snapshots(),
-              builder: (context, snap) {
-                // domyślne z Auth
-                String name = _deriveName(authUser);
-                String avatarUrl = authUser?.photoURL ?? '';
+            meAsync.when(
+              data: (me) {
+                final name = (me?.name?.isNotEmpty == true)
+                    ? me!.name!
+                    : _deriveName(authUser);
 
-                // nadpisz danymi z Firestore (jeśli są)
-                if (snap.hasData && snap.data!.exists) {
-                  final data = snap.data!.data();
-                  if (data != null) {
-                    final n = (data['name'] as String?)?.trim();
-                    final a = (data['avatar'] as String?)?.trim();
-                    if (n != null && n.isNotEmpty) name = n;
-                    if (a != null && a.isNotEmpty) avatarUrl = a;
-                  }
-                }
+                final avatarUrl = (me?.avatar?.isNotEmpty == true)
+                    ? me!.avatar!
+                    : (authUser?.photoURL ?? '');
 
                 final hasAvatar = avatarUrl.isNotEmpty;
 
@@ -96,6 +87,19 @@ class AppDrawer extends StatelessWidget {
                   ),
                 );
               },
+              loading: () => const Padding(
+                padding: EdgeInsets.all(16),
+                child: SizedBox(
+                  height: 24,
+                  width: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+              error: (_, __) => const ListTile(
+                leading: Icon(Icons.person_outline),
+                title: Text('Profil'),
+                subtitle: Text('Błąd wczytywania'),
+              ),
             )
           else
             const ListTile(
@@ -103,10 +107,7 @@ class AppDrawer extends StatelessWidget {
               title: Text('Nie zalogowano'),
               subtitle: Text('Zaloguj się, aby zobaczyć profil'),
             ),
-
           const SizedBox(height: 20),
-
-          // ======== MENU ========
           Expanded(
             child: ListView(
               children: [
@@ -138,7 +139,10 @@ class AppDrawer extends StatelessWidget {
                 ListTile(
                   leading: const Icon(Icons.exit_to_app, color: AppColors.red),
                   title: const Text('Wyloguj się'),
-                  onTap: () => FirebaseAuth.instance.signOut(),
+                  onTap: () async {
+                    Navigator.of(context).pop();
+                    await FirebaseAuth.instance.signOut();
+                  },
                 ),
               ],
             ),
