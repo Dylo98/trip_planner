@@ -33,16 +33,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('TripPlanner'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-            icon: Icon(Icons.exit_to_app, color: AppColors.red),
-          )
-        ],
       ),
-      drawer: AppDrawer(),
+      drawer: const AppDrawer(),
       body: userTripsAsync.when(
         data: (userTrips) => ListView(
           children: <Widget>[

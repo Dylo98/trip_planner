@@ -1,20 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-/* SERVICES */
 import 'package:trip_planner/features/trip/services/current_location.dart';
-
-/* MODEL */
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-
-/* PROVIDERS */
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
-// import 'package:trip_planner/features/trip/services/direction_service.dart';
-
-/* WIDGETS */
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 
 class NewTripMapScreen extends ConsumerStatefulWidget {
@@ -25,49 +16,63 @@ class NewTripMapScreen extends ConsumerStatefulWidget {
 }
 
 class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
-
-  // Set<Polyline> _polylines = {};
-
-  // Future<void> _drawPolylines() async {
-  //   final newPolylines =
-  //       DirectionService.drawLocalPolylines(next.value.markerPoints);
-
-  //   setState(() {
-  //     _polylines = {..._polylines, ...newPolylines};
-  //   });
-  // }
+  GoogleMapController? _mapController;
 
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(52.2297, 21.0122),
-    zoom: 1,
+    zoom: 6,
   );
 
   @override
-  Widget build(BuildContext context) {
-    final markersPoints = ref.watch(tripMarkersProvider);
-    final markers = markersPoints
-        .map(
-          (markerPoint) => Marker(
-            markerId: MarkerId(markerPoint.id),
-            position: markerPoint.position,
-            infoWindow: InfoWindow(
-              title: markerPoint.name,
-            ),
+  void dispose() {
+    _mapController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _onMyLocationPressed() async {
+    if (!mounted) return;
+
+    final position = await CurrentLocation.getCurrentPosition(context: context);
+    if (position == null || !mounted) return;
+
+    final latLng = LatLng(position.latitude, position.longitude);
+
+    ref.read(tripMarkersProvider.notifier).addMarker(
+          MarkerPoint(
+            id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
+            position: latLng,
+            name: 'Twoja lokalizacja',
           ),
-        )
-        .toSet();
+        );
+
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(latLng, 14),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final markerPoints = ref.watch(tripMarkersProvider);
+
+    final markers = markerPoints.map((markerPoint) {
+      return Marker(
+        markerId: MarkerId(markerPoint.id),
+        position: markerPoint.position,
+        infoWindow: InfoWindow(title: markerPoint.name),
+      );
+    }).toSet();
+
     return Scaffold(
       body: Stack(
         children: [
           GoogleMap(
             mapType: MapType.normal,
-            markers: Set<Marker>.from(markers),
-            // polylines: _polylines,
+            markers: markers,
             initialCameraPosition: _initialPosition,
+            myLocationEnabled: true,
+            myLocationButtonEnabled: false,
             onMapCreated: (GoogleMapController controller) {
-              _controller.complete(controller);
+              _mapController = controller;
             },
           ),
           Positioned(
@@ -75,8 +80,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             left: 16,
             right: 16,
             child: SearchLocation(
-              onPlaceSelected: (LatLng position, String name) async {
-                final controller = await _controller.future;
+              onPlaceSelected: (LatLng position, String name) {
                 ref.read(tripMarkersProvider.notifier).addMarker(
                       MarkerPoint(
                         id: name,
@@ -84,35 +88,16 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
                         name: name,
                       ),
                     );
-                controller.animateCamera(
+                _mapController?.animateCamera(
                   CameraUpdate.newLatLngZoom(position, 15),
                 );
-                // await _drawPolylines();
               },
             ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final position = await CurrentLocation.getCurrentPosition();
-          final cameraPosition = CameraPosition(
-            target: LatLng(position.latitude, position.longitude),
-            zoom: 14,
-          );
-          ref.read(tripMarkersProvider.notifier).addMarker(
-                MarkerPoint(
-                  id: 'currentLocation',
-                  position: LatLng(position.latitude, position.longitude),
-                  name: 'Twoja lokalizacja',
-                ),
-              );
-          final controller = await _controller.future;
-          controller.animateCamera(
-            CameraUpdate.newCameraPosition(cameraPosition),
-          );
-          // await _drawPolylines();
-        },
+        onPressed: _onMyLocationPressed,
         child: const Icon(Icons.my_location),
       ),
     );

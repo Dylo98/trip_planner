@@ -61,7 +61,7 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
         _isLoading = false;
         _errorMessage = error.message;
       });
-    } on Exception catch (error) {
+    } on Exception {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
