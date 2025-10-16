@@ -4,13 +4,15 @@ import 'colors.dart';
 class AppTextStyles {
   static const heading1 = TextStyle(
     fontSize: 32,
+    fontWeight: FontWeight.bold,
     fontFamily: "Oswald",
     color: AppColors.black,
   );
 
   static const heading2 = TextStyle(
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: FontWeight.w600,
+    fontFamily: "Oswald",
     color: AppColors.black,
   );
 

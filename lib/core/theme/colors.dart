@@ -8,11 +8,21 @@ class AppColors {
   static const black = Colors.black;
   static const red = Colors.redAccent;
 
+  static const grey = Color(0xFF9E9E9E);
+  static const lightGrey = Color(0xFFE0E0E0);
+  static const darkGrey = Color(0xFF616161);
+
   static final primaryGradient = LinearGradient(
     colors: [
-      Color(0xFF0bda51).withValues(alpha: 0.8),
-      Color(0xFF7cfc00).withValues(alpha: 0.8),
+      primary.withOpacity(0.8),
+      secondary.withOpacity(0.8),
     ],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static final primaryGradientSolid = const LinearGradient(
+    colors: [primary, secondary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

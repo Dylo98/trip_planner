@@ -8,7 +8,8 @@ void showLoginBottomSheet(BuildContext context) {
     context: context,
     isScrollControlled: true,
     builder: (ctx) {
-      return Padding(
+      return SafeArea(
+          child: Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(ctx).viewInsets.bottom,
         ),
@@ -18,7 +19,7 @@ void showLoginBottomSheet(BuildContext context) {
             child: LoginBottomSheet(context),
           ),
         ),
-      );
+      ));
     },
   );
 }

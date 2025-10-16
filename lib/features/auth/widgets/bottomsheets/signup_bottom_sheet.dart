@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
-
-// RIVER POD / PROVIDER //
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/auth/controller/auth_provider.dart';
-
-// SERVICES IMPORT //
-import 'package:trip_planner/data/services/auth_service.dart';
-
-// UTILS //
+import 'package:trip_planner/features/auth/services/auth_service.dart';
 import 'package:trip_planner/core/utils/validators.dart';
-
-// WIDGETS IMPORT //
-import 'package:trip_planner/features/auth/widgets/authflashbars/success_flushbar.dart';
-import 'package:trip_planner/features/auth/widgets/authflashbars/error_flushbar.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/widgets/buttons/form_auth_btn.dart';
+import 'package:trip_planner/features/auth/widgets/bottomsheets/login_bottom_sheet_trigger.dart';
 
 class SignupBottomSheet extends ConsumerStatefulWidget {
   const SignupBottomSheet(this.mainContext, {super.key});
@@ -25,92 +19,187 @@ class SignupBottomSheet extends ConsumerStatefulWidget {
 }
 
 class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
-  final _form = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
 
-  var _enteredEmail = '';
-  var _enteredPassword = '';
-  var _enteredName = '';
+  bool _isLoading = false;
+  bool _obscurePassword = true;
+  String? _errorMessage;
 
-  void _submit() async {
-    final isValid = _form.currentState!.validate();
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
-    if (!isValid) {
-      return;
-    }
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     final authService = ref.read(authProvider);
 
-    _form.currentState!.save();
     try {
       await authService.signup(
-        email: _enteredEmail,
-        password: _enteredPassword,
-        name: _enteredName,
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
       );
-      if (!widget.mainContext.mounted) return;
-      Navigator.of(widget.mainContext).pop();
-      SuccessFlushbar.show(
-        context: widget.mainContext,
-        message: 'Utworzono konto!',
-      );
-      // showLoginBottomSheet(widget.mainContext);
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     } on AuthException catch (error) {
-      if (!widget.mainContext.mounted) return;
-      ErrorFlushbar.show(
-        context: widget.mainContext,
-        message: error.message,
-      );
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = error.message;
+      });
+    } on Exception catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Wystąpił nieoczekiwany błąd: ${error.toString()}';
+      });
     }
+  }
+
+  void _navigateToLogin() {
+    Navigator.of(context).pop();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      showLoginBottomSheet(context);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Container(
-          decoration: BoxDecoration(),
-          child: Card(
-            margin: const EdgeInsets.all(20),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Form(
-                key: _form,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Imię',
-                      ),
-                      onSaved: (value) {
-                        _enteredName = value!;
-                      },
+        Padding(
+          padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
+          child: Text('Zarejestruj się', style: AppTextStyles.heading1),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
+          child: InkWell(
+            onTap: _navigateToLogin,
+            child: RichText(
+              text: TextSpan(
+                style: AppTextStyles.bodyText,
+                children: [
+                  const TextSpan(text: 'Masz już konto? '),
+                  TextSpan(
+                    text: 'Zaloguj się',
+                    style: AppTextStyles.bodyText.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
                     ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'E-mail',
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        Card(
+          margin: const EdgeInsets.all(20),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  if (_errorMessage != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColors.red),
                       ),
-                      keyboardType: TextInputType.emailAddress,
-                      autocorrect: false,
-                      textCapitalization: TextCapitalization.none,
-                      validator: Validators.validateEmail,
-                      onSaved: (value) {
-                        _enteredEmail = value!;
-                      },
-                    ),
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Hasło',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: AppColors.red, size: 20),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                color: AppColors.red,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      obscureText: true,
-                      validator: Validators.validatePassword,
-                      onSaved: (value) {
-                        _enteredPassword = value!;
-                      },
                     ),
-                    const SizedBox(height: 12),
-                    FormAuthBtn(onPressed: _submit, text: 'Zarejestruj się'),
-                  ],
-                ),
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: AppInputStyle.underlineInputDecoration(
+                      labelText: 'Imię',
+                      hintText: 'Jan',
+                    ),
+                    textCapitalization: TextCapitalization.words,
+                    validator: Validators.validateName,
+                    enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: AppInputStyle.underlineInputDecoration(
+                      labelText: 'E-mail',
+                      hintText: 'jan.kowalski@mail.com',
+                    ),
+                    keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    textCapitalization: TextCapitalization.none,
+                    validator: Validators.validateEmail,
+                    enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 8),
+                  TextFormField(
+                    controller: _passwordController,
+                    decoration: AppInputStyle.underlineInputDecoration(
+                      labelText: 'Hasło',
+                      hintText: '••••••••',
+                    ).copyWith(
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColors.grey,
+                        ),
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                setState(
+                                    () => _obscurePassword = !_obscurePassword);
+                              },
+                      ),
+                    ),
+                    obscureText: _obscurePassword,
+                    validator: Validators.validatePassword,
+                    enabled: !_isLoading,
+                  ),
+                  const SizedBox(height: 20),
+                  FormAuthBtn(
+                    onPressed: _submit,
+                    text: 'Zarejestruj się',
+                    isLoading: _isLoading,
+                  ),
+                ],
               ),
             ),
           ),
