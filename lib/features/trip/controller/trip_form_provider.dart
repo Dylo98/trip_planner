@@ -36,7 +36,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
     state = state.copyWith(startDate: startDate);
   }
 
-  void setEndDate(DateTime endDate) {
+  void setEndDate(DateTime? endDate) {
     state = state.copyWith(endDate: endDate);
   }
 
@@ -44,7 +44,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
     state = state.copyWith(imageUrl: imageUrl);
   }
 
-  void setTripPhotoUrl(String tripPhotoUrl) {
+  void setTripPhotoUrl(String? tripPhotoUrl) {
     state = state.copyWith(tripPhotoUrl: tripPhotoUrl);
   }
 
@@ -68,7 +68,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
     state = Trip(
       id: '',
       name: '',
-      startDate: DateTime.now(),
+      startDate: null,
       endDate: null,
       description: '',
       imageUrl: [],

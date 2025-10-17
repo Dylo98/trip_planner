@@ -53,8 +53,10 @@ class _TripDetailsScreenState extends ConsumerState<TripDetailsScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          DateFormat('dd-MM-yyyy')
-                              .format(widget.trip.startDate!),
+                          widget.trip.startDate != null
+                              ? DateFormat('dd-MM-yyyy')
+                                  .format(widget.trip.startDate!)
+                              : 'Brak daty',
                           style: AppTextStyles.bodyText,
                         ),
                         Icon(Icons.arrow_right),

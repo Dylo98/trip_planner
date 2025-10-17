@@ -38,22 +38,27 @@ class MarkerPoint {
   }
 
   factory MarkerPoint.fromJson(Map<String, dynamic> json) {
+    if (json['id'] == null || json['position'] == null) {
+      throw FormatException('Invalid marker data: missing required fields');
+    }
+    final position = json['position'] as Map<String, dynamic>;
     return MarkerPoint(
-      id: json['id'],
+      id: json['id'] as String,
       position: LatLng(
-        json['position']['latitude'],
-        json['position']['longitude'],
+        (position['latitude'] as num).toDouble(),
+        (position['longitude'] as num).toDouble(),
       ),
-      name: json['name'],
-      description: json['description'],
-      imageUrl: List<String>.from(json['imageUrl'] ?? []),
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      imageUrl:
+          json['imageUrl'] != null ? List<String>.from(json['imageUrl']) : null,
       arrivalDateTime: json['arrivalDateTime'] != null
           ? DateTime.parse(json['arrivalDateTime'])
           : null,
       departureDateTime: json['departureDateTime'] != null
           ? DateTime.parse(json['departureDateTime'])
           : null,
-      transportMode: json['transportMode'],
+      transportMode: json['transportMode'] as String?,
     );
   }
 

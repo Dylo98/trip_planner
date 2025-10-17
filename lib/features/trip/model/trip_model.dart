@@ -38,14 +38,18 @@ class Trip {
     return Trip(
       id: json['id'],
       name: json['name'],
-      startDate: DateTime.parse(json['startDate']),
+      startDate:
+          json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
       endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
-      description: json['description'],
-      imageUrl: List<String>.from(json['imageUrl'] ?? []),
-      tripPhotoUrl: json['tripPhotoUrl'],
-      markerPoints: (json['markerPoints'] as List)
-          .map((marker) => MarkerPoint.fromJson(marker))
-          .toList(),
+      description: json['description'] as String?,
+      imageUrl:
+          json['imageUrl'] != null ? List<String>.from(json['imageUrl']) : [],
+      tripPhotoUrl: json['tripPhotoUrl'] as String?,
+      markerPoints: json['markerPoints'] != null
+          ? (json['markerPoints'] as List)
+              .map((m) => MarkerPoint.fromJson(m))
+              .toList()
+          : [],
     );
   }
 

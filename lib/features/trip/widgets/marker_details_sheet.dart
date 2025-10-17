@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:uuid/uuid.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -34,6 +35,7 @@ class MarkerDetailsSheet extends ConsumerStatefulWidget {
 class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   int _currentImageIndex = 0;
   File? _selectedImage;
+  final _uuid = const Uuid();
   final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
@@ -290,7 +292,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                       return GestureDetector(
                                         onTap: () async {
                                           final newMarker = MarkerPoint(
-                                            id: UniqueKey().toString(),
+                                            id: _uuid.v4(),
                                             name: place.name,
                                             position: place.location,
                                             arrivalDateTime: null,

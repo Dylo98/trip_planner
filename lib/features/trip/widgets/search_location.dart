@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
@@ -20,71 +21,113 @@ class SearchLocation extends StatefulWidget {
 
 class _SearchLocation extends State<SearchLocation> {
   final TextEditingController _addressController = TextEditingController();
-  var uuid = Uuid();
+  final _uuid = const Uuid();
 
-  String _token = '37465';
+  String _sessionToken = '';
   List<dynamic> _suggestions = [];
+  Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _addressController.addListener(() {
-      onModify();
-    });
+    _sessionToken = _uuid.v4();
+    _addressController.addListener(_onTextChanged);
   }
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _addressController.dispose();
     super.dispose();
   }
 
-  void onModify() {
-    if (_token.isEmpty) {
-      setState(() {
-        _token = uuid.v4();
-      });
-    }
-    _fetchSuggestions(_addressController.text);
+  void _onTextChanged() {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      if (_addressController.text.isNotEmpty) {
+        _fetchSuggestions(_addressController.text);
+      } else {
+        setState(() => _suggestions = []);
+      }
+    });
   }
 
-  Future<void> _fetchSuggestions(String suggestion) async {
-    final apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '';
-    final url = 'https://maps.googleapis.com/maps/api/place/autocomplete/json'
-        '?input=$suggestion'
-        '&key=$apiKey'
-        '&sessiontoken=$_token'
-        '&language=pl';
+  Future<void> _fetchSuggestions(String input) async {
+    if (input.trim().isEmpty) return;
 
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      setState(() {
-        _suggestions = data['predictions'];
-      });
-    } else {
-      throw Exception('Błąd podczas pobierania');
+    final apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'];
+    if (apiKey == null || apiKey.isEmpty) {
+      debugPrint('Google Places API key not found');
+      return;
+    }
+
+    final url =
+        Uri.parse('https://maps.googleapis.com/maps/api/place/autocomplete/json'
+            '?input=${Uri.encodeComponent(input)}'
+            '&key=$apiKey'
+            '&sessiontoken=$_sessionToken'
+            '&language=pl');
+
+    try {
+      final response = await http.get(url).timeout(
+            const Duration(seconds: 5),
+          );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+
+        if (data['status'] == 'OK' || data['status'] == 'ZERO_RESULTS') {
+          setState(() {
+            _suggestions = data['predictions'] ?? [];
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching suggestions: $e');
     }
   }
 
   Future<void> _handlePlaceSelected(int index) async {
     FocusScope.of(context).unfocus();
+
     final placeId = _suggestions[index]['place_id'];
     final name = _suggestions[index]['description'];
-    final apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'] ?? '';
-    final detailsUrl = 'https://maps.googleapis.com/maps/api/place/details/json'
-        '?place_id=$placeId'
-        '&key=$apiKey'
-        '&language=pl';
+    final apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'];
 
-    final detailsResponse = await http.get(Uri.parse(detailsUrl));
-    if (detailsResponse.statusCode == 200) {
-      final details = jsonDecode(detailsResponse.body);
-      final location = details['result']['geometry']['location'];
-      final latLng = LatLng(location['lat'], location['lng']);
-      widget.onPlaceSelected?.call(latLng, name);
-    } else {
-      throw Exception('Błąd podczas pobierania szczegółów miejsca');
+    if (apiKey == null) return;
+
+    final detailsUrl =
+        Uri.parse('https://maps.googleapis.com/maps/api/place/details/json'
+            '?place_id=$placeId'
+            '&key=$apiKey'
+            '&sessiontoken=$_sessionToken'
+            '&language=pl');
+
+    try {
+      final response = await http.get(detailsUrl).timeout(
+            const Duration(seconds: 5),
+          );
+
+      if (response.statusCode == 200) {
+        final details = jsonDecode(response.body);
+        final location = details['result']['geometry']['location'];
+        final latLng = LatLng(
+          (location['lat'] as num).toDouble(),
+          (location['lng'] as num).toDouble(),
+        );
+
+        widget.onPlaceSelected?.call(latLng, name);
+
+        _sessionToken = _uuid.v4();
+
+        setState(() {
+          _suggestions = [];
+          _addressController.clear();
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching place details: $e');
     }
   }
 

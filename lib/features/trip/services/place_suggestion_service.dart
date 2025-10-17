@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -28,30 +30,56 @@ class PlaceSuggestionService {
       '&type=tourist_attraction&key=$apiKey',
     );
 
-    final response = await http.get(url);
+    try {
+      final response = await http.get(url).timeout(
+            const Duration(seconds: 10),
+          );
 
-    if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      final results = data['results'] as List<dynamic>;
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
 
-      return results.map((place) {
-        final location = place['geometry']?['location'];
-        final photo = place['photos'] != null && place['photos'].isNotEmpty
-            ? place['photos'][0]['photo_reference']
-            : null;
+        // Sprawdź status Google API
+        if (data['status'] == 'ZERO_RESULTS') {
+          return [];
+        }
 
-        return PlaceSuggestion(
-          name: place['name'] as String,
-          address: place['vicinity'] as String?,
-          photoReference: photo,
-          location: LatLng(
-            location['lat'] as double,
-            location['lng'] as double,
-          ),
-        );
-      }).toList();
-    } else {
-      throw Exception('Failed to load suggestions');
+        if (data['status'] != 'OK') {
+          throw Exception('Google Places API error: ${data['status']}');
+        }
+
+        final results = data['results'] as List<dynamic>;
+
+        return results
+            .map((place) {
+              final location = place['geometry']?['location'];
+              if (location == null) return null;
+
+              final photo =
+                  place['photos'] != null && place['photos'].isNotEmpty
+                      ? place['photos'][0]['photo_reference']
+                      : null;
+
+              return PlaceSuggestion(
+                name: place['name'] as String? ?? 'Unknown',
+                address: place['vicinity'] as String?,
+                photoReference: photo,
+                location: LatLng(
+                  (location['lat'] as num).toDouble(),
+                  (location['lng'] as num).toDouble(),
+                ),
+              );
+            })
+            .whereType<PlaceSuggestion>()
+            .toList();
+      } else {
+        throw Exception('HTTP ${response.statusCode}: ${response.body}');
+      }
+    } on TimeoutException {
+      throw Exception('Request timeout - sprawdź połączenie');
+    } on SocketException {
+      throw Exception('Brak połączenia z internetem');
+    } catch (e) {
+      throw Exception('Failed to load suggestions: $e');
     }
   }
 }
