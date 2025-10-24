@@ -1,14 +1,12 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:uuid/uuid.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 /* THEME */
 import 'package:trip_planner/core/theme/input_style.dart';
+
+/* SERVICES */
+import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
 
 class SearchLocation extends StatefulWidget {
   const SearchLocation({super.key, this.onPlaceSelected});
@@ -21,16 +19,13 @@ class SearchLocation extends StatefulWidget {
 
 class _SearchLocation extends State<SearchLocation> {
   final TextEditingController _addressController = TextEditingController();
-  final _uuid = const Uuid();
 
-  String _sessionToken = '';
-  List<dynamic> _suggestions = [];
+  List<PlaceSuggestion> _suggestions = [];
   Timer? _debounce;
 
   @override
   void initState() {
     super.initState();
-    _sessionToken = _uuid.v4();
     _addressController.addListener(_onTextChanged);
   }
 
@@ -56,79 +51,26 @@ class _SearchLocation extends State<SearchLocation> {
   Future<void> _fetchSuggestions(String input) async {
     if (input.trim().isEmpty) return;
 
-    final apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'];
-    if (apiKey == null || apiKey.isEmpty) {
-      debugPrint('Google Places API key not found');
-      return;
-    }
-
-    final url =
-        Uri.parse('https://maps.googleapis.com/maps/api/place/autocomplete/json'
-            '?input=${Uri.encodeComponent(input)}'
-            '&key=$apiKey'
-            '&sessiontoken=$_sessionToken'
-            '&language=pl');
-
     try {
-      final response = await http.get(url).timeout(
-            const Duration(seconds: 5),
-          );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-
-        if (data['status'] == 'OK' || data['status'] == 'ZERO_RESULTS') {
-          setState(() {
-            _suggestions = data['predictions'] ?? [];
-          });
-        }
-      }
+      final results = await NominatimSearchService.searchPlaces(input);
+      setState(() {
+        _suggestions = results;
+      });
     } catch (e) {
       debugPrint('Error fetching suggestions: $e');
     }
   }
 
-  Future<void> _handlePlaceSelected(int index) async {
+  void _handlePlaceSelected(int index) {
     FocusScope.of(context).unfocus();
 
-    final placeId = _suggestions[index]['place_id'];
-    final name = _suggestions[index]['description'];
-    final apiKey = dotenv.env['GOOGLE_PLACES_API_KEY'];
+    final suggestion = _suggestions[index];
+    widget.onPlaceSelected?.call(suggestion.location, suggestion.name);
 
-    if (apiKey == null) return;
-
-    final detailsUrl =
-        Uri.parse('https://maps.googleapis.com/maps/api/place/details/json'
-            '?place_id=$placeId'
-            '&key=$apiKey'
-            '&sessiontoken=$_sessionToken'
-            '&language=pl');
-
-    try {
-      final response = await http.get(detailsUrl).timeout(
-            const Duration(seconds: 5),
-          );
-
-      if (response.statusCode == 200) {
-        final details = jsonDecode(response.body);
-        final location = details['result']['geometry']['location'];
-        final latLng = LatLng(
-          (location['lat'] as num).toDouble(),
-          (location['lng'] as num).toDouble(),
-        );
-
-        widget.onPlaceSelected?.call(latLng, name);
-
-        _sessionToken = _uuid.v4();
-
-        setState(() {
-          _suggestions = [];
-          _addressController.clear();
-        });
-      }
-    } catch (e) {
-      debugPrint('Error fetching place details: $e');
-    }
+    setState(() {
+      _suggestions = [];
+      _addressController.clear();
+    });
   }
 
   @override
@@ -156,14 +98,11 @@ class _SearchLocation extends State<SearchLocation> {
                         itemCount: _suggestions.length,
                         itemBuilder: (context, index) {
                           return ListTile(
-                            title: Text(_suggestions[index]['description']),
-                            onTap: () {
-                              _handlePlaceSelected(index);
-                              setState(() {
-                                _suggestions = [];
-                                _addressController.text = '';
-                              });
-                            },
+                            title: Text(_suggestions[index].name),
+                            subtitle: _suggestions[index].address != null
+                                ? Text(_suggestions[index].address!)
+                                : null,
+                            onTap: () => _handlePlaceSelected(index),
                           );
                         },
                       ),

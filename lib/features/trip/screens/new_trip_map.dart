@@ -7,6 +7,8 @@ import 'package:trip_planner/features/trip/services/current_location.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
+import 'package:trip_planner/features/trip/widgets/select_transport.dart';
+import 'package:trip_planner/features/trip/services/direction_service.dart';
 
 class NewTripMapScreen extends ConsumerStatefulWidget {
   const NewTripMapScreen({super.key});
@@ -17,6 +19,7 @@ class NewTripMapScreen extends ConsumerStatefulWidget {
 
 class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
   GoogleMapController? _mapController;
+  Set<Polyline> _polylines = {};
 
   static const CameraPosition _initialPosition = CameraPosition(
     target: LatLng(52.2297, 21.0122),
@@ -29,6 +32,55 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
     super.dispose();
   }
 
+  void _updatePolylines() {
+    final markerPoints = ref.read(tripMarkersProvider);
+    if (markerPoints.length >= 2) {
+      final newPolylines = DirectionService.drawPolylines(markerPoints);
+      setState(() {
+        _polylines = newPolylines.toSet();
+      });
+    }
+  }
+
+  Future<void> _handlePlaceSelected(LatLng position, String name) async {
+    final markerPoints = ref.read(tripMarkersProvider);
+
+    if (markerPoints.isEmpty) {
+      ref.read(tripMarkersProvider.notifier).addMarker(
+            MarkerPoint(
+              id: name,
+              position: position,
+              name: name,
+              transportMode: 'other',
+            ),
+          );
+    } else {
+      final transportMode = await selectTransport(context);
+      if (transportMode == null) return;
+
+      final lastMarker = markerPoints.last;
+      ref.read(tripMarkersProvider.notifier).updateMarkerTransport(
+            lastMarker.id,
+            transportMode,
+          );
+
+      ref.read(tripMarkersProvider.notifier).addMarker(
+            MarkerPoint(
+              id: name,
+              position: position,
+              name: name,
+              transportMode: 'other',
+            ),
+          );
+
+      _updatePolylines();
+    }
+
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(position, 15),
+    );
+  }
+
   Future<void> _onMyLocationPressed() async {
     if (!mounted) return;
 
@@ -37,13 +89,38 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
 
     final latLng = LatLng(position.latitude, position.longitude);
 
-    ref.read(tripMarkersProvider.notifier).addMarker(
-          MarkerPoint(
-            id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
-            position: latLng,
-            name: 'Twoja lokalizacja',
-          ),
-        );
+    final markerPoints = ref.read(tripMarkersProvider);
+
+    if (markerPoints.isEmpty) {
+      ref.read(tripMarkersProvider.notifier).addMarker(
+            MarkerPoint(
+              id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
+              position: latLng,
+              name: 'Twoja lokalizacja',
+              transportMode: 'other',
+            ),
+          );
+    } else {
+      final transportMode = await selectTransport(context);
+      if (transportMode == null) return;
+
+      final lastMarker = markerPoints.last;
+      ref.read(tripMarkersProvider.notifier).updateMarkerTransport(
+            lastMarker.id,
+            transportMode,
+          );
+
+      ref.read(tripMarkersProvider.notifier).addMarker(
+            MarkerPoint(
+              id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
+              position: latLng,
+              name: 'Twoja lokalizacja',
+              transportMode: 'other',
+            ),
+          );
+
+      _updatePolylines();
+    }
 
     _mapController?.animateCamera(
       CameraUpdate.newLatLngZoom(latLng, 14),
@@ -68,6 +145,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           GoogleMap(
             mapType: MapType.normal,
             markers: markers,
+            polylines: _polylines,
             initialCameraPosition: _initialPosition,
             myLocationEnabled: true,
             myLocationButtonEnabled: false,
@@ -80,18 +158,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             left: 16,
             right: 16,
             child: SearchLocation(
-              onPlaceSelected: (LatLng position, String name) {
-                ref.read(tripMarkersProvider.notifier).addMarker(
-                      MarkerPoint(
-                        id: name,
-                        position: position,
-                        name: name,
-                      ),
-                    );
-                _mapController?.animateCamera(
-                  CameraUpdate.newLatLngZoom(position, 15),
-                );
-              },
+              onPlaceSelected: _handlePlaceSelected,
             ),
           ),
         ],

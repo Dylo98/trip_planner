@@ -14,9 +14,7 @@ import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_a
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
 
-import 'package:trip_planner/features/trip/services/place_suggestion_service.dart';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
 
 class MarkerDetailsSheet extends ConsumerStatefulWidget {
   const MarkerDetailsSheet({
@@ -130,12 +128,16 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
 
   Future<void> _fetchNearbyPlaces() async {
     try {
-      final places = await PlaceSuggestionService.fetchSuggestions(
-          widget.marker.position, dotenv.env['GOOGLE_PLACES_API_KEY']!);
-      setState(() {
-        _nearbyPlaces = places;
-        _isLoadingPlaces = false;
-      });
+      final places = await NominatimSearchService.getNearbyPlaces(
+        widget.marker.position,
+        radiusKm: 2,
+      );
+      if (mounted) {
+        setState(() {
+          _nearbyPlaces = places;
+          _isLoadingPlaces = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _isLoadingPlaces = false;
@@ -336,10 +338,71 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                                   borderRadius:
                                                       BorderRadius.circular(8),
                                                   child: Image.network(
-                                                    'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${place.photoReference}&key=${dotenv.env['GOOGLE_PLACES_API_KEY']}',
+                                                    place.photoReference!,
                                                     height: 100,
                                                     width: double.infinity,
                                                     fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                        error, stackTrace) {
+                                                      return Container(
+                                                        height: 100,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .grey.shade200,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                        ),
+                                                        child: const Center(
+                                                          child: Icon(
+                                                            Icons.place,
+                                                            size: 48,
+                                                            color: Colors.grey,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
+                                                    loadingBuilder: (context,
+                                                        child,
+                                                        loadingProgress) {
+                                                      if (loadingProgress ==
+                                                          null) {
+                                                        return child;
+                                                      }
+                                                      return Container(
+                                                        height: 100,
+                                                        decoration:
+                                                            BoxDecoration(
+                                                          color: Colors
+                                                              .grey.shade200,
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                        ),
+                                                        child: const Center(
+                                                          child:
+                                                              CircularProgressIndicator(),
+                                                        ),
+                                                      );
+                                                    },
+                                                  ),
+                                                )
+                                              else
+                                                Container(
+                                                  height: 100,
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.grey.shade200,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: const Center(
+                                                    child: Icon(
+                                                      Icons.place,
+                                                      size: 48,
+                                                      color: Colors.grey,
+                                                    ),
                                                   ),
                                                 ),
                                               const SizedBox(height: 4),
@@ -349,12 +412,17 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                                   fontWeight: FontWeight.bold,
                                                   fontSize: 14,
                                                 ),
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                               if (place.address != null)
                                                 Text(
                                                   place.address!,
                                                   style: const TextStyle(
                                                       fontSize: 12),
+                                                  maxLines: 2,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
                                                 ),
                                             ],
                                           ),
