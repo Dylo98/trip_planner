@@ -13,6 +13,7 @@ import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_add_image_button.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
+import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
 
@@ -67,18 +68,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
       pickedTime.hour,
       pickedTime.minute,
     );
-  }
-
-  Future<void> _updateMarkerDateTime({
-    required DateTime arrival,
-    required DateTime departure,
-  }) async {
-    await ref.read(tripServiceProvider).updateMarkerDates(
-          tripId: widget.tripId,
-          markerId: widget.marker.id,
-          arrival: arrival,
-          departure: departure,
-        );
   }
 
   Future<void> _onPickImageAndSave() async {
@@ -175,264 +164,288 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                 children: [
                   if (currentMarker.imageUrl == null ||
                       currentMarker.imageUrl!.isEmpty)
-                    EmptyImagePicker(
-                      onTap: _onPickImageAndSave,
-                      selectedImage: _selectedImage,
+                    Stack(
+                      children: [
+                        EmptyImagePicker(
+                          onTap: _onPickImageAndSave,
+                          selectedImage: _selectedImage,
+                        ),
+                        AddImageButton(onPressed: _onPickImageAndSave),
+                      ],
                     )
                   else
                     Stack(
                       children: [
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.5,
-                          child: MarkerImageCarousel(
-                            imageUrls: currentMarker.imageUrl!,
-                            currentIndex: _currentImageIndex,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentImageIndex = index;
-                              });
-                            },
-                          ),
+                        MarkerImageCarousel(
+                          imageUrls: currentMarker.imageUrl!,
+                          currentIndex: _currentImageIndex,
+                          onPageChanged: (index) {
+                            setState(() {
+                              _currentImageIndex = index;
+                            });
+                          },
                         ),
                         AddImageButton(onPressed: _onPickImageAndSave),
                       ],
                     ),
                   Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(widget.marker.name!),
-                  ),
-                  Form(
-                    key: _formKey,
+                    padding: const EdgeInsets.all(16),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0),
-                          child: Column(
-                            children: [
-                              ListTile(
-                                title: const Text('Data i godzina przyjazdu'),
-                                subtitle: Text(
-                                  _arrivalDateTime != null
-                                      ? '${_arrivalDateTime!.day}.${_arrivalDateTime!.month}.${_arrivalDateTime!.year} '
-                                          '${_arrivalDateTime!.hour.toString().padLeft(2, '0')}:${_arrivalDateTime!.minute.toString().padLeft(2, '0')}'
-                                      : 'Wybierz datę i godzinę',
-                                ),
-                                trailing: const Icon(Icons.access_time),
-                                onTap: () async {
-                                  final result =
-                                      await _pickDateTime(_arrivalDateTime);
-                                  if (result != null) {
-                                    setState(() {
-                                      _arrivalDateTime = result;
-                                    });
-
-                                    if (_departureDateTime != null) {
-                                      await _updateMarkerDateTime(
-                                        arrival: result,
-                                        departure: _departureDateTime!,
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                              ListTile(
-                                title: const Text('Data i godzina odjazdu'),
-                                subtitle: Text(
-                                  _departureDateTime != null
-                                      ? '${_departureDateTime!.day}.${_departureDateTime!.month}.${_departureDateTime!.year} '
-                                          '${_departureDateTime!.hour.toString().padLeft(2, '0')}:${_departureDateTime!.minute.toString().padLeft(2, '0')}'
-                                      : 'Wybierz datę i godzinę',
-                                ),
-                                trailing: const Icon(Icons.access_time),
-                                onTap: () async {
-                                  final result =
-                                      await _pickDateTime(_departureDateTime);
-                                  if (result != null) {
-                                    setState(() {
-                                      _departureDateTime = result;
-                                    });
-
-                                    if (_arrivalDateTime != null) {
-                                      await _updateMarkerDateTime(
-                                        arrival: _arrivalDateTime!,
-                                        departure: result,
-                                      );
-                                    }
-                                  }
-                                },
-                              ),
-                            ],
+                        Text(
+                          currentMarker.name ?? 'Bez nazwy',
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
+                        if (currentMarker.description != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Text(
+                              currentMarker.description!,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        const Divider(height: 32),
+                        ListTile(
+                          leading: const Icon(Icons.flight_land),
+                          title: const Text('Data przyjazdu'),
+                          subtitle: Text(
+                            _arrivalDateTime != null
+                                ? _arrivalDateTime!
+                                    .toLocal()
+                                    .toString()
+                                    .substring(0, 16)
+                                : 'Nie ustawiono',
+                          ),
+                          trailing: const Icon(Icons.edit),
+                          onTap: () async {
+                            final picked =
+                                await _pickDateTime(_arrivalDateTime);
+                            if (picked != null) {
+                              setState(() {
+                                _arrivalDateTime = picked;
+                              });
+
+                              await ref
+                                  .read(tripServiceProvider)
+                                  .updateMarkerDates(
+                                    tripId: widget.tripId,
+                                    markerId: widget.marker.id,
+                                    arrival: picked,
+                                    departure: _departureDateTime ?? picked,
+                                  );
+                            }
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.flight_takeoff),
+                          title: const Text('Data wyjazdu'),
+                          subtitle: Text(
+                            _departureDateTime != null
+                                ? _departureDateTime!
+                                    .toLocal()
+                                    .toString()
+                                    .substring(0, 16)
+                                : 'Nie ustawiono',
+                          ),
+                          trailing: const Icon(Icons.edit),
+                          onTap: () async {
+                            final picked =
+                                await _pickDateTime(_departureDateTime);
+                            if (picked != null) {
+                              setState(() {
+                                _departureDateTime = picked;
+                              });
+
+                              await ref
+                                  .read(tripServiceProvider)
+                                  .updateMarkerDates(
+                                    tripId: widget.tripId,
+                                    markerId: widget.marker.id,
+                                    arrival: _arrivalDateTime ?? picked,
+                                    departure: picked,
+                                  );
+                            }
+                          },
+                        ),
+                        const Divider(height: 32),
                         if (_isLoadingPlaces)
-                          const Padding(
-                            padding: EdgeInsets.all(16),
-                            child: CircularProgressIndicator(),
+                          const Center(
+                            child: Padding(
+                              padding: EdgeInsets.all(16),
+                              child: CircularProgressIndicator(),
+                            ),
                           )
                         else if (_nearbyPlaces.isNotEmpty)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
-                                  child: Text(
-                                    'Ciekawe miejsca w pobliżu:',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Ciekawe miejsca w pobliżu',
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                SizedBox(
-                                  height: 200,
-                                  child: ListView.builder(
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: _nearbyPlaces.length,
-                                    itemBuilder: (context, index) {
-                                      final place = _nearbyPlaces[index];
-                                      return GestureDetector(
-                                        onTap: () async {
-                                          final newMarker = MarkerPoint(
-                                            id: _uuid.v4(),
-                                            name: place.name,
-                                            position: place.location,
-                                            arrivalDateTime: null,
-                                            departureDateTime: null,
-                                            imageUrl: [],
-                                            transportMode: 'walk',
-                                          );
+                              ),
+                              SizedBox(
+                                height: 200,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: _nearbyPlaces.length,
+                                  itemBuilder: (context, index) {
+                                    final place = _nearbyPlaces[index];
+                                    return GestureDetector(
+                                      onTap: () async {
+                                        final transportMode =
+                                            await selectTransport(context);
+                                        if (transportMode == null) return;
 
-                                          await ref
-                                              .read(tripServiceProvider)
-                                              .addMarkerToTrip(
-                                                  widget.tripId, newMarker);
-                                          if (mounted) {
-                                            Navigator.of(context).pop();
-                                          }
-                                        },
-                                        child: Container(
-                                          width: 200,
-                                          margin: const EdgeInsets.all(8),
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            border: Border.all(
-                                                color: Colors.grey.shade300),
-                                            borderRadius:
-                                                BorderRadius.circular(12),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey.shade300,
-                                                blurRadius: 5,
-                                                offset: const Offset(2, 2),
-                                              ),
-                                            ],
-                                          ),
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              if (place.photoReference != null)
-                                                ClipRRect(
+                                        await ref
+                                            .read(tripServiceProvider)
+                                            .updateMarkerTransportMode(
+                                              tripId: widget.tripId,
+                                              markerId: widget.marker.id,
+                                              transportMode: transportMode,
+                                            );
+                                        final newMarker = MarkerPoint(
+                                          id: _uuid.v4(),
+                                          name: place.name,
+                                          position: place.location,
+                                          arrivalDateTime: null,
+                                          departureDateTime: null,
+                                          imageUrl: [],
+                                          transportMode: 'other',
+                                        );
+
+                                        await ref
+                                            .read(tripServiceProvider)
+                                            .addMarkerToTrip(
+                                                widget.tripId, newMarker);
+                                        if (mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+                                      },
+                                      child: Container(
+                                        width: 200,
+                                        margin: const EdgeInsets.all(8),
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                              color: Colors.grey.shade300),
+                                          borderRadius:
+                                              BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.shade300,
+                                              blurRadius: 5,
+                                              offset: const Offset(2, 2),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            if (place.photoReference != null)
+                                              ClipRRect(
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                                child: Image.network(
+                                                  place.photoReference!,
+                                                  height: 100,
+                                                  width: double.infinity,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error,
+                                                      stackTrace) {
+                                                    return Container(
+                                                      height: 100,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .grey.shade200,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
+                                                      child: const Center(
+                                                        child: Icon(
+                                                          Icons.place,
+                                                          size: 48,
+                                                          color: Colors.grey,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  },
+                                                  loadingBuilder: (context,
+                                                      child, loadingProgress) {
+                                                    if (loadingProgress ==
+                                                        null) {
+                                                      return child;
+                                                    }
+                                                    return Container(
+                                                      height: 100,
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .grey.shade200,
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(8),
+                                                      ),
+                                                      child: const Center(
+                                                        child:
+                                                            CircularProgressIndicator(),
+                                                      ),
+                                                    );
+                                                  },
+                                                ),
+                                              )
+                                            else
+                                              Container(
+                                                height: 100,
+                                                decoration: BoxDecoration(
+                                                  color: Colors.grey.shade200,
                                                   borderRadius:
                                                       BorderRadius.circular(8),
-                                                  child: Image.network(
-                                                    place.photoReference!,
-                                                    height: 100,
-                                                    width: double.infinity,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                        error, stackTrace) {
-                                                      return Container(
-                                                        height: 100,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .grey.shade200,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                        ),
-                                                        child: const Center(
-                                                          child: Icon(
-                                                            Icons.place,
-                                                            size: 48,
-                                                            color: Colors.grey,
-                                                          ),
-                                                        ),
-                                                      );
-                                                    },
-                                                    loadingBuilder: (context,
-                                                        child,
-                                                        loadingProgress) {
-                                                      if (loadingProgress ==
-                                                          null) {
-                                                        return child;
-                                                      }
-                                                      return Container(
-                                                        height: 100,
-                                                        decoration:
-                                                            BoxDecoration(
-                                                          color: Colors
-                                                              .grey.shade200,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(8),
-                                                        ),
-                                                        child: const Center(
-                                                          child:
-                                                              CircularProgressIndicator(),
-                                                        ),
-                                                      );
-                                                    },
-                                                  ),
-                                                )
-                                              else
-                                                Container(
-                                                  height: 100,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.grey.shade200,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: const Center(
-                                                    child: Icon(
-                                                      Icons.place,
-                                                      size: 48,
-                                                      color: Colors.grey,
-                                                    ),
+                                                ),
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.place,
+                                                    size: 48,
+                                                    color: Colors.grey,
                                                   ),
                                                 ),
-                                              const SizedBox(height: 4),
+                                              ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              place.name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            if (place.address != null)
                                               Text(
-                                                place.name,
+                                                place.address!,
                                                 style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 14,
-                                                ),
+                                                    fontSize: 12),
                                                 maxLines: 2,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
-                                              if (place.address != null)
-                                                Text(
-                                                  place.address!,
-                                                  style: const TextStyle(
-                                                      fontSize: 12),
-                                                  maxLines: 2,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                            ],
-                                          ),
+                                          ],
                                         ),
-                                      );
-                                    },
-                                  ),
+                                      ),
+                                    );
+                                  },
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         Padding(
                           padding: const EdgeInsets.only(top: 16),

@@ -21,6 +21,15 @@ class TripMarkersNotifier extends StateNotifier<List<MarkerPoint>> {
     }).toList();
   }
 
+  void updateMarker(String markerId, MarkerPoint updatedMarker) {
+    state = state.map((marker) {
+      if (marker.id == markerId) {
+        return updatedMarker;
+      }
+      return marker;
+    }).toList();
+  }
+
   void clear() {
     state = [];
   }

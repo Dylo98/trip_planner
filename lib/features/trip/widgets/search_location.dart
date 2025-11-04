@@ -14,11 +14,12 @@ class SearchLocation extends StatefulWidget {
   final void Function(LatLng latLng, String name)? onPlaceSelected;
 
   @override
-  State<SearchLocation> createState() => _SearchLocation();
+  State<SearchLocation> createState() => _SearchLocationState();
 }
 
-class _SearchLocation extends State<SearchLocation> {
+class _SearchLocationState extends State<SearchLocation> {
   final TextEditingController _addressController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   List<PlaceSuggestion> _suggestions = [];
   Timer? _debounce;
@@ -33,6 +34,7 @@ class _SearchLocation extends State<SearchLocation> {
   void dispose() {
     _debounce?.cancel();
     _addressController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -43,7 +45,9 @@ class _SearchLocation extends State<SearchLocation> {
       if (_addressController.text.isNotEmpty) {
         _fetchSuggestions(_addressController.text);
       } else {
-        setState(() => _suggestions = []);
+        if (mounted) {
+          setState(() => _suggestions = []);
+        }
       }
     });
   }
@@ -53,16 +57,23 @@ class _SearchLocation extends State<SearchLocation> {
 
     try {
       final results = await NominatimSearchService.searchPlaces(input);
-      setState(() {
-        _suggestions = results;
-      });
+      if (mounted) {
+        setState(() {
+          _suggestions = results;
+        });
+      }
     } catch (e) {
       debugPrint('Error fetching suggestions: $e');
+      if (mounted) {
+        setState(() {
+          _suggestions = [];
+        });
+      }
     }
   }
 
   void _handlePlaceSelected(int index) {
-    FocusScope.of(context).unfocus();
+    _focusNode.unfocus();
 
     final suggestion = _suggestions[index];
     widget.onPlaceSelected?.call(suggestion.location, suggestion.name);
@@ -75,45 +86,48 @@ class _SearchLocation extends State<SearchLocation> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 250,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              children: [
-                TextFormField(
-                  controller: _addressController,
-                  decoration: AppInputStyle.inputDecoration(
-                    icon: Icons.place,
-                    labelText: 'Punkt podróży',
-                  ),
-                ),
-                if (_suggestions.isNotEmpty)
-                  Expanded(
-                    child: Material(
-                      elevation: 4,
-                      color: Colors.white,
-                      child: ListView.builder(
-                        itemCount: _suggestions.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(_suggestions[index].name),
-                            subtitle: _suggestions[index].address != null
-                                ? Text(_suggestions[index].address!)
-                                : null,
-                            onTap: () => _handlePlaceSelected(index),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-              ],
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Material(
+          elevation: 4,
+          borderRadius: BorderRadius.circular(8),
+          child: TextFormField(
+            controller: _addressController,
+            focusNode: _focusNode,
+            decoration: AppInputStyle.inputDecoration(
+              icon: Icons.place,
+              labelText: 'Punkt podróży',
             ),
           ),
-          const SizedBox(width: 10),
+        ),
+        if (_suggestions.isNotEmpty) ...[
+          const SizedBox(height: 8),
+          Material(
+            elevation: 4,
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.white,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxHeight: 200,
+              ),
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: _suggestions.length,
+                itemBuilder: (context, index) {
+                  return ListTile(
+                    title: Text(_suggestions[index].name),
+                    subtitle: _suggestions[index].address != null
+                        ? Text(_suggestions[index].address!)
+                        : null,
+                    onTap: () => _handlePlaceSelected(index),
+                  );
+                },
+              ),
+            ),
+          ),
         ],
-      ),
+      ],
     );
   }
 }

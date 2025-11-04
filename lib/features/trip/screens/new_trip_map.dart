@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'package:trip_planner/features/trip/services/current_location.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
@@ -9,6 +10,7 @@ import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
+import 'package:trip_planner/features/trip/widgets/new_trip_marker_details_sheet.dart';
 
 class NewTripMapScreen extends ConsumerStatefulWidget {
   const NewTripMapScreen({super.key});
@@ -46,14 +48,19 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
     final markerPoints = ref.read(tripMarkersProvider);
 
     if (markerPoints.isEmpty) {
-      ref.read(tripMarkersProvider.notifier).addMarker(
-            MarkerPoint(
-              id: name,
-              position: position,
-              name: name,
-              transportMode: 'other',
-            ),
-          );
+      final newMarker = MarkerPoint(
+        id: name,
+        position: position,
+        name: name,
+        transportMode: 'other',
+      );
+
+      ref.read(tripMarkersProvider.notifier).addMarker(newMarker);
+
+      await showMaterialModalBottomSheet(
+        context: context,
+        builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+      );
     } else {
       final transportMode = await selectTransport(context);
       if (transportMode == null) return;
@@ -64,16 +71,21 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             transportMode,
           );
 
-      ref.read(tripMarkersProvider.notifier).addMarker(
-            MarkerPoint(
-              id: name,
-              position: position,
-              name: name,
-              transportMode: 'other',
-            ),
-          );
+      final newMarker = MarkerPoint(
+        id: name,
+        position: position,
+        name: name,
+        transportMode: 'other',
+      );
+
+      ref.read(tripMarkersProvider.notifier).addMarker(newMarker);
 
       _updatePolylines();
+
+      await showMaterialModalBottomSheet(
+        context: context,
+        builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+      );
     }
 
     _mapController?.animateCamera(
@@ -92,14 +104,19 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
     final markerPoints = ref.read(tripMarkersProvider);
 
     if (markerPoints.isEmpty) {
-      ref.read(tripMarkersProvider.notifier).addMarker(
-            MarkerPoint(
-              id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
-              position: latLng,
-              name: 'Twoja lokalizacja',
-              transportMode: 'other',
-            ),
-          );
+      final newMarker = MarkerPoint(
+        id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
+        position: latLng,
+        name: 'Twoja lokalizacja',
+        transportMode: 'other',
+      );
+
+      ref.read(tripMarkersProvider.notifier).addMarker(newMarker);
+
+      await showMaterialModalBottomSheet(
+        context: context,
+        builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+      );
     } else {
       final transportMode = await selectTransport(context);
       if (transportMode == null) return;
@@ -110,16 +127,21 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             transportMode,
           );
 
-      ref.read(tripMarkersProvider.notifier).addMarker(
-            MarkerPoint(
-              id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
-              position: latLng,
-              name: 'Twoja lokalizacja',
-              transportMode: 'other',
-            ),
-          );
+      final newMarker = MarkerPoint(
+        id: 'currentLocation_${DateTime.now().millisecondsSinceEpoch}',
+        position: latLng,
+        name: 'Twoja lokalizacja',
+        transportMode: 'other',
+      );
+
+      ref.read(tripMarkersProvider.notifier).addMarker(newMarker);
 
       _updatePolylines();
+
+      await showMaterialModalBottomSheet(
+        context: context,
+        builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+      );
     }
 
     _mapController?.animateCamera(
@@ -136,6 +158,13 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
         markerId: MarkerId(markerPoint.id),
         position: markerPoint.position,
         infoWindow: InfoWindow(title: markerPoint.name),
+        onTap: () async {
+          await showMaterialModalBottomSheet(
+            context: context,
+            builder: (context) =>
+                NewTripMarkerDetailsSheet(marker: markerPoint),
+          );
+        },
       );
     }).toSet();
 
@@ -157,8 +186,10 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             top: 16,
             left: 16,
             right: 16,
-            child: SearchLocation(
-              onPlaceSelected: _handlePlaceSelected,
+            child: SafeArea(
+              child: SearchLocation(
+                onPlaceSelected: _handlePlaceSelected,
+              ),
             ),
           ),
         ],
