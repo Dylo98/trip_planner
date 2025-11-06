@@ -9,6 +9,7 @@ class MarkerPoint {
   final DateTime? arrivalDateTime;
   final DateTime? departureDateTime;
   final String? transportMode;
+  final double? expense;
 
   MarkerPoint({
     required this.id,
@@ -19,6 +20,7 @@ class MarkerPoint {
     this.arrivalDateTime,
     this.departureDateTime,
     this.transportMode,
+    this.expense,
   });
 
   Map<String, dynamic> toJson() {
@@ -34,6 +36,7 @@ class MarkerPoint {
       'arrivalDateTime': arrivalDateTime?.toIso8601String(),
       'departureDateTime': departureDateTime?.toIso8601String(),
       'transportMode': transportMode,
+      'expense': expense,
     };
   }
 
@@ -59,6 +62,8 @@ class MarkerPoint {
           ? DateTime.parse(json['departureDateTime'])
           : null,
       transportMode: json['transportMode'] as String?,
+      expense:
+          json['expense'] != null ? (json['expense'] as num).toDouble() : null,
     );
   }
 
@@ -71,6 +76,7 @@ class MarkerPoint {
     DateTime? arrivalDateTime,
     DateTime? departureDateTime,
     String? transportMode,
+    double? expense,
   }) {
     return MarkerPoint(
       id: id ?? this.id,
@@ -81,6 +87,7 @@ class MarkerPoint {
       arrivalDateTime: arrivalDateTime ?? this.arrivalDateTime,
       departureDateTime: departureDateTime ?? this.departureDateTime,
       transportMode: transportMode ?? this.transportMode,
+      expense: expense ?? this.expense,
     );
   }
 }

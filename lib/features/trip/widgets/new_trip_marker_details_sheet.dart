@@ -40,6 +40,7 @@ class _NewTripMarkerDetailsSheetState
 
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _expenseController = TextEditingController();
 
   List<PlaceSuggestion> _nearbyPlaces = [];
   bool _isLoadingPlaces = true;
@@ -85,6 +86,8 @@ class _NewTripMarkerDetailsSheetState
   }
 
   void _updateMarkerInProvider() {
+    final expense = double.tryParse(_expenseController.text);
+
     final updatedMarker = widget.marker.copyWith(
       name: _nameController.text.isNotEmpty
           ? _nameController.text
@@ -94,6 +97,7 @@ class _NewTripMarkerDetailsSheetState
           : widget.marker.description,
       arrivalDateTime: _arrivalDateTime,
       departureDateTime: _departureDateTime,
+      expense: expense,
     );
 
     ref.read(tripMarkersProvider.notifier).updateMarker(
@@ -153,6 +157,7 @@ class _NewTripMarkerDetailsSheetState
     super.initState();
     _nameController.text = widget.marker.name ?? '';
     _descriptionController.text = widget.marker.description ?? '';
+    _expenseController.text = widget.marker.expense?.toStringAsFixed(2) ?? '';
     _arrivalDateTime = widget.marker.arrivalDateTime;
     _departureDateTime = widget.marker.departureDateTime;
 
@@ -163,6 +168,7 @@ class _NewTripMarkerDetailsSheetState
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
+    _expenseController.dispose();
     super.dispose();
   }
 
@@ -176,61 +182,6 @@ class _NewTripMarkerDetailsSheetState
           padding: const EdgeInsets.only(bottom: 32),
           child: Column(
             children: [
-              if (_localImages.isEmpty)
-                Stack(
-                  children: [
-                    EmptyImagePicker(
-                      onTap: _onPickImage,
-                      selectedImage: null,
-                    ),
-                    AddImageButton(onPressed: _onPickImage),
-                  ],
-                )
-              else
-                Stack(
-                  children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: 300,
-                          child: PageView.builder(
-                            itemCount: _localImages.length,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentImageIndex = index;
-                              });
-                            },
-                            itemBuilder: (context, index) {
-                              return Image.file(
-                                _localImages[index],
-                                fit: BoxFit.cover,
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: _localImages.asMap().entries.map((entry) {
-                            return Container(
-                              width: 8.0,
-                              height: 8.0,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: _currentImageIndex == entry.key
-                                    ? Colors.black
-                                    : Colors.grey,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ],
-                    ),
-                    AddImageButton(onPressed: _onPickImage),
-                  ],
-                ),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Form(
@@ -297,6 +248,19 @@ class _NewTripMarkerDetailsSheetState
                             _updateMarkerInProvider();
                           }
                         },
+                      ),
+                      const Divider(height: 32),
+                      TextFormField(
+                        controller: _expenseController,
+                        decoration: const InputDecoration(
+                          labelText: 'Wydatek (PLN)',
+                          hintText: 'Wprowadź kwotę',
+                          prefixIcon: Icon(Icons.attach_money),
+                          border: OutlineInputBorder(),
+                        ),
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        onChanged: (_) => _updateMarkerInProvider(),
                       ),
                       const Divider(height: 32),
                       if (_isLoadingPlaces)

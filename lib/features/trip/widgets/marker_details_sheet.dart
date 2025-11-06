@@ -43,6 +43,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
 
   DateTime? _arrivalDateTime;
   DateTime? _departureDateTime;
+  final TextEditingController _expenseController = TextEditingController();
 
   Future<DateTime?> _pickDateTime(DateTime? initial) async {
     final pickedDate = await showDatePicker(
@@ -139,8 +140,15 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
     super.initState();
     _arrivalDateTime = widget.marker.arrivalDateTime;
     _departureDateTime = widget.marker.departureDateTime;
+    _expenseController.text = widget.marker.expense?.toStringAsFixed(2) ?? '';
 
     _fetchNearbyPlaces();
+  }
+
+  @override
+  void dispose() {
+    _expenseController.dispose();
+    super.dispose();
   }
 
   @override
@@ -272,6 +280,33 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                           },
                         ),
                         const Divider(height: 32),
+                        Padding(
+                          padding: const EdgeInsets.all(0),
+                          child: TextFormField(
+                            controller: _expenseController,
+                            decoration: const InputDecoration(
+                              labelText: 'Wydatek (PLN)',
+                              hintText: 'Wprowadź kwotę',
+                              prefixIcon: Icon(Icons.attach_money),
+                              border: OutlineInputBorder(),
+                            ),
+                            keyboardType: const TextInputType.numberWithOptions(
+                                decimal: true),
+                            onChanged: (value) async {
+                              final expense = double.tryParse(value);
+                              if (expense != null) {
+                                await ref
+                                    .read(tripServiceProvider)
+                                    .updateMarkerExpense(
+                                      tripId: widget.tripId,
+                                      markerId: widget.marker.id,
+                                      expense: expense,
+                                    );
+                              }
+                            },
+                          ),
+                        ),
+                        const Divider(height: 32),
                         if (_isLoadingPlaces)
                           const Center(
                             child: Padding(
@@ -312,6 +347,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                               markerId: widget.marker.id,
                                               transportMode: transportMode,
                                             );
+
                                         final newMarker = MarkerPoint(
                                           id: _uuid.v4(),
                                           name: place.name,

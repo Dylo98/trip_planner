@@ -3,6 +3,7 @@ import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/screens/trip_details.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_map.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_timeline.dart';
+import 'package:trip_planner/features/trip/screens/trip_details_budget.dart';
 
 class MainTripDetailsScreen extends StatefulWidget {
   const MainTripDetailsScreen({super.key, required this.trip});
@@ -24,6 +25,9 @@ class _MainTripDetailsScreenState extends State<MainTripDetailsScreen> {
         tripId: widget.trip.id,
       ),
       TripDetailsTimelineScreen(
+        tripId: widget.trip.id,
+      ),
+      TripDetailsBudgetScreen(
         tripId: widget.trip.id,
       ),
     ];
@@ -48,6 +52,7 @@ class _MainTripDetailsScreenState extends State<MainTripDetailsScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onTabSelected,
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -59,7 +64,11 @@ class _MainTripDetailsScreenState extends State<MainTripDetailsScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.timeline),
-            label: 'Podróż',
+            label: 'Oś czasu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Budżet',
           ),
         ],
       ),

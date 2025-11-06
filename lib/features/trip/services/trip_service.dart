@@ -21,7 +21,6 @@ class TripService {
   // TRIPS – ZAPIS / ODCZYT PODRÓŻY
   // =============================
 
-  /// Zapisuje podróż do Firestore
   Future<void> saveTrip(Trip trip) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
@@ -40,7 +39,6 @@ class TripService {
     }
   }
 
-  /// Pobiera pojedynczą podróż
   Future<Trip?> getTrip(String tripId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
@@ -63,7 +61,6 @@ class TripService {
     }
   }
 
-  /// Obserwuje zmiany w podróży (real-time)
   Stream<Trip> watchTrip(String tripId) {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
@@ -88,7 +85,6 @@ class TripService {
     });
   }
 
-  /// Pobiera wszystkie podróże użytkownika (stream)
   Stream<List<Trip>> getTrips(String uid) {
     return _firestore
         .collection('users')
@@ -103,7 +99,6 @@ class TripService {
             trips.add(Trip.fromJson(doc.data()));
           }
         } catch (e) {
-          // Loguj błąd ale nie crashuj całej aplikacji
           print('Error parsing trip ${doc.id}: $e');
         }
       }
@@ -115,7 +110,6 @@ class TripService {
   // TRIPS – ZDJĘCIA
   // =============================
 
-  /// Uploaduje zdjęcie podróży do Firebase Storage
   Future<String> uploadTripImage(File imageFile, String tripId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
@@ -140,7 +134,6 @@ class TripService {
   // MARKERY – DODAWANIE / AKTUALIZACJA
   // =============================
 
-  /// Dodaje marker do podróży
   Future<void> addMarkerToTrip(String tripId, MarkerPoint marker) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
@@ -170,7 +163,6 @@ class TripService {
     }
   }
 
-  /// Aktualizuje daty przyjazdu/odjazdu dla markera
   Future<void> updateMarkerDates({
     required String tripId,
     required String markerId,
@@ -214,7 +206,6 @@ class TripService {
     }
   }
 
-  /// Aktualizuje środek transportu dla markera
   Future<void> updateMarkerTransportMode({
     required String tripId,
     required String markerId,
@@ -256,11 +247,50 @@ class TripService {
     }
   }
 
+  Future<void> updateMarkerExpense({
+    required String tripId,
+    required String markerId,
+    required double expense,
+  }) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) {
+      throw Exception('Użytkownik niezalogowany');
+    }
+
+    try {
+      final tripRef = _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('trips')
+          .doc(tripId);
+
+      final tripSnap = await tripRef.get();
+      if (!tripSnap.exists || tripSnap.data() == null) {
+        return;
+      }
+
+      final data = tripSnap.data()!;
+
+      if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
+        return;
+      }
+
+      final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
+      final index = markers.indexWhere((m) => m['id'] == markerId);
+
+      if (index == -1) return;
+
+      markers[index]['expense'] = expense;
+
+      await tripRef.update({'markerPoints': markers});
+    } catch (e) {
+      throw Exception('Nie udało się zaktualizować wydatku: $e');
+    }
+  }
   // =============================
   // MARKERY – ZDJĘCIA
   // =============================
 
-  /// Dodaje zdjęcie do markera
   Future<void> addImageToMarker({
     required String tripId,
     required String markerId,
@@ -274,7 +304,6 @@ class TripService {
     }
 
     try {
-      // Upload do Storage
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final storageRef = _storage.ref().child(
           'users/$uid/trips/$tripId/markers/$markerId/image_$timestamp.jpg');
@@ -282,7 +311,6 @@ class TripService {
       await storageRef.putFile(image);
       final imageUrl = await storageRef.getDownloadURL();
 
-      // Aktualizuj Firestore
       final tripDoc = await _firestore
           .collection('users')
           .doc(uid)
@@ -320,7 +348,6 @@ class TripService {
   // MARKERY – USUWANIE
   // =============================
 
-  /// Usuwa marker z podróży
   Future<void> deleteMarkerFromTrip(String tripId, String markerId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
@@ -356,7 +383,6 @@ class TripService {
   // TRIPS – USUWANIE
   // =============================
 
-  /// Usuwa całą podróż (opcjonalnie)
   Future<void> deleteTrip(String tripId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) {
