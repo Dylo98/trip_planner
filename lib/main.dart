@@ -2,12 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // FIREBASE //
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-
-// SCREENS //
-import 'package:trip_planner/features/splash/screens/splash.dart';
-import 'package:trip_planner/features/auth/screens/auth.dart';
 
 // NAVIGATION //
 import 'package:trip_planner/core/navigation/app_router.dart';
