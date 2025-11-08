@@ -33,7 +33,11 @@ class BuildProfileImage extends ConsumerWidget {
             backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
             child: hasAvatar
                 ? null
-                : const Icon(Icons.person, size: 40, color: Colors.white70),
+                : Icon(
+                    Icons.person,
+                    size: profileHeight / 2 - 10,
+                    color: Colors.white70,
+                  ),
           ),
         );
       },
@@ -56,7 +60,11 @@ class BuildProfileImage extends ConsumerWidget {
         child: CircleAvatar(
           radius: profileHeight / 2 - 10,
           backgroundColor: Colors.grey.shade300,
-          child: const Icon(Icons.person, size: 40, color: Colors.white70),
+          child: Icon(
+            Icons.person,
+            size: profileHeight / 2 - 10,
+            color: Colors.white70,
+          ),
         ),
       ),
     );

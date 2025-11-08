@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 
 // FIREBASE //
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 // NAVIGATION //
-import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
 import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
-
-// THEME //
-import 'package:trip_planner/core/theme/colors.dart';
 
 // WIDGETS //
 import 'package:trip_planner/features/home/widgets/home_top.dart';
@@ -43,9 +39,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             HomeContent(),
             const SizedBox(height: 20),
             GestureDetector(
-              onTap: () {
-                navigateToAddTrip(context);
-              },
+              onTap: () => context.push('/add-trip'),
               child: AddTripBox(),
             ),
             const SizedBox(height: 20),

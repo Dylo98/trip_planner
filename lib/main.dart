@@ -6,9 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 // SCREENS //
-import 'package:trip_planner/features/home/screens/home.dart';
 import 'package:trip_planner/features/splash/screens/splash.dart';
 import 'package:trip_planner/features/auth/screens/auth.dart';
+
+// NAVIGATION //
+import 'package:trip_planner/core/navigation/app_router.dart';
 
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:trip_planner/core/theme/app_theme.dart';
@@ -28,20 +30,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: StreamBuilder(
-          stream: FirebaseAuth.instance.authStateChanges(),
-          builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SplashScreen();
-            }
-            if (snapshot.hasData) {
-              return const HomeScreen();
-            }
-            return const AuthScreen();
-          }),
+      routerConfig: appRouter,
     );
   }
 }

@@ -3,10 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 // FIREBASE //
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:go_router/go_router.dart';
 
 // NAVIGATION //
-import 'package:trip_planner/core/navigation/my_trips_navigation.dart';
-import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
 
 // THEME //
 import 'package:trip_planner/core/theme/colors.dart';
@@ -60,15 +59,16 @@ class AppDrawer extends ConsumerWidget {
                     children: [
                       CircleAvatar(
                         radius: 25,
-                        backgroundColor: Colors.grey.shade200,
-                        backgroundImage: hasAvatar
-                            ? NetworkImage(avatarUrl)
-                            : const AssetImage('assets/images/no_profile.png')
-                                as ImageProvider,
+                        backgroundColor: Colors.grey.shade300,
+                        backgroundImage:
+                            hasAvatar ? NetworkImage(avatarUrl) : null,
                         child: hasAvatar
                             ? null
-                            : const Icon(Icons.person,
-                                color: Colors.grey, size: 30),
+                            : const Icon(
+                                Icons.person,
+                                color: Colors.white70,
+                                size: 30,
+                              ),
                       ),
                       const SizedBox(width: 10),
                       Column(
@@ -114,27 +114,22 @@ class AppDrawer extends ConsumerWidget {
                 ListTile(
                   leading: const Icon(Icons.home, color: Colors.black),
                   title: const Text('Strona główna'),
-                  onTap: () {},
+                  onTap: () => context.push('/'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.add, color: AppColors.primary),
                   title: const Text('Dodaj nową podróż'),
-                  onTap: () => navigateToAddTrip(context),
+                  onTap: () => context.push('/add-trip'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.book, color: Colors.blue),
                   title: const Text('Moje podróże'),
-                  onTap: () => navigateToMyTrips(context),
+                  onTap: () => context.push('/my-trips'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.person, color: Colors.pink),
                   title: const Text('Profil'),
-                  onTap: () {},
-                ),
-                ListTile(
-                  leading: const Icon(Icons.settings, color: Colors.grey),
-                  title: const Text('Ustawienia'),
-                  onTap: () {},
+                  onTap: () => context.push('/profile'),
                 ),
                 ListTile(
                   leading: const Icon(Icons.exit_to_app, color: AppColors.red),

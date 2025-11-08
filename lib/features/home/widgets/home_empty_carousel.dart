@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 // EXTERNAL PACKAGES //
 import 'package:lottie/lottie.dart';
-
-// NAVIGATION //
-import 'package:trip_planner/core/navigation/add_trip_navigation.dart';
 
 // THEME //
 import 'package:trip_planner/core/theme/button_style.dart';
@@ -38,9 +36,7 @@ class HomeEmptyCarousel extends StatelessWidget {
           ),
           child: ElevatedButton(
             style: AppButtonStyles.primaryButton,
-            onPressed: () {
-              navigateToAddTrip(context);
-            },
+            onPressed: () => context.push('/add-trip'),
             child: const Text('Dodaj pierwszą podróż',
                 style: AppTextStyles.buttonText),
           ),

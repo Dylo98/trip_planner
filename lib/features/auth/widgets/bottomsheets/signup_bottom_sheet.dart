@@ -52,9 +52,6 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
         password: _passwordController.text,
         name: _nameController.text.trim(),
       );
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
     } on AuthException catch (error) {
       if (!mounted) return;
       setState(() {

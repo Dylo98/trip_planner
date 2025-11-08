@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// UTILS
 import 'package:trip_planner/core/utils/validators.dart';
-import 'package:trip_planner/features/auth/widgets/authflashbars/error_flushbar.dart';
+
+// NOTIFICATIONS (SNACKBARS)
+import 'package:trip_planner/core/widgets/app_notifications.dart';
+
+// PROVIDERS
 import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
@@ -23,7 +29,7 @@ class TripFormService {
     );
 
     if (dateError != null) {
-      ErrorFlushbar.show(context: context, message: dateError);
+      AppNotifications.showError(context: context, message: dateError);
       return;
     }
 
@@ -35,6 +41,10 @@ class TripFormService {
     ref.read(tripPhotoProvider.notifier).state = null;
 
     if (context.mounted) {
+      AppNotifications.showSuccess(
+        context: context,
+        message: 'Podróż została zapisana',
+      );
       Navigator.of(context).pop();
     }
   }

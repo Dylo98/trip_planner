@@ -37,8 +37,6 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final navigator = Navigator.of(context);
-
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -51,10 +49,6 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
-
-      if (mounted) {
-        navigator.pop();
-      }
     } on AuthException catch (error) {
       if (!mounted) return;
       setState(() {

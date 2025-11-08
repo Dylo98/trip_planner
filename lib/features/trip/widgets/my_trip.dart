@@ -219,8 +219,6 @@ class _MyTripState extends ConsumerState<MyTrip> {
             ],
           ),
         ),
-
-        // Results Info
         if (_searchQuery.isNotEmpty || _selectedSort != SortOption.dateNewest)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -251,7 +249,6 @@ class _MyTripState extends ConsumerState<MyTrip> {
               ],
             ),
           ),
-
         Expanded(
           child: filteredTrips.isEmpty
               ? Center(

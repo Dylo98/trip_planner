@@ -10,9 +10,6 @@ import 'package:intl/intl.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_add_image_button.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
