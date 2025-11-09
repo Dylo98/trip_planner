@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/features/auth/constants/auth_messages.dart';
 import 'package:trip_planner/features/auth/controller/auth_provider.dart';
 import 'package:trip_planner/features/auth/services/auth_service.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/widgets/buttons/form_auth_btn.dart';
-import 'package:trip_planner/features/auth/widgets/bottomsheets/signup_bottom_sheet_trigger.dart';
+import 'package:trip_planner/features/auth/widgets/auth_error_message.dart';
+import 'package:trip_planner/features/auth/widgets/bottomsheets/auth_bottom_sheet_wrapper.dart';
+import 'package:trip_planner/features/auth/widgets/bottomsheets/signup_bottom_sheet.dart';
 
 class LoginBottomSheet extends ConsumerStatefulWidget {
-  const LoginBottomSheet(this.mainContext, {super.key});
-
-  final BuildContext mainContext;
+  const LoginBottomSheet({super.key});
 
   @override
   ConsumerState<LoginBottomSheet> createState() => _LoginBottomSheetState();
@@ -55,11 +56,11 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
         _isLoading = false;
         _errorMessage = error.message;
       });
-    } on Exception {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Wystąpił nieoczekiwany błąd';
+        _errorMessage = AuthMessages.unexpectedError;
       });
     }
   }
@@ -68,8 +69,83 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
     Navigator.of(context).pop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      showSignupBottomSheet(context);
+      AuthBottomSheetWrapper.show(
+        context: context,
+        child: const SignupBottomSheet(),
+      );
     });
+  }
+
+  Future<void> _showForgotPasswordDialog() async {
+    final emailController = TextEditingController(
+      text: _emailController.text.trim(),
+    );
+
+    final formKey = GlobalKey<FormState>();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Reset hasła'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                  'Podaj adres e-mail, na który wyślemy link do resetu hasła.'),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: emailController,
+                decoration: const InputDecoration(
+                  labelText: 'E-mail',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                validator: Validators.validateEmail,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Anuluj'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(ctx, true);
+              }
+            },
+            child: const Text('Wyślij'),
+          ),
+        ],
+      ),
+    );
+
+    if (result == true && mounted) {
+      try {
+        await ref.read(authProvider).resetPassword(emailController.text.trim());
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Link do resetu hasła został wysłany'),
+            ),
+          );
+          setState(() => _errorMessage = null);
+        }
+      } on AuthException catch (e) {
+        if (mounted) {
+          setState(() {
+            _errorMessage = e.message;
+          });
+        }
+      }
+    }
+
+    emailController.dispose();
   }
 
   @override
@@ -80,12 +156,12 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
-          child: Text('Zaloguj się', style: AppTextStyles.heading1),
+          child: Text(AuthMessages.loginTitle, style: AppTextStyles.heading1),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
           child: Text(
-            'Uzyskaj dostęp do swoich podróży i planów.',
+            AuthMessages.loginSubtitle,
             style: AppTextStyles.bodyText,
           ),
         ),
@@ -98,9 +174,9 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
               text: TextSpan(
                 style: AppTextStyles.bodyText,
                 children: [
-                  const TextSpan(text: 'Nie masz konta? '),
+                  const TextSpan(text: AuthMessages.noAccount),
                   TextSpan(
-                    text: 'Zarejestruj się',
+                    text: AuthMessages.signupLink,
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
@@ -120,37 +196,12 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
               child: Column(
                 children: [
                   if (_errorMessage != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.red),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline,
-                              color: AppColors.red, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(
-                                color: AppColors.red,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    AuthErrorMessage(message: _errorMessage!),
                   TextFormField(
                     controller: _emailController,
                     decoration: AppInputStyle.underlineInputDecoration(
-                      labelText: 'E-mail',
-                      hintText: 'jan.kowalski@mail.com',
+                      labelText: AuthMessages.emailLabel,
+                      hintText: AuthMessages.emailHint,
                     ),
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
@@ -162,8 +213,8 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: AppInputStyle.underlineInputDecoration(
-                      labelText: 'Hasło',
-                      hintText: '••••••••',
+                      labelText: AuthMessages.passwordLabel,
+                      hintText: AuthMessages.passwordHint,
                     ).copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -188,23 +239,18 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () {
-                              // TODO: reset hasła
-                            },
+                      onPressed: _isLoading ? null : _showForgotPasswordDialog,
                       child: Text(
-                        'Nie pamiętasz hasła?',
-                        style: AppTextStyles.bodyText.copyWith(
-                          color: AppColors.grey,
-                        ),
+                        AuthMessages.forgotPassword,
+                        style: AppTextStyles.bodyText
+                            .copyWith(color: AppColors.grey),
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   FormAuthBtn(
                     onPressed: _submit,
-                    text: 'Zaloguj się',
+                    text: AuthMessages.loginButton,
                     isLoading: _isLoading,
                   ),
                 ],

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/features/auth/constants/auth_messages.dart';
 import 'package:trip_planner/features/auth/controller/auth_provider.dart';
 import 'package:trip_planner/features/auth/services/auth_service.dart';
 import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/widgets/buttons/form_auth_btn.dart';
-import 'package:trip_planner/features/auth/widgets/bottomsheets/login_bottom_sheet_trigger.dart';
+import 'package:trip_planner/features/auth/widgets/auth_error_message.dart';
+import 'package:trip_planner/features/auth/widgets/bottomsheets/auth_bottom_sheet_wrapper.dart';
+import 'package:trip_planner/features/auth/widgets/bottomsheets/login_bottom_sheet.dart';
 
 class SignupBottomSheet extends ConsumerStatefulWidget {
-  const SignupBottomSheet(this.mainContext, {super.key});
-
-  final BuildContext mainContext;
+  const SignupBottomSheet({super.key});
 
   @override
   ConsumerState<SignupBottomSheet> createState() => _SignupBottomSheetState();
@@ -58,11 +59,11 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
         _isLoading = false;
         _errorMessage = error.message;
       });
-    } on Exception catch (error) {
+    } catch (e) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Wystąpił nieoczekiwany błąd: ${error.toString()}';
+        _errorMessage = '${AuthMessages.unexpectedError}: ${e.toString()}';
       });
     }
   }
@@ -71,7 +72,10 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
     Navigator.of(context).pop();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      showLoginBottomSheet(context);
+      AuthBottomSheetWrapper.show(
+        context: context,
+        child: const LoginBottomSheet(),
+      );
     });
   }
 
@@ -83,7 +87,7 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
       children: [
         Padding(
           padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
-          child: Text('Zarejestruj się', style: AppTextStyles.heading1),
+          child: Text(AuthMessages.signupTitle, style: AppTextStyles.heading1),
         ),
         Padding(
           padding: const EdgeInsets.only(top: 15, left: 15, bottom: 5),
@@ -93,9 +97,9 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
               text: TextSpan(
                 style: AppTextStyles.bodyText,
                 children: [
-                  const TextSpan(text: 'Masz już konto? '),
+                  const TextSpan(text: AuthMessages.hasAccount),
                   TextSpan(
-                    text: 'Zaloguj się',
+                    text: AuthMessages.loginLink,
                     style: AppTextStyles.bodyText.copyWith(
                       color: AppColors.primary,
                       fontWeight: FontWeight.w700,
@@ -115,37 +119,12 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
               child: Column(
                 children: [
                   if (_errorMessage != null)
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: AppColors.red.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: AppColors.red),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.error_outline,
-                              color: AppColors.red, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _errorMessage!,
-                              style: const TextStyle(
-                                color: AppColors.red,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                    AuthErrorMessage(message: _errorMessage!),
                   TextFormField(
                     controller: _nameController,
                     decoration: AppInputStyle.underlineInputDecoration(
-                      labelText: 'Imię',
-                      hintText: 'Jan',
+                      labelText: AuthMessages.nameLabel,
+                      hintText: AuthMessages.nameHint,
                     ),
                     textCapitalization: TextCapitalization.words,
                     validator: Validators.validateName,
@@ -155,8 +134,8 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
                   TextFormField(
                     controller: _emailController,
                     decoration: AppInputStyle.underlineInputDecoration(
-                      labelText: 'E-mail',
-                      hintText: 'jan.kowalski@mail.com',
+                      labelText: AuthMessages.emailLabel,
+                      hintText: AuthMessages.emailHint,
                     ),
                     keyboardType: TextInputType.emailAddress,
                     autocorrect: false,
@@ -168,8 +147,8 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: AppInputStyle.underlineInputDecoration(
-                      labelText: 'Hasło',
-                      hintText: '••••••••',
+                      labelText: AuthMessages.passwordLabel,
+                      hintText: AuthMessages.passwordHint,
                     ).copyWith(
                       suffixIcon: IconButton(
                         icon: Icon(
@@ -193,7 +172,7 @@ class _SignupBottomSheetState extends ConsumerState<SignupBottomSheet> {
                   const SizedBox(height: 20),
                   FormAuthBtn(
                     onPressed: _submit,
-                    text: 'Zarejestruj się',
+                    text: AuthMessages.signupButton,
                     isLoading: _isLoading,
                   ),
                 ],

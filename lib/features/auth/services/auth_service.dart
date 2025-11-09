@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trip_planner/features/auth/constants/auth_messages.dart';
 
 class AuthException implements Exception {
   AuthException(this.message);
@@ -27,12 +28,15 @@ class AuthService {
     required String password,
   }) async {
     try {
-      return await _auth.signInWithEmailAndPassword(
+      final credential = await _auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password,
       );
+      return credential;
     } on FirebaseAuthException catch (error) {
       throw _handleAuthException(error);
+    } catch (e) {
+      throw AuthException(AuthMessages.unexpectedError);
     }
   }
 
@@ -43,10 +47,10 @@ class AuthService {
   }) async {
     try {
       if (name.trim().isEmpty) {
-        throw AuthException('Imię nie może być puste');
+        throw AuthException(AuthMessages.nameEmpty);
       }
       if (name.trim().length < 2) {
-        throw AuthException('Imię musi mieć co najmniej 2 znaki');
+        throw AuthException(AuthMessages.nameTooShort);
       }
 
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -56,7 +60,7 @@ class AuthService {
 
       final user = credential.user;
       if (user == null) {
-        throw AuthException('Nie udało się utworzyć użytkownika');
+        throw AuthException(AuthMessages.userCreationFailed);
       }
 
       await _firestore.collection('users').doc(user.uid).set({
@@ -73,7 +77,7 @@ class AuthService {
       throw _handleAuthException(error);
     } catch (e) {
       if (e is AuthException) rethrow;
-      throw AuthException('Nieoczekiwany błąd: ${e.toString()}');
+      throw AuthException('${AuthMessages.unexpectedError}: ${e.toString()}');
     }
   }
 
@@ -92,23 +96,25 @@ class AuthService {
   AuthException _handleAuthException(FirebaseAuthException error) {
     switch (error.code) {
       case 'invalid-email':
-        return AuthException('Nieprawidłowy adres e-mail');
+        return AuthException(AuthMessages.invalidEmail);
       case 'user-disabled':
-        return AuthException('Konto zostało zablokowane');
+        return AuthException(AuthMessages.userDisabled);
       case 'user-not-found':
+        return AuthException(AuthMessages.userNotFound);
       case 'wrong-password':
+        return AuthException(AuthMessages.wrongPassword);
       case 'invalid-credential':
-        return AuthException('Nieprawidłowe dane logowania');
+        return AuthException(AuthMessages.invalidCredential);
       case 'email-already-in-use':
-        return AuthException('Adres e-mail jest już zajęty');
+        return AuthException(AuthMessages.emailInUse);
       case 'weak-password':
-        return AuthException('Hasło jest zbyt słabe (min. 6 znaków)');
+        return AuthException(AuthMessages.weakPassword);
       case 'network-request-failed':
-        return AuthException('Brak połączenia z internetem');
+        return AuthException(AuthMessages.noInternet);
       case 'too-many-requests':
-        return AuthException('Zbyt wiele prób. Spróbuj później');
+        return AuthException(AuthMessages.tooManyRequests);
       default:
-        return AuthException(error.message ?? 'Nieznany błąd');
+        return AuthException(error.message ?? AuthMessages.unknownError);
     }
   }
 }
