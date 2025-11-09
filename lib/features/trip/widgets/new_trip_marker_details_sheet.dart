@@ -11,8 +11,9 @@ import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
-
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
+import 'package:trip_planner/core/utils/debouncer.dart';
 
 class NewTripMarkerDetailsSheet extends ConsumerStatefulWidget {
   const NewTripMarkerDetailsSheet({
@@ -45,6 +46,14 @@ class _NewTripMarkerDetailsSheetState
   DateTime? _arrivalDateTime;
   DateTime? _departureDateTime;
 
+  final _uiLock = ActionLock();
+  final _netLock = ActionLock();
+  final _saveDebouncer = Debouncer(milliseconds: 400);
+
+  void _debouncedUpdate() {
+    _saveDebouncer.run(_updateMarkerInProvider);
+  }
+
   Future<DateTime?> _pickDateTime(DateTime? initial) async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -72,18 +81,22 @@ class _NewTripMarkerDetailsSheetState
   }
 
   Future<void> _onPickImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
+    await _uiLock.run(() async {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) return;
 
-    final image = File(pickedFile.path);
-    setState(() {
-      _localImages.add(image);
+      final image = File(pickedFile.path);
+      if (!mounted) return;
+      setState(() {
+        _localImages.add(image);
+      });
     });
   }
 
   void _updateMarkerInProvider() {
-    final expense = double.tryParse(_expenseController.text);
+    final raw = _expenseController.text.replaceAll(',', '.');
+    final expense = double.tryParse(raw);
 
     final updatedMarker = widget.marker.copyWith(
       name: _nameController.text.isNotEmpty
@@ -104,49 +117,53 @@ class _NewTripMarkerDetailsSheetState
   }
 
   Future<void> _deleteMarker() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Usuń punkt podróży'),
-        content: const Text('Czy na pewno chcesz usunąć ten punkt podróży?'),
-        actions: [
-          TextButton(
-            child: const Text('Anuluj'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: const Text('Usuń'),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    );
+    await _uiLock.run(() async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Usuń punkt podróży'),
+          content: const Text('Czy na pewno chcesz usunąć ten punkt podróży?'),
+          actions: [
+            TextButton(
+              child: const Text('Anuluj'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Usuń'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
 
-    if (confirmed == true) {
-      ref.read(tripMarkersProvider.notifier).removeMarker(widget.marker.id);
-      if (mounted) {
-        Navigator.of(context).pop();
+      if (confirmed == true) {
+        ref.read(tripMarkersProvider.notifier).removeMarker(widget.marker.id);
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       }
-    }
+    });
   }
 
   Future<void> _fetchNearbyPlaces() async {
-    try {
-      final places = await NominatimSearchService.getNearbyPlaces(
-        widget.marker.position,
-        radiusKm: 2,
-      );
-      if (mounted) {
+    await _netLock.run(() async {
+      try {
+        final places = await NominatimSearchService.getNearbyPlaces(
+          widget.marker.position,
+          radiusKm: 2,
+        );
+        if (!mounted) return;
         setState(() {
           _nearbyPlaces = places;
           _isLoadingPlaces = false;
         });
+      } catch (e) {
+        if (!mounted) return;
+        setState(() {
+          _isLoadingPlaces = false;
+        });
       }
-    } catch (e) {
-      setState(() {
-        _isLoadingPlaces = false;
-      });
-    }
+    });
   }
 
   @override
@@ -166,6 +183,7 @@ class _NewTripMarkerDetailsSheetState
     _nameController.dispose();
     _descriptionController.dispose();
     _expenseController.dispose();
+    _saveDebouncer.dispose();
     super.dispose();
   }
 
@@ -192,9 +210,10 @@ class _NewTripMarkerDetailsSheetState
                           labelText: 'Nazwa punktu',
                           border: OutlineInputBorder(),
                         ),
-                        onChanged: (_) => _updateMarkerInProvider(),
+                        onChanged: (_) => _debouncedUpdate(),
                       ),
                       const SizedBox(height: 16),
+
                       TextFormField(
                         controller: _descriptionController,
                         decoration: const InputDecoration(
@@ -202,9 +221,10 @@ class _NewTripMarkerDetailsSheetState
                           border: OutlineInputBorder(),
                         ),
                         maxLines: 3,
-                        onChanged: (_) => _updateMarkerInProvider(),
+                        onChanged: (_) => _debouncedUpdate(),
                       ),
                       const SizedBox(height: 16),
+
                       ListTile(
                         leading: const Icon(Icons.flight_land),
                         title: const Text('Data przyjazdu'),
@@ -216,13 +236,16 @@ class _NewTripMarkerDetailsSheetState
                         ),
                         trailing: const Icon(Icons.edit),
                         onTap: () async {
-                          final picked = await _pickDateTime(_arrivalDateTime);
-                          if (picked != null) {
-                            setState(() {
-                              _arrivalDateTime = picked;
-                            });
-                            _updateMarkerInProvider();
-                          }
+                          await _uiLock.run(() async {
+                            final picked =
+                                await _pickDateTime(_arrivalDateTime);
+                            if (picked != null) {
+                              setState(() {
+                                _arrivalDateTime = picked;
+                              });
+                              _debouncedUpdate();
+                            }
+                          });
                         },
                       ),
                       ListTile(
@@ -236,17 +259,20 @@ class _NewTripMarkerDetailsSheetState
                         ),
                         trailing: const Icon(Icons.edit),
                         onTap: () async {
-                          final picked =
-                              await _pickDateTime(_departureDateTime);
-                          if (picked != null) {
-                            setState(() {
-                              _departureDateTime = picked;
-                            });
-                            _updateMarkerInProvider();
-                          }
+                          await _uiLock.run(() async {
+                            final picked =
+                                await _pickDateTime(_departureDateTime);
+                            if (picked != null) {
+                              setState(() {
+                                _departureDateTime = picked;
+                              });
+                              _debouncedUpdate();
+                            }
+                          });
                         },
                       ),
                       const Divider(height: 32),
+
                       TextFormField(
                         controller: _expenseController,
                         decoration: const InputDecoration(
@@ -256,10 +282,12 @@ class _NewTripMarkerDetailsSheetState
                           border: OutlineInputBorder(),
                         ),
                         keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true),
-                        onChanged: (_) => _updateMarkerInProvider(),
+                          decimal: true,
+                        ),
+                        onChanged: (_) => _debouncedUpdate(),
                       ),
                       const Divider(height: 32),
+
                       if (_isLoadingPlaces)
                         const Center(
                           child: Padding(
@@ -276,7 +304,9 @@ class _NewTripMarkerDetailsSheetState
                               child: Text(
                                 'Ciekawe miejsca w pobliżu',
                                 style: TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                             SizedBox(
@@ -288,34 +318,36 @@ class _NewTripMarkerDetailsSheetState
                                   final place = _nearbyPlaces[index];
                                   return GestureDetector(
                                     onTap: () async {
-                                      final transportMode =
-                                          await selectTransport(context);
-                                      if (transportMode == null) return;
+                                      await _uiLock.run(() async {
+                                        final transportMode =
+                                            await selectTransport(context);
+                                        if (transportMode == null) return;
 
-                                      ref
-                                          .read(tripMarkersProvider.notifier)
-                                          .updateMarkerTransport(
-                                            widget.marker.id,
-                                            transportMode,
-                                          );
+                                        ref
+                                            .read(tripMarkersProvider.notifier)
+                                            .updateMarkerTransport(
+                                              widget.marker.id,
+                                              transportMode,
+                                            );
 
-                                      final newMarker = MarkerPoint(
-                                        id: _uuid.v4(),
-                                        name: place.name,
-                                        position: place.location,
-                                        arrivalDateTime: null,
-                                        departureDateTime: null,
-                                        imageUrl: [],
-                                        transportMode: 'other',
-                                      );
+                                        final newMarker = MarkerPoint(
+                                          id: _uuid.v4(),
+                                          name: place.name,
+                                          position: place.location,
+                                          arrivalDateTime: null,
+                                          departureDateTime: null,
+                                          imageUrl: [],
+                                          transportMode: 'other',
+                                        );
 
-                                      ref
-                                          .read(tripMarkersProvider.notifier)
-                                          .addMarker(newMarker);
+                                        ref
+                                            .read(tripMarkersProvider.notifier)
+                                            .addMarker(newMarker);
 
-                                      if (mounted) {
-                                        Navigator.of(context).pop();
-                                      }
+                                        if (mounted) {
+                                          Navigator.of(context).pop();
+                                        }
+                                      });
                                     },
                                     child: Container(
                                       width: 200,
@@ -324,7 +356,8 @@ class _NewTripMarkerDetailsSheetState
                                       decoration: BoxDecoration(
                                         color: Colors.white,
                                         border: Border.all(
-                                            color: Colors.grey.shade300),
+                                          color: Colors.grey.shade300,
+                                        ),
                                         borderRadius: BorderRadius.circular(12),
                                         boxShadow: [
                                           BoxShadow(
@@ -432,6 +465,7 @@ class _NewTripMarkerDetailsSheetState
                             ),
                           ],
                         ),
+
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
                         child: Center(

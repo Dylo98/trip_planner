@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-/* WIDGETS */
 import 'package:trip_planner/features/trip/widgets/trip_form.dart';
 
 class NewTripScreen extends StatelessWidget {

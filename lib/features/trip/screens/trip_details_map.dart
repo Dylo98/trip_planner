@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
 
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
@@ -24,6 +25,7 @@ class TripDetailsMapScreen extends ConsumerStatefulWidget {
 }
 
 class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
+  final _placeSelectLock = ActionLock();
   late final ProviderSubscription _tripListener;
   final Completer<GoogleMapController> _controller =
       Completer<GoogleMapController>();
@@ -116,20 +118,22 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
               right: 16,
               child: SearchLocation(
                 onPlaceSelected: (LatLng position, String name) async {
-                  final controller = await _controller.future;
-                  await handlePlaceSelected(
-                    context: context,
-                    ref: ref,
-                    tripId: widget.tripId,
-                    position: position,
-                    name: name,
-                    controller: controller,
-                    updatePolylines: (newPolylines) {
-                      setState(() {
-                        _polylines = newPolylines;
-                      });
-                    },
-                  );
+                  await _placeSelectLock.run(() async {
+                    final controller = await _controller.future;
+                    await handlePlaceSelected(
+                      context: context,
+                      ref: ref,
+                      tripId: widget.tripId,
+                      position: position,
+                      name: name,
+                      controller: controller,
+                      updatePolylines: (newPolylines) {
+                        setState(() {
+                          _polylines = newPolylines;
+                        });
+                      },
+                    );
+                  });
                 },
               ),
             ),

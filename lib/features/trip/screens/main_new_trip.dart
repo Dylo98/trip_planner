@@ -1,15 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/* PROVIDERS */
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
-
-/* SCREENS */
 import 'package:trip_planner/features/trip/screens/new_trip.dart';
 import 'package:trip_planner/features/trip/screens/new_trip_map.dart';
-
 import 'package:trip_planner/features/trip/services/trip_form_service.dart';
 
 class MainNewTripScreen extends ConsumerStatefulWidget {
@@ -24,6 +19,8 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
   int _selectedIndex = 0;
   late final List<Widget> _screens;
 
+  bool _isSaving = false;
+
   @override
   void initState() {
     super.initState();
@@ -34,13 +31,20 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
   }
 
   void _onTabSelected(int index) {
+    if (_isSaving) return;
     setState(() {
       _selectedIndex = index;
     });
   }
 
-  void _saveTrip() {
-    TripFormService(ref: ref, context: context).saveTrip(_formKey);
+  Future<void> _saveTrip() async {
+    if (_isSaving) return;
+    setState(() => _isSaving = true);
+    try {
+      await TripFormService(ref: ref, context: context).saveTrip(_formKey);
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -58,10 +62,20 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
         appBar: AppBar(
           title: const Text('Nowa podróż'),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.check),
-              onPressed: _saveTrip,
-            ),
+            if (_isSaving)
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else
+              IconButton(
+                icon: const Icon(Icons.check),
+                onPressed: _saveTrip,
+              ),
           ],
         ),
         body: IndexedStack(

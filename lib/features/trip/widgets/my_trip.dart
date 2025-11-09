@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+
 import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
 import 'package:trip_planner/features/trip/screens/main_trip_details.dart';
+
+import 'package:trip_planner/core/utils/action_lock.dart';
+import 'package:trip_planner/core/utils/debouncer.dart';
 
 enum SortOption {
   dateNewest,
@@ -27,13 +31,18 @@ class _MyTripState extends ConsumerState<MyTrip> {
   String _searchQuery = '';
   SortOption _selectedSort = SortOption.dateNewest;
 
+  final _searchDebouncer = Debouncer(milliseconds: 350);
+
+  final _openTripLock = ActionLock();
+
   @override
   void dispose() {
     _searchController.dispose();
+    _searchDebouncer.dispose();
     super.dispose();
   }
 
-  double _calculateTotalBudget(trip) {
+  double _calculateTotalBudget(dynamic trip) {
     double total = 0;
     for (final marker in trip.markerPoints) {
       if (marker.expense != null) {
@@ -44,10 +53,10 @@ class _MyTripState extends ConsumerState<MyTrip> {
   }
 
   List _filterAndSortTrips(List trips) {
-    var filteredTrips = trips.where((trip) {
-      final tripName = trip.name.toLowerCase();
-      final query = _searchQuery.toLowerCase();
-      return tripName.contains(query);
+    final query = _searchQuery.trim().toLowerCase();
+    final filteredTrips = trips.where((trip) {
+      final tripName = (trip.name ?? '').toString().toLowerCase();
+      return query.isEmpty ? true : tripName.contains(query);
     }).toList();
 
     switch (_selectedSort) {
@@ -80,10 +89,10 @@ class _MyTripState extends ConsumerState<MyTrip> {
         });
         break;
       case SortOption.nameAZ:
-        filteredTrips.sort((a, b) => a.name.compareTo(b.name));
+        filteredTrips.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
         break;
       case SortOption.nameZA:
-        filteredTrips.sort((a, b) => b.name.compareTo(a.name));
+        filteredTrips.sort((a, b) => (b.name ?? '').compareTo(a.name ?? ''));
         break;
     }
 
@@ -198,8 +207,11 @@ class _MyTripState extends ConsumerState<MyTrip> {
                     fillColor: Colors.grey.shade100,
                   ),
                   onChanged: (value) {
-                    setState(() {
-                      _searchQuery = value;
+                    _searchDebouncer.run(() {
+                      if (!mounted) return;
+                      setState(() {
+                        _searchQuery = value;
+                      });
                     });
                   },
                 ),
@@ -284,9 +296,9 @@ class _MyTripState extends ConsumerState<MyTrip> {
                   itemCount: filteredTrips.length,
                   itemBuilder: (context, index) {
                     final trip = filteredTrips[index];
-                    String urlImage = trip.tripPhotoUrl ?? '';
-                    String tripName = trip.name;
-                    String formattedStartDate = trip.startDate != null
+                    final String urlImage = trip.tripPhotoUrl ?? '';
+                    final String tripName = trip.name ?? '';
+                    final String formattedStartDate = trip.startDate != null
                         ? DateFormat('dd-MM-yyyy').format(trip.startDate!)
                         : 'Brak daty';
                     final totalBudget = _calculateTotalBudget(trip);
@@ -295,122 +307,134 @@ class _MyTripState extends ConsumerState<MyTrip> {
                       key: Key('openContainer_${trip.id}'),
                       transitionType: ContainerTransitionType.fadeThrough,
                       closedBuilder: (context, action) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8.0,
-                            vertical: 4.0,
-                          ),
-                          child: Stack(
-                            children: [
-                              Card(
-                                clipBehavior: Clip.hardEdge,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                ),
-                                child: SizedBox(
-                                  height: 250,
-                                  width: double.infinity,
-                                  child: urlImage.isNotEmpty &&
-                                          Uri.tryParse(urlImage)
-                                                  ?.hasAbsolutePath ==
-                                              true
-                                      ? Image.network(
-                                          urlImage,
-                                          fit: BoxFit.cover,
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                        )
-                                      : Container(
-                                          width: double.infinity,
-                                          height: double.infinity,
-                                          color: Colors.grey[300],
-                                          alignment: Alignment.center,
-                                          child: const Text(
-                                            'Brak zdjęcia',
-                                            style: TextStyle(
-                                              color: Colors.black54,
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                top: 0,
-                                right: 0,
-                                left: 0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.black.withValues(alpha: 0.5),
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 5,
-                                    ),
+                        return GestureDetector(
+                          onTap: () async {
+                            await _openTripLock.run(() async {
+                              action();
+                              await Future<void>.delayed(Duration.zero);
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4.0,
+                            ),
+                            child: Stack(
+                              children: [
+                                Card(
+                                  clipBehavior: Clip.hardEdge,
+                                  shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        tripName,
-                                        style: GoogleFonts.bebasNeue().copyWith(
-                                          color: Colors.white,
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        formattedStartDate,
-                                        style: GoogleFonts.bebasNeue().copyWith(
-                                          color: const Color(0xFFB9F90B),
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      if (totalBudget > 0) ...[
-                                        const SizedBox(height: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 12,
-                                            vertical: 4,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue
-                                                .withValues(alpha: 0.8),
-                                            borderRadius:
-                                                BorderRadius.circular(20),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.account_balance_wallet,
-                                                color: Colors.white,
-                                                size: 14,
+                                  child: SizedBox(
+                                    height: 250,
+                                    width: double.infinity,
+                                    child: urlImage.isNotEmpty &&
+                                            Uri.tryParse(urlImage)
+                                                    ?.hasAbsolutePath ==
+                                                true
+                                        ? Image.network(
+                                            urlImage,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                          )
+                                        : Container(
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                            color: Colors.grey[300],
+                                            alignment: Alignment.center,
+                                            child: const Text(
+                                              'Brak zdjęcia',
+                                              style: TextStyle(
+                                                color: Colors.black54,
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                              const SizedBox(width: 4),
-                                              Text(
-                                                '${totalBudget.toStringAsFixed(2)} PLN',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ],
                                   ),
                                 ),
-                              ),
-                            ],
+                                Positioned(
+                                  bottom: 0,
+                                  top: 0,
+                                  right: 0,
+                                  left: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Colors.black.withValues(alpha: 0.5),
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 5,
+                                      ),
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          tripName,
+                                          style:
+                                              GoogleFonts.bebasNeue().copyWith(
+                                            color: Colors.white,
+                                            fontSize: 24,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          formattedStartDate,
+                                          style:
+                                              GoogleFonts.bebasNeue().copyWith(
+                                            color: const Color(0xFFB9F90B),
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        if (totalBudget > 0) ...[
+                                          const SizedBox(height: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.blue
+                                                  .withValues(alpha: 0.8),
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                const Icon(
+                                                  Icons.account_balance_wallet,
+                                                  color: Colors.white,
+                                                  size: 14,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${totalBudget.toStringAsFixed(2)} PLN',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 12,
+                                                    fontWeight: FontWeight.bold,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         );
                       },

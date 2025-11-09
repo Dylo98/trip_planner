@@ -17,6 +17,9 @@ import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
 
+import 'package:trip_planner/core/utils/action_lock.dart';
+import 'package:trip_planner/core/utils/debouncer.dart';
+
 class MarkerDetailsSheet extends ConsumerStatefulWidget {
   const MarkerDetailsSheet({
     super.key,
@@ -45,6 +48,13 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   DateTime? _departureDateTime;
   final TextEditingController _expenseController = TextEditingController();
 
+  final _pickImageLock = ActionLock();
+  final _deleteLock = ActionLock();
+  final _updateDatesLock = ActionLock();
+  final _addNearbyLock = ActionLock();
+
+  final _expenseDebouncer = Debouncer(milliseconds: 600);
+
   Future<DateTime?> _pickDateTime(DateTime? initial) async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -72,48 +82,58 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   }
 
   Future<void> _onPickImageAndSave() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
+    await _pickImageLock.run(() async {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) return;
 
-    final image = File(pickedFile.path);
-    await ref.read(tripServiceProvider).addImageToMarker(
-          tripId: widget.tripId,
-          markerId: widget.marker.id,
-          image: image,
-          arrival: _arrivalDateTime,
-          departure: _departureDateTime,
-        );
+      final image = File(pickedFile.path);
+      if (mounted) {
+        setState(() {
+          _selectedImage = image;
+        });
+      }
+
+      await ref.read(tripServiceProvider).addImageToMarker(
+            tripId: widget.tripId,
+            markerId: widget.marker.id,
+            image: image,
+            arrival: _arrivalDateTime,
+            departure: _departureDateTime,
+          );
+    });
   }
 
   Future<void> _deleteMarker() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Usuń punkt podróży'),
-        content: const Text('Czy na pewno chcesz usunąć ten punkt podróży?'),
-        actions: [
-          TextButton(
-            child: const Text('Anuluj'),
-            onPressed: () => Navigator.of(context).pop(false),
-          ),
-          TextButton(
-            child: const Text('Usuń'),
-            onPressed: () => Navigator.of(context).pop(true),
-          ),
-        ],
-      ),
-    );
+    await _deleteLock.run(() async {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Usuń punkt podróży'),
+          content: const Text('Czy na pewno chcesz usunąć ten punkt podróży?'),
+          actions: [
+            TextButton(
+              child: const Text('Anuluj'),
+              onPressed: () => Navigator.of(context).pop(false),
+            ),
+            TextButton(
+              child: const Text('Usuń'),
+              onPressed: () => Navigator.of(context).pop(true),
+            ),
+          ],
+        ),
+      );
 
-    if (confirmed == true) {
-      final nav = Navigator.of(context);
-
-      await ref
-          .read(tripServiceProvider)
-          .deleteMarkerFromTrip(widget.tripId, widget.marker.id);
-
-      nav.pop(true);
-    }
+      if (confirmed == true) {
+        final nav = Navigator.of(context);
+        await ref
+            .read(tripServiceProvider)
+            .deleteMarkerFromTrip(widget.tripId, widget.marker.id);
+        if (nav.mounted) {
+          nav.pop(true);
+        }
+      }
+    });
   }
 
   Future<void> _fetchNearbyPlaces() async {
@@ -122,13 +142,13 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
         widget.marker.position,
         radiusKm: 2,
       );
-      if (mounted) {
-        setState(() {
-          _nearbyPlaces = places;
-          _isLoadingPlaces = false;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _nearbyPlaces = places;
+        _isLoadingPlaces = false;
+      });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _isLoadingPlaces = false;
       });
@@ -148,6 +168,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   @override
   void dispose() {
     _expenseController.dispose();
+    _expenseDebouncer.dispose();
     super.dispose();
   }
 
@@ -188,6 +209,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                           imageUrls: currentMarker.imageUrl!,
                           currentIndex: _currentImageIndex,
                           onPageChanged: (index) {
+                            if (!mounted) return;
                             setState(() {
                               _currentImageIndex = index;
                             });
@@ -217,6 +239,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                             ),
                           ),
                         const Divider(height: 32),
+
                         ListTile(
                           leading: const Icon(Icons.flight_land),
                           title: const Text('Data przyjazdu'),
@@ -230,12 +253,16 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                           ),
                           trailing: const Icon(Icons.edit),
                           onTap: () async {
-                            final picked =
-                                await _pickDateTime(_arrivalDateTime);
-                            if (picked != null) {
-                              setState(() {
-                                _arrivalDateTime = picked;
-                              });
+                            await _updateDatesLock.run(() async {
+                              final picked =
+                                  await _pickDateTime(_arrivalDateTime);
+                              if (picked == null) return;
+
+                              if (mounted) {
+                                setState(() {
+                                  _arrivalDateTime = picked;
+                                });
+                              }
 
                               await ref
                                   .read(tripServiceProvider)
@@ -245,9 +272,10 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                     arrival: picked,
                                     departure: _departureDateTime ?? picked,
                                   );
-                            }
+                            });
                           },
                         ),
+
                         ListTile(
                           leading: const Icon(Icons.flight_takeoff),
                           title: const Text('Data wyjazdu'),
@@ -261,12 +289,16 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                           ),
                           trailing: const Icon(Icons.edit),
                           onTap: () async {
-                            final picked =
-                                await _pickDateTime(_departureDateTime);
-                            if (picked != null) {
-                              setState(() {
-                                _departureDateTime = picked;
-                              });
+                            await _updateDatesLock.run(() async {
+                              final picked =
+                                  await _pickDateTime(_departureDateTime);
+                              if (picked == null) return;
+
+                              if (mounted) {
+                                setState(() {
+                                  _departureDateTime = picked;
+                                });
+                              }
 
                               await ref
                                   .read(tripServiceProvider)
@@ -276,10 +308,12 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                     arrival: _arrivalDateTime ?? picked,
                                     departure: picked,
                                   );
-                            }
+                            });
                           },
                         ),
+
                         const Divider(height: 32),
+
                         Padding(
                           padding: const EdgeInsets.all(0),
                           child: TextFormField(
@@ -291,22 +325,30 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                               border: OutlineInputBorder(),
                             ),
                             keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            onChanged: (value) async {
-                              final expense = double.tryParse(value);
-                              if (expense != null) {
-                                await ref
-                                    .read(tripServiceProvider)
-                                    .updateMarkerExpense(
-                                      tripId: widget.tripId,
-                                      markerId: widget.marker.id,
-                                      expense: expense,
-                                    );
-                              }
+                              decimal: true,
+                            ),
+                            onChanged: (value) {
+                              _expenseDebouncer.run(() async {
+                                final parsed = double.tryParse(
+                                  _expenseController.text
+                                      .replaceAll(',', '.'),
+                                );
+                                if (parsed != null) {
+                                  await ref
+                                      .read(tripServiceProvider)
+                                      .updateMarkerExpense(
+                                        tripId: widget.tripId,
+                                        markerId: widget.marker.id,
+                                        expense: parsed,
+                                      );
+                                }
+                              });
                             },
                           ),
                         ),
+
                         const Divider(height: 32),
+
                         if (_isLoadingPlaces)
                           const Center(
                             child: Padding(
@@ -323,8 +365,9 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                 child: Text(
                                   'Ciekawe miejsca w pobliżu',
                                   style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold),
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                               SizedBox(
@@ -336,35 +379,37 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                     final place = _nearbyPlaces[index];
                                     return GestureDetector(
                                       onTap: () async {
-                                        final transportMode =
-                                            await selectTransport(context);
-                                        if (transportMode == null) return;
+                                        await _addNearbyLock.run(() async {
+                                          final transportMode =
+                                              await selectTransport(context);
+                                          if (transportMode == null) return;
 
-                                        await ref
-                                            .read(tripServiceProvider)
-                                            .updateMarkerTransportMode(
-                                              tripId: widget.tripId,
-                                              markerId: widget.marker.id,
-                                              transportMode: transportMode,
-                                            );
+                                          await ref
+                                              .read(tripServiceProvider)
+                                              .updateMarkerTransportMode(
+                                                tripId: widget.tripId,
+                                                markerId: widget.marker.id,
+                                                transportMode: transportMode,
+                                              );
 
-                                        final newMarker = MarkerPoint(
-                                          id: _uuid.v4(),
-                                          name: place.name,
-                                          position: place.location,
-                                          arrivalDateTime: null,
-                                          departureDateTime: null,
-                                          imageUrl: [],
-                                          transportMode: 'other',
-                                        );
+                                          final newMarker = MarkerPoint(
+                                            id: _uuid.v4(),
+                                            name: place.name,
+                                            position: place.location,
+                                            arrivalDateTime: null,
+                                            departureDateTime: null,
+                                            imageUrl: [],
+                                            transportMode: 'other',
+                                          );
 
-                                        await ref
-                                            .read(tripServiceProvider)
-                                            .addMarkerToTrip(
-                                                widget.tripId, newMarker);
-                                        if (mounted) {
-                                          Navigator.of(context).pop();
-                                        }
+                                          await ref
+                                              .read(tripServiceProvider)
+                                              .addMarkerToTrip(
+                                                  widget.tripId, newMarker);
+                                          if (mounted) {
+                                            Navigator.of(context).pop();
+                                          }
+                                        });
                                       },
                                       child: Container(
                                         width: 200,
@@ -373,7 +418,8 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                         decoration: BoxDecoration(
                                           color: Colors.white,
                                           border: Border.all(
-                                              color: Colors.grey.shade300),
+                                            color: Colors.grey.shade300,
+                                          ),
                                           borderRadius:
                                               BorderRadius.circular(12),
                                           boxShadow: [
@@ -470,9 +516,11 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                               Text(
                                                 place.address!,
                                                 style: const TextStyle(
-                                                    fontSize: 12),
+                                                  fontSize: 12,
+                                                ),
                                                 maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
                                               ),
                                           ],
                                         ),
@@ -483,6 +531,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                               ),
                             ],
                           ),
+
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: IconButton(

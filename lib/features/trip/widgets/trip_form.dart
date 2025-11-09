@@ -8,6 +8,8 @@ import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
+import 'package:trip_planner/core/utils/debouncer.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
 
 class TripForm extends ConsumerStatefulWidget {
   const TripForm({super.key, required this.formKey});
@@ -23,26 +25,31 @@ class _TripFormState extends ConsumerState<TripForm> {
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
+  final _saveDebouncer = Debouncer(milliseconds: 350);
+  final _uiLock = ActionLock(); // dla pickerów i wyboru zdjęcia
 
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-    );
-
-    if (pickedFile != null) {
+    await _uiLock.run(() async {
+      final XFile? pickedFile =
+          await _picker.pickImage(source: ImageSource.gallery);
+      if (pickedFile == null) return;
       final image = File(pickedFile.path);
-      setState(() {
-        _selectedImage = image;
-      });
+      if (!mounted) return;
+      setState(() => _selectedImage = image);
       ref.read(tripPhotoProvider.notifier).state = image;
-    }
+    });
+  }
+
+  void _debounced(void Function() fn) {
+    _saveDebouncer.run(fn);
   }
 
   @override
   void dispose() {
+    _saveDebouncer.dispose();
     _nameController.dispose();
     _descriptionController.dispose();
     _startDateController.dispose();
@@ -62,8 +69,9 @@ class _TripFormState extends ConsumerState<TripForm> {
             decoration: AppInputStyle.inputDecoration(
                 icon: Icons.title, labelText: 'Nazwa podróży'),
             validator: Validators.validateTripName,
-            onChanged: (value) =>
-                ref.read(tripFormProvider.notifier).setName(value),
+            onChanged: (value) => _debounced(() {
+              ref.read(tripFormProvider.notifier).setName(value);
+            }),
           ),
           const SizedBox(height: 20),
           TextFormField(
@@ -71,8 +79,9 @@ class _TripFormState extends ConsumerState<TripForm> {
             maxLength: 100,
             decoration: AppInputStyle.inputDecoration(
                 icon: Icons.description, labelText: 'Opis podróży'),
-            onChanged: (value) =>
-                ref.read(tripFormProvider.notifier).setDescription(value),
+            onChanged: (value) => _debounced(() {
+              ref.read(tripFormProvider.notifier).setDescription(value);
+            }),
           ),
           const SizedBox(height: 20),
           Container(
@@ -109,21 +118,23 @@ class _TripFormState extends ConsumerState<TripForm> {
                         ),
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          );
-                          if (pickedDate != null) {
-                            setState(() {
-                              _startDateController.text =
-                                  DateFormat('yyyy.MM.dd').format(pickedDate);
-                            });
-                            ref
-                                .read(tripFormProvider.notifier)
-                                .setStartDate(pickedDate);
-                          }
+                          await _uiLock.run(() async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                _startDateController.text =
+                                    DateFormat('yyyy.MM.dd').format(pickedDate);
+                              });
+                              ref
+                                  .read(tripFormProvider.notifier)
+                                  .setStartDate(pickedDate);
+                            }
+                          });
                         },
                       ),
                     ),
@@ -137,21 +148,24 @@ class _TripFormState extends ConsumerState<TripForm> {
                         ),
                         onTap: () async {
                           FocusScope.of(context).requestFocus(FocusNode());
-                          DateTime? pickedDate = await showDatePicker(
-                            context: context,
-                            initialDate: DateTime.now(),
-                            firstDate: DateTime(2000),
-                            lastDate: DateTime(2100),
-                          );
-                          if (pickedDate != null) {
-                            setState(() {
-                              _endDateController.text =
-                                  DateFormat('yyyy.MM.dd').format(pickedDate);
-                            });
-                            ref
-                                .read(tripFormProvider.notifier)
-                                .setEndDate(pickedDate);
-                          }
+                          await _uiLock.run(() async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2000),
+                              lastDate: DateTime(2100),
+                            );
+
+                            if (pickedDate != null) {
+                              setState(() {
+                                _endDateController.text =
+                                    DateFormat('yyyy.MM.dd').format(pickedDate);
+                              });
+                              ref
+                                  .read(tripFormProvider.notifier)
+                                  .setEndDate(pickedDate);
+                            }
+                          });
                         },
                       ),
                     ),

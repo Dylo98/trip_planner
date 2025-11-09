@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-// NOTIFICATIONS (SNACKBARS)
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-
-// THEME
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/theme/colors.dart';
-
-// VALIDATORS
 import 'package:trip_planner/core/utils/validators.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({Key? key}) : super(key: key);
@@ -25,6 +20,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
   final _currentPasswordController = TextEditingController();
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+
+  final ActionLock _lock = ActionLock();
 
   bool _isLoading = false;
   bool _obscureCurrentPassword = true;
@@ -49,62 +46,64 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     return null;
   }
 
-  Future<void> _changePassword() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _changePassword() {
+    return _lock.run(() async {
+      if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+      setState(() => _isLoading = true);
 
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        throw Exception('Użytkownik nie jest zalogowany');
-      }
+      try {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) {
+          throw Exception('Użytkownik nie jest zalogowany');
+        }
 
-      final credential = EmailAuthProvider.credential(
-        email: user.email!,
-        password: _currentPasswordController.text,
-      );
-
-      await user.reauthenticateWithCredential(credential);
-      await user.updatePassword(_newPasswordController.text);
-
-      if (mounted) {
-        AppNotifications.showSuccess(
-          context: context,
-          message: 'Hasło zostało zmienione',
+        final credential = EmailAuthProvider.credential(
+          email: user.email!,
+          password: _currentPasswordController.text,
         );
-        Navigator.of(context).pop();
-      }
-    } on FirebaseAuthException catch (e) {
-      String message = 'Błąd podczas zmiany hasła';
 
-      switch (e.code) {
-        case 'wrong-password':
-          message = 'Nieprawidłowe obecne hasło';
-          break;
-        case 'weak-password':
-          message = 'Nowe hasło jest zbyt słabe';
-          break;
-        case 'requires-recent-login':
-          message = 'Musisz się ponownie zalogować, aby zmienić hasło';
-          break;
-      }
+        await user.reauthenticateWithCredential(credential);
+        await user.updatePassword(_newPasswordController.text);
 
-      if (mounted) {
-        AppNotifications.showError(context: context, message: message);
+        if (mounted) {
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Hasło zostało zmienione',
+          );
+          Navigator.of(context).pop();
+        }
+      } on FirebaseAuthException catch (e) {
+        String message = 'Błąd podczas zmiany hasła';
+
+        switch (e.code) {
+          case 'wrong-password':
+            message = 'Nieprawidłowe obecne hasło';
+            break;
+          case 'weak-password':
+            message = 'Nowe hasło jest zbyt słabe';
+            break;
+          case 'requires-recent-login':
+            message = 'Musisz się ponownie zalogować, aby zmienić hasło';
+            break;
+        }
+
+        if (mounted) {
+          AppNotifications.showError(context: context, message: message);
+        }
+      } catch (e) {
+        if (mounted) {
+          AppNotifications.showError(
+            context: context,
+            message: 'Błąd: $e',
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        AppNotifications.showError(
-          context: context,
-          message: 'Błąd: $e',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    });
   }
 
   @override

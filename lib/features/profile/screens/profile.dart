@@ -3,19 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-
-// PROVIDERS
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
 import 'package:trip_planner/features/auth/controller/auth_provider.dart';
-
-// SERVICES
 import 'package:trip_planner/features/profile/services/profile_image_service.dart';
-
-// CONSTANTS
 import 'package:trip_planner/features/home/constants/layout_constants.dart';
-
-// NOTIFICATIONS (SNACKBARS)
 import 'package:trip_planner/core/widgets/app_notifications.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -28,11 +21,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   final ImagePicker _picker = ImagePicker();
   final ProfileImageService _profileImageService = ProfileImageService();
 
+  final ActionLock _avatarLock = ActionLock();
+  final ActionLock _coverLock = ActionLock();
+  final ActionLock _logoutLock = ActionLock();
+
   File? _selectedProfileImage;
   File? _selectedCoverImage;
   bool _isUpdating = false;
 
   Future<void> _pickProfileImage() async {
+    if (_isUpdating || _avatarLock.isBusy) return;
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -56,6 +55,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Future<void> _pickCoverImage() async {
+    if (_isUpdating || _coverLock.isBusy) return;
+
     try {
       final XFile? image = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -78,82 +79,88 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     }
   }
 
-  Future<void> _uploadProfileImage(File imageFile) async {
-    if (!mounted) return;
-    setState(() => _isUpdating = true);
+  Future<void> _uploadProfileImage(File imageFile) {
+    return _avatarLock.run(() async {
+      if (!mounted) return;
+      setState(() => _isUpdating = true);
 
-    try {
-      await _profileImageService.uploadAvatar(imageFile);
+      try {
+        await _profileImageService.uploadAvatar(imageFile);
 
-      if (mounted) {
-        setState(() => _selectedProfileImage = null);
-        ref.invalidate(meProvider);
+        if (mounted) {
+          setState(() => _selectedProfileImage = null);
+          ref.invalidate(meProvider);
 
-        AppNotifications.showSuccess(
-          context: context,
-          message: 'Zdjęcie profilowe zostało zaktualizowane',
-        );
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Zdjęcie profilowe zostało zaktualizowane',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          AppNotifications.showError(
+            context: context,
+            message: 'Nie udało się zapisać zdjęcia',
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isUpdating = false);
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        AppNotifications.showError(
-          context: context,
-          message: 'Nie udało się zapisać zdjęcia',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isUpdating = false);
-      }
-    }
+    });
   }
 
-  Future<void> _uploadCoverImage(File imageFile) async {
-    if (!mounted) return;
-    setState(() => _isUpdating = true);
+  Future<void> _uploadCoverImage(File imageFile) {
+    return _coverLock.run(() async {
+      if (!mounted) return;
+      setState(() => _isUpdating = true);
 
-    try {
-      await _profileImageService.uploadCoverImage(imageFile);
+      try {
+        await _profileImageService.uploadCoverImage(imageFile);
 
-      if (mounted) {
-        setState(() => _selectedCoverImage = null);
-        ref.invalidate(meProvider);
+        if (mounted) {
+          setState(() => _selectedCoverImage = null);
+          ref.invalidate(meProvider);
 
-        AppNotifications.showSuccess(
-          context: context,
-          message: 'Zdjęcie w tle zostało zaktualizowane',
-        );
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Zdjęcie w tle zostało zaktualizowane',
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          AppNotifications.showError(
+            context: context,
+            message: 'Nie udało się zapisać zdjęcia',
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isUpdating = false);
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        AppNotifications.showError(
-          context: context,
-          message: 'Nie udało się zapisać zdjęcia',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isUpdating = false);
-      }
-    }
+    });
   }
 
-  Future<void> _logout() async {
-    try {
-      final authService = ref.read(authProvider);
-      await authService.logout();
+  Future<void> _logout() {
+    return _logoutLock.run(() async {
+      try {
+        final authService = ref.read(authProvider);
+        await authService.logout();
 
-      if (mounted) {
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        if (mounted) {
+          Navigator.of(context).popUntil((route) => route.isFirst);
+        }
+      } catch (e) {
+        if (mounted) {
+          AppNotifications.showError(
+            context: context,
+            message: 'Nie udało się wylogować',
+          );
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        AppNotifications.showError(
-          context: context,
-          message: 'Nie udało się wylogować',
-        );
-      }
-    }
+    });
   }
 
   @override
@@ -181,7 +188,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         child: Material(
                           color: Colors.transparent,
                           child: InkWell(
-                            onTap: _pickCoverImage,
+                            onTap: _isUpdating ? null : _pickCoverImage,
                             borderRadius: BorderRadius.circular(25),
                             child: _buildEditButton(icon: Icons.camera_alt),
                           ),
@@ -199,7 +206,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               child: Material(
                                 color: Colors.transparent,
                                 child: InkWell(
-                                  onTap: _pickProfileImage,
+                                  onTap: _isUpdating ? null : _pickProfileImage,
                                   borderRadius: BorderRadius.circular(20),
                                   child: _buildEditButton(
                                     icon: Icons.camera_alt,
@@ -296,7 +303,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   Widget _buildCoverImage(String? coverImageUrl) {
     return GestureDetector(
-      onTap: _pickCoverImage,
+      onTap: _isUpdating ? null : _pickCoverImage,
       child: Container(
         height: coverHeight,
         width: double.infinity,
@@ -325,7 +332,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         avatarUrl?.isNotEmpty == true || _selectedProfileImage != null;
 
     return GestureDetector(
-      onTap: _pickProfileImage,
+      onTap: _isUpdating ? null : _pickProfileImage,
       child: CircleAvatar(
         radius: profileHeight / 2,
         backgroundColor: Colors.white,

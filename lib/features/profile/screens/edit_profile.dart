@@ -1,18 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// PROVIDERS
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
-
-// NOTIFICATIONS (SNACKBARS)
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-
-// THEME
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/theme/colors.dart';
-
-// VALIDATORS
 import 'package:trip_planner/core/utils/validators.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -24,7 +17,9 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+
   bool _isLoading = false;
+  final ActionLock _lock = ActionLock();
 
   @override
   void initState() {
@@ -43,39 +38,41 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _saveProfile() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _saveProfile() {
+    return _lock.run(() async {
+      if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isLoading = true);
+      setState(() => _isLoading = true);
 
-    try {
-      final userRepository = ref.read(userRepositoryProvider);
+      try {
+        final userRepository = ref.read(userRepositoryProvider);
 
-      await userRepository.updateProfile(
-        name: _nameController.text.trim(),
-      );
-
-      ref.invalidate(meProvider);
-
-      if (mounted) {
-        AppNotifications.showSuccess(
-          context: context,
-          message: 'Profil został zaktualizowany',
+        await userRepository.updateProfile(
+          name: _nameController.text.trim(),
         );
-        Navigator.of(context).pop();
+
+        ref.invalidate(meProvider);
+
+        if (mounted) {
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Profil został zaktualizowany',
+          );
+          Navigator.of(context).pop();
+        }
+      } catch (e) {
+        if (mounted) {
+          AppNotifications.showError(
+            context: context,
+            message: 'Błąd podczas zapisywania profilu: $e',
+          );
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
       }
-    } catch (e) {
-      if (mounted) {
-        AppNotifications.showError(
-          context: context,
-          message: 'Błąd podczas zapisywania profilu: $e',
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
+    });
   }
 
   @override

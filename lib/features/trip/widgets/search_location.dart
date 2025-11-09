@@ -8,6 +8,9 @@ import 'package:trip_planner/core/theme/input_style.dart';
 /* SERVICES */
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
 
+import 'package:trip_planner/core/utils/debouncer.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
+
 class SearchLocation extends StatefulWidget {
   const SearchLocation({super.key, this.onPlaceSelected});
 
@@ -22,7 +25,9 @@ class _SearchLocationState extends State<SearchLocation> {
   final FocusNode _focusNode = FocusNode();
 
   List<PlaceSuggestion> _suggestions = [];
-  Timer? _debounce;
+  final _debouncer = Debouncer(milliseconds: 400);
+  final _netLock = ActionLock();
+  final _uiLock = ActionLock();
 
   @override
   void initState() {
@@ -32,55 +37,47 @@ class _SearchLocationState extends State<SearchLocation> {
 
   @override
   void dispose() {
-    _debounce?.cancel();
+    _debouncer.dispose();
     _addressController.dispose();
     _focusNode.dispose();
     super.dispose();
   }
 
   void _onTextChanged() {
-    if (_debounce?.isActive ?? false) _debounce!.cancel();
-
-    _debounce = Timer(const Duration(milliseconds: 500), () {
-      if (_addressController.text.isNotEmpty) {
-        _fetchSuggestions(_addressController.text);
-      } else {
-        if (mounted) {
-          setState(() => _suggestions = []);
-        }
+    final text = _addressController.text;
+    _debouncer.run(() {
+      if (text.isNotEmpty) {
+        _fetchSuggestions(text);
+      } else if (mounted) {
+        setState(() => _suggestions = []);
       }
     });
   }
 
   Future<void> _fetchSuggestions(String input) async {
     if (input.trim().isEmpty) return;
-
-    try {
-      final results = await NominatimSearchService.searchPlaces(input);
-      if (mounted) {
-        setState(() {
-          _suggestions = results;
-        });
+    await _netLock.run(() async {
+      try {
+        final results = await NominatimSearchService.searchPlaces(input);
+        if (mounted) setState(() => _suggestions = results);
+      } catch (e) {
+        debugPrint('Error fetching suggestions: $e');
+        if (mounted) setState(() => _suggestions = []);
       }
-    } catch (e) {
-      debugPrint('Error fetching suggestions: $e');
-      if (mounted) {
-        setState(() {
-          _suggestions = [];
-        });
-      }
-    }
+    });
   }
 
   void _handlePlaceSelected(int index) {
-    _focusNode.unfocus();
-
-    final suggestion = _suggestions[index];
-    widget.onPlaceSelected?.call(suggestion.location, suggestion.name);
-
-    setState(() {
-      _suggestions = [];
-      _addressController.clear();
+    _uiLock.run(() async {
+      _focusNode.unfocus();
+      final suggestion = _suggestions[index];
+      widget.onPlaceSelected?.call(suggestion.location, suggestion.name);
+      if (mounted) {
+        setState(() {
+          _suggestions = [];
+          _addressController.clear();
+        });
+      }
     });
   }
 
