@@ -291,7 +291,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           ),
           if (_isUpdating)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               child: const Center(
                 child: CircularProgressIndicator(),
               ),
@@ -305,7 +305,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return GestureDetector(
       onTap: _isUpdating ? null : _pickCoverImage,
       child: Container(
-        height: coverHeight,
+        height: LayoutConstants.coverHeight,
         width: double.infinity,
         color: Colors.black,
         child: _selectedCoverImage != null
@@ -334,10 +334,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     return GestureDetector(
       onTap: _isUpdating ? null : _pickProfileImage,
       child: CircleAvatar(
-        radius: profileHeight / 2,
+        radius: LayoutConstants.profileHeight / 2,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: profileHeight / 2 - 5,
+          radius: LayoutConstants.profileHeight / 2 - 5,
           backgroundColor: Colors.grey.shade300,
           backgroundImage: _selectedProfileImage != null
               ? FileImage(_selectedProfileImage!)
@@ -362,7 +362,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

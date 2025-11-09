@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
-
-// FIREBASE //
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-// NAVIGATION //
 import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
-
-// WIDGETS //
 import 'package:trip_planner/features/home/widgets/home_top.dart';
 import 'package:trip_planner/features/home/widgets/home_content.dart';
 import 'package:trip_planner/features/home/widgets/add_trip_box.dart';
@@ -34,21 +28,38 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: userTripsAsync.when(
         data: (userTrips) => ListView(
           children: <Widget>[
-            HomeTop(),
+            const HomeTop(),
             const SizedBox(height: 20),
-            HomeContent(),
+            const HomeContent(),
             const SizedBox(height: 20),
             GestureDetector(
               onTap: () => context.push('/add-trip'),
-              child: AddTripBox(),
+              child: const AddTripBox(),
             ),
             const SizedBox(height: 20),
             userTrips.isNotEmpty
                 ? HomeCarousel(userTrips: userTrips.take(3).toList())
-                : HomeEmptyCarousel(),
+                : const HomeEmptyCarousel(),
           ],
         ),
-        error: (err, stack) => Center(child: Text('Błąd: $err')),
+        error: (err, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
+                'Nie udało się załadować podróży',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              ElevatedButton(
+                onPressed: () => ref.refresh(getTripProvider),
+                child: const Text('Spróbuj ponownie'),
+              ),
+            ],
+          ),
+        ),
         loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );

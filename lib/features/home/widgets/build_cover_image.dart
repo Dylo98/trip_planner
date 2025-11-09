@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-// CONSTANTS
 import 'package:trip_planner/features/home/constants/layout_constants.dart';
-
-// PROVIDERS
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
 
 class BuildCoverImage extends ConsumerWidget {
@@ -24,13 +20,13 @@ class BuildCoverImage extends ConsumerWidget {
           child: hasCoverImage
               ? Image.network(
                   coverImageUrl!,
-                  height: coverHeight,
+                  height: LayoutConstants.coverHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Image.asset(
                       'assets/images/image_home.jpg',
-                      height: coverHeight,
+                      height: LayoutConstants.coverHeight,
                       width: double.infinity,
                       fit: BoxFit.cover,
                     );
@@ -38,7 +34,7 @@ class BuildCoverImage extends ConsumerWidget {
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
                     return Container(
-                      height: coverHeight,
+                      height: LayoutConstants.coverHeight,
                       width: double.infinity,
                       color: Colors.grey.shade300,
                       child: Center(
@@ -54,7 +50,7 @@ class BuildCoverImage extends ConsumerWidget {
                 )
               : Image.asset(
                   'assets/images/image_home.jpg',
-                  height: coverHeight,
+                  height: LayoutConstants.coverHeight,
                   width: double.infinity,
                   fit: BoxFit.cover,
                 ),
@@ -62,7 +58,7 @@ class BuildCoverImage extends ConsumerWidget {
       },
       loading: () => Container(
         color: Colors.grey.shade300,
-        height: coverHeight,
+        height: LayoutConstants.coverHeight,
         width: double.infinity,
         child: const Center(
           child: CircularProgressIndicator(),
@@ -72,7 +68,7 @@ class BuildCoverImage extends ConsumerWidget {
         color: Colors.black,
         child: Image.asset(
           'assets/images/image_home.jpg',
-          height: coverHeight,
+          height: LayoutConstants.coverHeight,
           width: double.infinity,
           fit: BoxFit.cover,
         ),

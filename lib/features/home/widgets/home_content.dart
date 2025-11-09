@@ -2,22 +2,11 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
+import 'package:trip_planner/core/utils/user_utils.dart';
 
 class HomeContent extends ConsumerWidget {
   const HomeContent({super.key});
-
-  String _deriveName(User? user) {
-    if (user?.displayName != null && user!.displayName!.trim().isNotEmpty) {
-      return user.displayName!.trim();
-    }
-    final email = user?.email;
-    if (email != null && email.contains('@')) {
-      return email.split('@').first;
-    }
-    return 'Użytkowniku';
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,7 +31,7 @@ class HomeContent extends ConsumerWidget {
         if (me?.name?.isNotEmpty == true) {
           return me!.name!;
         }
-        return _deriveName(authUser);
+        return UserUtils.getDisplayName(authUser);
       },
       loading: () => 'Użytkowniku',
       error: (_, __) => 'Użytkowniku',

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-// THEME //
 import 'package:trip_planner/core/theme/colors.dart';
 
 class AddTripBox extends StatefulWidget {

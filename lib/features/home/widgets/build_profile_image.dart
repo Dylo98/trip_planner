@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
-// CONSTANTS
 import 'package:trip_planner/features/home/constants/layout_constants.dart';
-
-// PROVIDERS
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
 
 class BuildProfileImage extends ConsumerWidget {
@@ -25,27 +21,27 @@ class BuildProfileImage extends ConsumerWidget {
         final hasAvatar = avatarUrl.isNotEmpty;
 
         return CircleAvatar(
-          radius: profileHeight / 2,
+          radius: LayoutConstants.profileHeight / 2,
           backgroundColor: Colors.white,
           child: CircleAvatar(
-            radius: profileHeight / 2 - 10,
+            radius: LayoutConstants.profileHeight / 2 - 10,
             backgroundColor: Colors.grey.shade300,
             backgroundImage: hasAvatar ? NetworkImage(avatarUrl) : null,
             child: hasAvatar
                 ? null
                 : Icon(
                     Icons.person,
-                    size: profileHeight / 2 - 10,
+                    size: LayoutConstants.profileHeight / 2 - 10,
                     color: Colors.white70,
                   ),
           ),
         );
       },
       loading: () => CircleAvatar(
-        radius: profileHeight / 2,
+        radius: LayoutConstants.profileHeight / 2,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: profileHeight / 2 - 10,
+          radius: LayoutConstants.profileHeight / 2 - 10,
           backgroundColor: Colors.grey.shade300,
           child: const SizedBox(
             width: 24,
@@ -55,14 +51,14 @@ class BuildProfileImage extends ConsumerWidget {
         ),
       ),
       error: (_, __) => CircleAvatar(
-        radius: profileHeight / 2,
+        radius: LayoutConstants.profileHeight / 2,
         backgroundColor: Colors.white,
         child: CircleAvatar(
-          radius: profileHeight / 2 - 10,
+          radius: LayoutConstants.profileHeight / 2 - 10,
           backgroundColor: Colors.grey.shade300,
           child: Icon(
             Icons.person,
-            size: profileHeight / 2 - 10,
+            size: LayoutConstants.profileHeight / 2 - 10,
             color: Colors.white70,
           ),
         ),

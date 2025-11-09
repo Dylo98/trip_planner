@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
-
-// EXTERNAL PACKAGES //
 import 'package:carousel_slider/carousel_slider.dart';
-
-// WIDGETS //
 import 'package:trip_planner/features/home/widgets/build_carousel_image.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 
@@ -29,7 +25,9 @@ class HomeCarousel extends StatelessWidget {
         itemBuilder: (context, index, realIndex) {
           final trip = userTrips[index];
           return BuildCarouselImage(
-              urlImage: trip.tripPhotoUrl ?? 'Brak zdjęcia', title: trip.name);
+            urlImage: trip.tripPhotoUrl ?? '',
+            title: trip.name,
+          );
         },
       ),
     );
