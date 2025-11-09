@@ -10,6 +10,7 @@ class AppNotifications {
     required BuildContext context,
     required String message,
     required Color backgroundColor,
+    IconData? icon,
   }) {
     if (!context.mounted) return;
 
@@ -27,7 +28,15 @@ class AppNotifications {
 
     messenger.showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: Row(
+          children: [
+            if (icon != null) ...[
+              Icon(icon, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+            ],
+            Expanded(child: Text(message)),
+          ],
+        ),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 3),
@@ -46,7 +55,12 @@ class AppNotifications {
     required BuildContext context,
     required String message,
   }) {
-    _show(context: context, message: message, backgroundColor: AppColors.red);
+    _show(
+      context: context,
+      message: message,
+      backgroundColor: AppColors.red,
+      icon: Icons.error_outline,
+    );
   }
 
   static void showSuccess({
@@ -54,7 +68,10 @@ class AppNotifications {
     required String message,
   }) {
     _show(
-        context: context, message: message, backgroundColor: AppColors.primary);
+        context: context,
+        message: message,
+        backgroundColor: AppColors.primary,
+        icon: Icons.check_circle_outline);
   }
 
   static void showInfo({

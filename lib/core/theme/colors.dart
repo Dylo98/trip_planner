@@ -14,8 +14,8 @@ class AppColors {
 
   static final primaryGradient = LinearGradient(
     colors: [
-      primary.withOpacity(0.8),
-      secondary.withOpacity(0.8),
+      primary.withValues(alpha: 0.8),
+      secondary.withValues(alpha: 0.8),
     ],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,

@@ -213,7 +213,6 @@ class _NewTripMarkerDetailsSheetState
                         onChanged: (_) => _debouncedUpdate(),
                       ),
                       const SizedBox(height: 16),
-
                       TextFormField(
                         controller: _descriptionController,
                         decoration: const InputDecoration(
@@ -224,7 +223,6 @@ class _NewTripMarkerDetailsSheetState
                         onChanged: (_) => _debouncedUpdate(),
                       ),
                       const SizedBox(height: 16),
-
                       ListTile(
                         leading: const Icon(Icons.flight_land),
                         title: const Text('Data przyjazdu'),
@@ -272,7 +270,6 @@ class _NewTripMarkerDetailsSheetState
                         },
                       ),
                       const Divider(height: 32),
-
                       TextFormField(
                         controller: _expenseController,
                         decoration: const InputDecoration(
@@ -287,7 +284,6 @@ class _NewTripMarkerDetailsSheetState
                         onChanged: (_) => _debouncedUpdate(),
                       ),
                       const Divider(height: 32),
-
                       if (_isLoadingPlaces)
                         const Center(
                           child: Padding(
@@ -465,7 +461,6 @@ class _NewTripMarkerDetailsSheetState
                             ),
                           ],
                         ),
-
                       Padding(
                         padding: const EdgeInsets.only(top: 16),
                         child: Center(

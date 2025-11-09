@@ -249,17 +249,17 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _buildProfileOption(
                     icon: Icons.person_outline,
                     title: 'Edytuj profil',
-                    onTap: () => context.push('/edit-profile'),
+                    onTap: () => context.push('/profile/edit'),
                   ),
                   _buildProfileOption(
                     icon: Icons.notifications_outlined,
                     title: 'Powiadomienia',
-                    onTap: () => context.push('/notification-settings'),
+                    onTap: () => context.push('/profile/notifications'),
                   ),
                   _buildProfileOption(
                     icon: Icons.security_outlined,
                     title: 'Prywatność i bezpieczeństwo',
-                    onTap: () => context.push('/change-password'),
+                    onTap: () => context.push('/profile/change-password'),
                   ),
                   const Divider(height: 30),
                   _buildProfileOption(

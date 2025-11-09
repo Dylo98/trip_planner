@@ -239,7 +239,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                             ),
                           ),
                         const Divider(height: 32),
-
                         ListTile(
                           leading: const Icon(Icons.flight_land),
                           title: const Text('Data przyjazdu'),
@@ -275,7 +274,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                             });
                           },
                         ),
-
                         ListTile(
                           leading: const Icon(Icons.flight_takeoff),
                           title: const Text('Data wyjazdu'),
@@ -311,9 +309,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                             });
                           },
                         ),
-
                         const Divider(height: 32),
-
                         Padding(
                           padding: const EdgeInsets.all(0),
                           child: TextFormField(
@@ -330,8 +326,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                             onChanged: (value) {
                               _expenseDebouncer.run(() async {
                                 final parsed = double.tryParse(
-                                  _expenseController.text
-                                      .replaceAll(',', '.'),
+                                  _expenseController.text.replaceAll(',', '.'),
                                 );
                                 if (parsed != null) {
                                   await ref
@@ -346,9 +341,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                             },
                           ),
                         ),
-
                         const Divider(height: 32),
-
                         if (_isLoadingPlaces)
                           const Center(
                             child: Padding(
@@ -519,8 +512,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                                                   fontSize: 12,
                                                 ),
                                                 maxLines: 2,
-                                                overflow:
-                                                    TextOverflow.ellipsis,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                           ],
                                         ),
@@ -531,7 +523,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                               ),
                             ],
                           ),
-
                         Padding(
                           padding: const EdgeInsets.only(top: 16),
                           child: IconButton(

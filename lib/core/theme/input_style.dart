@@ -80,7 +80,7 @@ class AppInputStyle {
       errorText: errorText,
       labelStyle: const TextStyle(color: AppColors.grey, fontSize: 14),
       hintStyle:
-          TextStyle(color: AppColors.grey.withOpacity(0.6), fontSize: 14),
+          TextStyle(color: AppColors.grey.withValues(alpha: 0.6), fontSize: 14),
       border: const UnderlineInputBorder(
         borderSide: BorderSide(color: AppColors.lightGrey, width: 1),
       ),

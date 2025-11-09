@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:trip_planner/features/home/screens/home.dart';
 import 'package:trip_planner/features/auth/screens/auth.dart';
 import 'package:trip_planner/features/profile/screens/change_password.dart';
@@ -68,18 +67,20 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/profile',
       builder: (context, state) => const ProfileScreen(),
-    ),
-    GoRoute(
-      path: '/edit-profile',
-      builder: (context, state) => const EditProfileScreen(),
-    ),
-    GoRoute(
-      path: '/change-password',
-      builder: (context, state) => const ChangePasswordScreen(),
-    ),
-    GoRoute(
-      path: '/notification-settings',
-      builder: (context, state) => const NotificationSettingsScreen(),
+      routes: [
+        GoRoute(
+          path: 'edit',
+          builder: (context, state) => const EditProfileScreen(),
+        ),
+        GoRoute(
+          path: 'change-password',
+          builder: (context, state) => const ChangePasswordScreen(),
+        ),
+        GoRoute(
+          path: 'notifications',
+          builder: (context, state) => const NotificationSettingsScreen(),
+        ),
+      ],
     ),
   ],
 );
