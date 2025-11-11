@@ -3,10 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
-
 import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
 import 'package:trip_planner/features/trip/screens/main_trip_details.dart';
-
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 

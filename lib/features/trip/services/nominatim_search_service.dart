@@ -21,8 +21,24 @@ class PlaceSuggestion {
 class NominatimSearchService {
   static const String _baseUrl = 'https://nominatim.openstreetmap.org';
 
+  static DateTime? _lastRequestTime;
+  static const Duration _minRequestInterval = Duration(seconds: 1);
+
+  static Future<void> _ensureRateLimit() async {
+    if (_lastRequestTime != null) {
+      final timeSinceLastRequest = DateTime.now().difference(_lastRequestTime!);
+      if (timeSinceLastRequest < _minRequestInterval) {
+        final waitTime = _minRequestInterval - timeSinceLastRequest;
+        await Future.delayed(waitTime);
+      }
+    }
+    _lastRequestTime = DateTime.now();
+  }
+
   static Future<List<PlaceSuggestion>> searchPlaces(String query) async {
     if (query.trim().isEmpty) return [];
+
+    await _ensureRateLimit();
 
     final url = Uri.parse('$_baseUrl/search?'
         'q=${Uri.encodeComponent(query)}'
@@ -35,7 +51,7 @@ class NominatimSearchService {
       final response = await http.get(
         url,
         headers: {
-          'User-Agent': 'TripPlanner/1.0',
+          'User-Agent': 'TripPlanner/1.0 (contact: dawid.dyl2@wp.pl)',
         },
       ).timeout(const Duration(seconds: 5));
 
@@ -76,6 +92,8 @@ class NominatimSearchService {
     String? country,
     String? building,
   }) async {
+    await _ensureRateLimit();
+
     final params = <String, String>{
       'format': 'json',
       'addressdetails': '1',
@@ -94,7 +112,7 @@ class NominatimSearchService {
       final response = await http.get(
         url,
         headers: {
-          'User-Agent': 'TripPlanner/1.0',
+          'User-Agent': 'TripPlanner/1.0 (contact: dawid.dyl2@wp.pl)',
         },
       ).timeout(const Duration(seconds: 5));
 

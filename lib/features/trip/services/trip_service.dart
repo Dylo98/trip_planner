@@ -1,13 +1,9 @@
 import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-/* FIREBASE */
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-
-/* MODEL */
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 
 class TripService {
@@ -117,13 +113,36 @@ class TripService {
     }
 
     try {
+      final tripDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('trips')
+          .doc(tripId)
+          .get();
+
+      String? oldImageUrl;
+      if (tripDoc.exists && tripDoc.data() != null) {
+        oldImageUrl = tripDoc.data()!['tripPhotoUrl'] as String?;
+      }
+
       final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final ref = _storage
+      final storageRef = _storage
           .ref()
           .child('users/$uid/trips/$tripId/trip_photo_$timestamp.jpg');
 
-      await ref.putFile(imageFile);
-      final downloadUrl = await ref.getDownloadURL();
+      await storageRef.putFile(imageFile);
+      final downloadUrl = await storageRef.getDownloadURL();
+
+      if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+        try {
+          final oldRef = _storage.refFromURL(oldImageUrl);
+          await oldRef.delete();
+          print('✅ Deleted old trip image');
+        } catch (e) {
+          print('⚠️ Failed to delete old trip image: $e');
+        }
+      }
+
       return downloadUrl;
     } catch (e) {
       throw Exception('Nie udało się przesłać zdjęcia: $e');
@@ -368,6 +387,23 @@ class TripService {
 
       final trip = Trip.fromJson(doc.data()!);
 
+      final markerToDelete = trip.markerPoints.firstWhere(
+        (m) => m.id == markerId,
+        orElse: () => throw Exception('Marker nie istnieje'),
+      );
+
+      if (markerToDelete.imageUrl != null) {
+        for (final imageUrl in markerToDelete.imageUrl!) {
+          try {
+            final imageRef = _storage.refFromURL(imageUrl);
+            await imageRef.delete();
+            print('✅ Deleted image: $imageUrl');
+          } catch (e) {
+            print('⚠️ Failed to delete image: $e');
+          }
+        }
+      }
+
       final updatedMarkers =
           trip.markerPoints.where((marker) => marker.id != markerId).toList();
 
@@ -390,12 +426,47 @@ class TripService {
     }
 
     try {
+      final tripDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('trips')
+          .doc(tripId)
+          .get();
+
+      if (tripDoc.exists && tripDoc.data() != null) {
+        final trip = Trip.fromJson(tripDoc.data()!);
+
+        if (trip.tripPhotoUrl != null) {
+          try {
+            final photoRef = _storage.refFromURL(trip.tripPhotoUrl!);
+            await photoRef.delete();
+          } catch (e) {
+            print('⚠️ Failed to delete trip photo: $e');
+          }
+        }
+
+        for (final marker in trip.markerPoints) {
+          if (marker.imageUrl != null) {
+            for (final imageUrl in marker.imageUrl!) {
+              try {
+                final imageRef = _storage.refFromURL(imageUrl);
+                await imageRef.delete();
+              } catch (e) {
+                print('⚠️ Failed to delete marker image: $e');
+              }
+            }
+          }
+        }
+      }
+
       await _firestore
           .collection('users')
           .doc(uid)
           .collection('trips')
           .doc(tripId)
           .delete();
+
+      print('✅ Trip and all images deleted successfully');
     } catch (e) {
       throw Exception('Nie udało się usunąć podróży: $e');
     }

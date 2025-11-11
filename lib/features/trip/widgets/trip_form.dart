@@ -26,7 +26,7 @@ class _TripFormState extends ConsumerState<TripForm> {
   final TextEditingController _startDateController = TextEditingController();
   final TextEditingController _endDateController = TextEditingController();
   final _saveDebouncer = Debouncer(milliseconds: 350);
-  final _uiLock = ActionLock(); // dla pickerów i wyboru zdjęcia
+  final _uiLock = ActionLock();
 
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();

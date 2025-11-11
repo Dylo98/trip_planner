@@ -1,13 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-
-/* THEME */
 import 'package:trip_planner/core/theme/input_style.dart';
-
-/* SERVICES */
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
-
 import 'package:trip_planner/core/utils/debouncer.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 

@@ -17,10 +17,7 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
 class _NotificationSettingsScreenState
     extends ConsumerState<NotificationSettingsScreen> {
   bool _tripReminders = true;
-  bool _newFeatures = true;
   bool _weeklyDigest = false;
-  bool _friendActivity = true;
-  bool _emailNotifications = true;
   bool _pushNotifications = true;
 
   bool _isLoading = true;
@@ -48,10 +45,7 @@ class _NotificationSettingsScreenState
         final data = doc.data()!;
         setState(() {
           _tripReminders = data['tripReminders'] ?? true;
-          _newFeatures = data['newFeatures'] ?? true;
           _weeklyDigest = data['weeklyDigest'] ?? false;
-          _friendActivity = data['friendActivity'] ?? true;
-          _emailNotifications = data['emailNotifications'] ?? true;
           _pushNotifications = data['pushNotifications'] ?? true;
           _isLoading = false;
         });
@@ -83,10 +77,7 @@ class _NotificationSettingsScreenState
           .doc('notifications')
           .set({
         'tripReminders': _tripReminders,
-        'newFeatures': _newFeatures,
         'weeklyDigest': _weeklyDigest,
-        'friendActivity': _friendActivity,
-        'emailNotifications': _emailNotifications,
         'pushNotifications': _pushNotifications,
         'updatedAt': FieldValue.serverTimestamp(),
       });
@@ -149,16 +140,6 @@ class _NotificationSettingsScreenState
               _saveSettings();
             },
           ),
-          _buildSwitchTile(
-            title: 'Powiadomienia email',
-            subtitle: 'Otrzymuj ważne informacje na email',
-            value: _emailNotifications,
-            icon: Icons.email,
-            onChanged: (value) {
-              setState(() => _emailNotifications = value);
-              _saveSettings();
-            },
-          ),
           const Divider(height: 32),
           _buildSectionHeader('Podróże'),
           _buildSwitchTile(
@@ -178,30 +159,6 @@ class _NotificationSettingsScreenState
             icon: Icons.summarize,
             onChanged: (value) {
               setState(() => _weeklyDigest = value);
-              _saveSettings();
-            },
-          ),
-          const Divider(height: 32),
-          _buildSectionHeader('Aktywność'),
-          _buildSwitchTile(
-            title: 'Aktywność znajomych',
-            subtitle: 'Powiadamiaj o nowych podróżach znajomych',
-            value: _friendActivity,
-            icon: Icons.people,
-            onChanged: (value) {
-              setState(() => _friendActivity = value);
-              _saveSettings();
-            },
-          ),
-          const Divider(height: 32),
-          _buildSectionHeader('Nowości'),
-          _buildSwitchTile(
-            title: 'Nowe funkcje',
-            subtitle: 'Dowiedz się o nowych funkcjach aplikacji',
-            value: _newFeatures,
-            icon: Icons.new_releases,
-            onChanged: (value) {
-              setState(() => _newFeatures = value);
               _saveSettings();
             },
           ),

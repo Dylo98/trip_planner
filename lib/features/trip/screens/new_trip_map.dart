@@ -9,7 +9,7 @@ import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
-import 'package:trip_planner/features/trip/widgets/new_trip_marker_details_sheet.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 
@@ -34,11 +34,6 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
     target: LatLng(52.2297, 21.0122),
     zoom: 6,
   );
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   void dispose() {
@@ -78,7 +73,10 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           if (!mounted) return;
           await showMaterialModalBottomSheet(
             context: context,
-            builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+            builder: (_) => MarkerDetailsSheet(
+              marker: newMarker,
+              tripId: null,
+            ),
           );
         });
       } else {
@@ -102,7 +100,10 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           if (!mounted) return;
           await showMaterialModalBottomSheet(
             context: context,
-            builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+            builder: (_) => MarkerDetailsSheet(
+              marker: newMarker,
+              tripId: null,
+            ),
           );
         });
       }
@@ -138,7 +139,10 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           if (!mounted) return;
           await showMaterialModalBottomSheet(
             context: context,
-            builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+            builder: (_) => MarkerDetailsSheet(
+              marker: newMarker,
+              tripId: null,
+            ),
           );
         });
       } else {
@@ -163,7 +167,10 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
           if (!mounted) return;
           await showMaterialModalBottomSheet(
             context: context,
-            builder: (context) => NewTripMarkerDetailsSheet(marker: newMarker),
+            builder: (_) => MarkerDetailsSheet(
+              marker: newMarker,
+              tripId: null,
+            ),
           );
         });
       }
@@ -191,8 +198,10 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             if (!mounted) return;
             await showMaterialModalBottomSheet(
               context: context,
-              builder: (context) =>
-                  NewTripMarkerDetailsSheet(marker: markerPoint),
+              builder: (_) => MarkerDetailsSheet(
+                marker: markerPoint,
+                tripId: null,
+              ),
             );
           });
         },
@@ -234,7 +243,8 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
             ? const SizedBox(
                 width: 20,
                 height: 20,
-                child: CircularProgressIndicator(strokeWidth: 2))
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
             : const Icon(Icons.my_location),
       ),
     );
