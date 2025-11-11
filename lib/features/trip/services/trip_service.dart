@@ -465,8 +465,6 @@ class TripService {
           .collection('trips')
           .doc(tripId)
           .delete();
-
-      print('✅ Trip and all images deleted successfully');
     } catch (e) {
       throw Exception('Nie udało się usunąć podróży: $e');
     }

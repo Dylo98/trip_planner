@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class BuildCarouselImage extends StatelessWidget {
@@ -36,27 +37,26 @@ class BuildCarouselImage extends StatelessWidget {
       return _buildPlaceholder();
     }
 
-    return Image.network(
-      urlImage,
+    return CachedNetworkImage(
+      imageUrl: urlImage,
       fit: BoxFit.cover,
-      width: double.infinity,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Container(
-          color: Colors.grey[300],
-          child: Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
+      memCacheWidth: 800,
+      memCacheHeight: 800,
+      maxWidthDiskCache: 1000,
+      maxHeightDiskCache: 1000,
+      placeholder: (context, url) => Container(
+        color: Colors.grey[300],
+        child: const Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
           ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return _buildPlaceholder();
-      },
+        ),
+      ),
+      errorWidget: (context, url, error) => _buildPlaceholder(),
+      fadeInDuration: const Duration(milliseconds: 200),
+      fadeOutDuration: const Duration(milliseconds: 150),
     );
   }
 
@@ -91,6 +91,7 @@ class BuildCarouselImage extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.bold,
           ),
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );

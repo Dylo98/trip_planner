@@ -1,4 +1,5 @@
 import 'package:animations/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,7 +31,6 @@ class _MyTripState extends ConsumerState<MyTrip> {
   SortOption _selectedSort = SortOption.dateNewest;
 
   final _searchDebouncer = Debouncer(milliseconds: 350);
-
   final _openTripLock = ActionLock();
 
   @override
@@ -327,37 +327,10 @@ class _MyTripState extends ConsumerState<MyTrip> {
                                   child: SizedBox(
                                     height: 250,
                                     width: double.infinity,
-                                    child: urlImage.isNotEmpty &&
-                                            Uri.tryParse(urlImage)
-                                                    ?.hasAbsolutePath ==
-                                                true
-                                        ? Image.network(
-                                            urlImage,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                          )
-                                        : Container(
-                                            width: double.infinity,
-                                            height: double.infinity,
-                                            color: Colors.grey[300],
-                                            alignment: Alignment.center,
-                                            child: const Text(
-                                              'Brak zdjęcia',
-                                              style: TextStyle(
-                                                color: Colors.black54,
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
+                                    child: _TripCardImage(urlImage: urlImage),
                                   ),
                                 ),
-                                Positioned(
-                                  bottom: 0,
-                                  top: 0,
-                                  right: 0,
-                                  left: 0,
+                                Positioned.fill(
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color:
@@ -447,6 +420,66 @@ class _MyTripState extends ConsumerState<MyTrip> {
                 ),
         ),
       ],
+    );
+  }
+}
+
+class _TripCardImage extends StatelessWidget {
+  const _TripCardImage({required this.urlImage});
+
+  final String urlImage;
+
+  bool get _isValidUrl =>
+      urlImage.isNotEmpty && Uri.tryParse(urlImage)?.hasAbsolutePath == true;
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isValidUrl) {
+      return _placeholder();
+    }
+
+    return CachedNetworkImage(
+      imageUrl: urlImage,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      memCacheWidth: 1200,
+      memCacheHeight: 1200,
+      maxWidthDiskCache: 1600,
+      maxHeightDiskCache: 1600,
+      fadeInDuration: const Duration(milliseconds: 200),
+      fadeOutDuration: const Duration(milliseconds: 150),
+      placeholder: (context, _) => _loading(),
+      errorWidget: (context, _, __) => _placeholder(),
+    );
+  }
+
+  Widget _loading() {
+    return Container(
+      color: Colors.grey[300],
+      alignment: Alignment.center,
+      child: const SizedBox(
+        width: 28,
+        height: 28,
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+    );
+  }
+
+  Widget _placeholder() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.grey[300],
+      alignment: Alignment.center,
+      child: const Text(
+        'Brak zdjęcia',
+        style: TextStyle(
+          color: Colors.black54,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }
