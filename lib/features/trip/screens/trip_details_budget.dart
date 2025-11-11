@@ -137,7 +137,7 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
                         ),
                       ),
                     );
-                  }).toList(),
+                  }),
                   const SizedBox(height: 24),
                   Card(
                     child: Padding(

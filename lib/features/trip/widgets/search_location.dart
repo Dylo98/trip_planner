@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
@@ -24,6 +25,9 @@ class _SearchLocationState extends State<SearchLocation> {
   final _netLock = ActionLock();
   final _uiLock = ActionLock();
 
+  int _requestId = 0;
+  http.Client? _httpClient;
+
   @override
   void initState() {
     super.initState();
@@ -32,6 +36,7 @@ class _SearchLocationState extends State<SearchLocation> {
 
   @override
   void dispose() {
+    _httpClient?.close();
     _debouncer.dispose();
     _addressController.dispose();
     _focusNode.dispose();
@@ -51,13 +56,28 @@ class _SearchLocationState extends State<SearchLocation> {
 
   Future<void> _fetchSuggestions(String input) async {
     if (input.trim().isEmpty) return;
+
+    _httpClient?.close();
+    _httpClient = http.Client();
+
+    final currentRequestId = ++_requestId;
+
     await _netLock.run(() async {
       try {
-        final results = await NominatimSearchService.searchPlaces(input);
-        if (mounted) setState(() => _suggestions = results);
+        final results = await NominatimSearchService.searchPlaces(
+          input,
+          client: _httpClient,
+        );
+
+        if (mounted && currentRequestId == _requestId) {
+          setState(() => _suggestions = results);
+        }
       } catch (e) {
         debugPrint('Error fetching suggestions: $e');
-        if (mounted) setState(() => _suggestions = []);
+
+        if (mounted && currentRequestId == _requestId) {
+          setState(() => _suggestions = []);
+        }
       }
     });
   }

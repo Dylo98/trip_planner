@@ -23,38 +23,30 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(trip.id)
-          .set(trip.toJson());
-    } catch (e) {
-      throw Exception('Nie udało się zapisać podróży: $e');
-    }
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(trip.id)
+        .set(trip.toJson());
   }
 
   Future<Trip?> getTrip(String tripId) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) return null;
 
-    try {
-      final doc = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId)
-          .get();
+    final doc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
 
-      if (!doc.exists || doc.data() == null) {
-        return null;
-      }
-
-      return Trip.fromJson(doc.data()!);
-    } catch (e) {
-      throw Exception('Nie udało się pobrać podróży: $e');
+    if (!doc.exists || doc.data() == null) {
+      return null;
     }
+
+    return Trip.fromJson(doc.data()!);
   }
 
   Stream<Trip> watchTrip(String tripId) {
@@ -73,11 +65,7 @@ class TripService {
       if (!doc.exists || doc.data() == null) {
         throw Exception('Podróż nie istnieje');
       }
-      try {
-        return Trip.fromJson(doc.data()!);
-      } catch (e) {
-        throw Exception('Błąd parsowania danych podróży: $e');
-      }
+      return Trip.fromJson(doc.data()!);
     });
   }
 
@@ -94,8 +82,8 @@ class TripService {
           if (doc.data().isNotEmpty) {
             trips.add(Trip.fromJson(doc.data()));
           }
-        } catch (e) {
-          print('Error parsing trip ${doc.id}: $e');
+        } catch (_) {
+          // Skip invalid trip documents
         }
       }
       return trips;
@@ -112,41 +100,36 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripDoc = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId)
-          .get();
+    final tripDoc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
 
-      String? oldImageUrl;
-      if (tripDoc.exists && tripDoc.data() != null) {
-        oldImageUrl = tripDoc.data()!['tripPhotoUrl'] as String?;
-      }
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final storageRef = _storage
-          .ref()
-          .child('users/$uid/trips/$tripId/trip_photo_$timestamp.jpg');
-
-      await storageRef.putFile(imageFile);
-      final downloadUrl = await storageRef.getDownloadURL();
-
-      if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
-        try {
-          final oldRef = _storage.refFromURL(oldImageUrl);
-          await oldRef.delete();
-          print('✅ Deleted old trip image');
-        } catch (e) {
-          print('⚠️ Failed to delete old trip image: $e');
-        }
-      }
-
-      return downloadUrl;
-    } catch (e) {
-      throw Exception('Nie udało się przesłać zdjęcia: $e');
+    String? oldImageUrl;
+    if (tripDoc.exists && tripDoc.data() != null) {
+      oldImageUrl = tripDoc.data()!['tripPhotoUrl'] as String?;
     }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final storageRef = _storage
+        .ref()
+        .child('users/$uid/trips/$tripId/trip_photo_$timestamp.jpg');
+
+    await storageRef.putFile(imageFile);
+    final downloadUrl = await storageRef.getDownloadURL();
+
+    if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+      try {
+        final oldRef = _storage.refFromURL(oldImageUrl);
+        await oldRef.delete();
+      } catch (_) {
+        // Ignore deletion errors
+      }
+    }
+
+    return downloadUrl;
   }
 
   // =============================
@@ -159,27 +142,20 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripRef = _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId);
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
 
-      final doc = await tripRef.get();
-      if (!doc.exists || doc.data() == null) {
-        throw Exception('Podróż nie istnieje');
-      }
-
-      final trip = Trip.fromJson(doc.data()!);
-      final updatedMarkers = [...trip.markerPoints, marker];
-
-      await tripRef.update({
-        'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-      });
-    } catch (e) {
-      throw Exception('Nie udało się dodać markera: $e');
+    final doc = await tripRef.get();
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('Podróż nie istnieje');
     }
+
+    final trip = Trip.fromJson(doc.data()!);
+    final updatedMarkers = [...trip.markerPoints, marker];
+
+    await tripRef.update({
+      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
+    });
   }
 
   Future<void> updateMarkerDates({
@@ -193,36 +169,29 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripRef = _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId);
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
 
-      final doc = await tripRef.get();
-      if (!doc.exists || doc.data() == null) {
-        throw Exception('Podróż nie istnieje');
-      }
-
-      final trip = Trip.fromJson(doc.data()!);
-
-      final updatedMarkers = trip.markerPoints.map((marker) {
-        if (marker.id == markerId) {
-          return marker.copyWith(
-            arrivalDateTime: arrival,
-            departureDateTime: departure,
-          );
-        }
-        return marker;
-      }).toList();
-
-      await tripRef.update({
-        'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-      });
-    } catch (e) {
-      throw Exception('Nie udało się zaktualizować dat: $e');
+    final doc = await tripRef.get();
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('Podróż nie istnieje');
     }
+
+    final trip = Trip.fromJson(doc.data()!);
+
+    final updatedMarkers = trip.markerPoints.map((marker) {
+      if (marker.id == markerId) {
+        return marker.copyWith(
+          arrivalDateTime: arrival,
+          departureDateTime: departure,
+        );
+      }
+      return marker;
+    }).toList();
+
+    await tripRef.update({
+      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
+    });
   }
 
   Future<void> updateMarkerTransportMode({
@@ -235,35 +204,28 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripRef = _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId);
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
 
-      final tripSnap = await tripRef.get();
-      if (!tripSnap.exists || tripSnap.data() == null) {
-        return;
-      }
-
-      final data = tripSnap.data()!;
-
-      if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
-        return;
-      }
-
-      final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
-      final index = markers.indexWhere((m) => m['id'] == markerId);
-
-      if (index == -1) return;
-
-      markers[index]['transportMode'] = transportMode;
-
-      await tripRef.update({'markerPoints': markers});
-    } catch (e) {
-      throw Exception('Nie udało się zaktualizować transportu: $e');
+    final tripSnap = await tripRef.get();
+    if (!tripSnap.exists || tripSnap.data() == null) {
+      return;
     }
+
+    final data = tripSnap.data()!;
+
+    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
+      return;
+    }
+
+    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
+    final index = markers.indexWhere((m) => m['id'] == markerId);
+
+    if (index == -1) return;
+
+    markers[index]['transportMode'] = transportMode;
+
+    await tripRef.update({'markerPoints': markers});
   }
 
   Future<void> updateMarkerExpense({
@@ -276,36 +238,30 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripRef = _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId);
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
 
-      final tripSnap = await tripRef.get();
-      if (!tripSnap.exists || tripSnap.data() == null) {
-        return;
-      }
-
-      final data = tripSnap.data()!;
-
-      if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
-        return;
-      }
-
-      final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
-      final index = markers.indexWhere((m) => m['id'] == markerId);
-
-      if (index == -1) return;
-
-      markers[index]['expense'] = expense;
-
-      await tripRef.update({'markerPoints': markers});
-    } catch (e) {
-      throw Exception('Nie udało się zaktualizować wydatku: $e');
+    final tripSnap = await tripRef.get();
+    if (!tripSnap.exists || tripSnap.data() == null) {
+      return;
     }
+
+    final data = tripSnap.data()!;
+
+    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
+      return;
+    }
+
+    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
+    final index = markers.indexWhere((m) => m['id'] == markerId);
+
+    if (index == -1) return;
+
+    markers[index]['expense'] = expense;
+
+    await tripRef.update({'markerPoints': markers});
   }
+
   // =============================
   // MARKERY – ZDJĘCIA
   // =============================
@@ -322,45 +278,41 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      final storageRef = _storage.ref().child(
-          'users/$uid/trips/$tripId/markers/$markerId/image_$timestamp.jpg');
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final storageRef = _storage.ref().child(
+        'users/$uid/trips/$tripId/markers/$markerId/image_$timestamp.jpg');
 
-      await storageRef.putFile(image);
-      final imageUrl = await storageRef.getDownloadURL();
+    await storageRef.putFile(image);
+    final imageUrl = await storageRef.getDownloadURL();
 
-      final tripDoc = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId)
-          .get();
+    final tripDoc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
 
-      if (!tripDoc.exists || tripDoc.data() == null) {
-        throw Exception('Podróż nie istnieje');
-      }
-
-      final trip = Trip.fromJson(tripDoc.data()!);
-
-      final updatedMarkers = trip.markerPoints.map((marker) {
-        if (marker.id == markerId) {
-          final updatedUrls = List<String>.from(marker.imageUrl ?? [])
-            ..add(imageUrl);
-          return marker.copyWith(
-            imageUrl: updatedUrls,
-            arrivalDateTime: arrival ?? marker.arrivalDateTime,
-            departureDateTime: departure ?? marker.departureDateTime,
-          );
-        }
-        return marker;
-      }).toList();
-
-      final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
-      await saveTrip(updatedTrip);
-    } catch (e) {
-      throw Exception('Nie udało się dodać zdjęcia: $e');
+    if (!tripDoc.exists || tripDoc.data() == null) {
+      throw Exception('Podróż nie istnieje');
     }
+
+    final trip = Trip.fromJson(tripDoc.data()!);
+
+    final updatedMarkers = trip.markerPoints.map((marker) {
+      if (marker.id == markerId) {
+        final updatedUrls = List<String>.from(marker.imageUrl ?? [])
+          ..add(imageUrl);
+        return marker.copyWith(
+          imageUrl: updatedUrls,
+          arrivalDateTime: arrival ?? marker.arrivalDateTime,
+          departureDateTime: departure ?? marker.departureDateTime,
+        );
+      }
+      return marker;
+    }).toList();
+
+    final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
+    await saveTrip(updatedTrip);
   }
 
   // =============================
@@ -373,46 +325,38 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripRef = _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId);
+    final tripRef =
+        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
 
-      final doc = await tripRef.get();
-      if (!doc.exists || doc.data() == null) {
-        throw Exception('Podróż nie istnieje');
-      }
+    final doc = await tripRef.get();
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('Podróż nie istnieje');
+    }
 
-      final trip = Trip.fromJson(doc.data()!);
+    final trip = Trip.fromJson(doc.data()!);
 
-      final markerToDelete = trip.markerPoints.firstWhere(
-        (m) => m.id == markerId,
-        orElse: () => throw Exception('Marker nie istnieje'),
-      );
+    final markerToDelete = trip.markerPoints.firstWhere(
+      (m) => m.id == markerId,
+      orElse: () => throw Exception('Marker nie istnieje'),
+    );
 
-      if (markerToDelete.imageUrl != null) {
-        for (final imageUrl in markerToDelete.imageUrl!) {
-          try {
-            final imageRef = _storage.refFromURL(imageUrl);
-            await imageRef.delete();
-            print('✅ Deleted image: $imageUrl');
-          } catch (e) {
-            print('⚠️ Failed to delete image: $e');
-          }
+    if (markerToDelete.imageUrl != null) {
+      for (final imageUrl in markerToDelete.imageUrl!) {
+        try {
+          final imageRef = _storage.refFromURL(imageUrl);
+          await imageRef.delete();
+        } catch (_) {
+          // Ignore deletion errors
         }
       }
-
-      final updatedMarkers =
-          trip.markerPoints.where((marker) => marker.id != markerId).toList();
-
-      await tripRef.update({
-        'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-      });
-    } catch (e) {
-      throw Exception('Nie udało się usunąć markera: $e');
     }
+
+    final updatedMarkers =
+        trip.markerPoints.where((marker) => marker.id != markerId).toList();
+
+    await tripRef.update({
+      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
+    });
   }
 
   // =============================
@@ -425,49 +369,45 @@ class TripService {
       throw Exception('Użytkownik niezalogowany');
     }
 
-    try {
-      final tripDoc = await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId)
-          .get();
+    final tripDoc = await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
 
-      if (tripDoc.exists && tripDoc.data() != null) {
-        final trip = Trip.fromJson(tripDoc.data()!);
+    if (tripDoc.exists && tripDoc.data() != null) {
+      final trip = Trip.fromJson(tripDoc.data()!);
 
-        if (trip.tripPhotoUrl != null) {
-          try {
-            final photoRef = _storage.refFromURL(trip.tripPhotoUrl!);
-            await photoRef.delete();
-          } catch (e) {
-            print('⚠️ Failed to delete trip photo: $e');
-          }
+      if (trip.tripPhotoUrl != null) {
+        try {
+          final photoRef = _storage.refFromURL(trip.tripPhotoUrl!);
+          await photoRef.delete();
+        } catch (_) {
+          // Ignore deletion errors
         }
+      }
 
-        for (final marker in trip.markerPoints) {
-          if (marker.imageUrl != null) {
-            for (final imageUrl in marker.imageUrl!) {
-              try {
-                final imageRef = _storage.refFromURL(imageUrl);
-                await imageRef.delete();
-              } catch (e) {
-                print('⚠️ Failed to delete marker image: $e');
-              }
+      for (final marker in trip.markerPoints) {
+        if (marker.imageUrl != null) {
+          for (final imageUrl in marker.imageUrl!) {
+            try {
+              final imageRef = _storage.refFromURL(imageUrl);
+              await imageRef.delete();
+            } catch (_) {
+              // Ignore deletion errors
             }
           }
         }
       }
-
-      await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId)
-          .delete();
-    } catch (e) {
-      throw Exception('Nie udało się usunąć podróży: $e');
     }
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .delete();
   }
 }
 

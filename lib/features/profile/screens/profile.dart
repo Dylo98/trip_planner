@@ -11,7 +11,7 @@ import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
-  const ProfileScreen({Key? key}) : super(key: key);
+  const ProfileScreen({super.key});
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();

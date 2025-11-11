@@ -6,7 +6,7 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_sheet.dart';
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 import 'package:trip_planner/features/trip/utils/handle_place_selected.dart';
 import 'package:trip_planner/features/trip/utils/generate_polylines.dart';

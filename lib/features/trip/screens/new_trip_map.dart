@@ -9,7 +9,7 @@ import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 import 'package:trip_planner/features/trip/services/direction_service.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_sheet.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 

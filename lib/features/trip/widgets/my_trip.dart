@@ -162,7 +162,7 @@ class _MyTripState extends ConsumerState<MyTrip> {
                     Navigator.pop(context);
                   },
                 );
-              }).toList(),
+              }),
             ],
           ),
         );

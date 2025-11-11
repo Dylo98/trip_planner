@@ -8,7 +8,7 @@ import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
-  const ChangePasswordScreen({Key? key}) : super(key: key);
+  const ChangePasswordScreen({super.key});
 
   @override
   ConsumerState<ChangePasswordScreen> createState() =>

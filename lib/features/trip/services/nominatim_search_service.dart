@@ -35,10 +35,16 @@ class NominatimSearchService {
     _lastRequestTime = DateTime.now();
   }
 
-  static Future<List<PlaceSuggestion>> searchPlaces(String query) async {
+  static Future<List<PlaceSuggestion>> searchPlaces(
+    String query, {
+    http.Client? client,
+  }) async {
     if (query.trim().isEmpty) return [];
 
     await _ensureRateLimit();
+
+    final httpClient = client ?? http.Client();
+    final shouldCloseClient = client == null;
 
     final url = Uri.parse('$_baseUrl/search?'
         'q=${Uri.encodeComponent(query)}'
@@ -48,41 +54,47 @@ class NominatimSearchService {
         '&dedupe=1');
 
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         url,
         headers: {
           'User-Agent': 'TripPlanner/1.0 (contact: dawid.dyl2@wp.pl)',
         },
       ).timeout(const Duration(seconds: 5));
 
-      if (response.statusCode == 200) {
-        final List results = json.decode(response.body);
-
-        var suggestions = results.map((place) {
-          return PlaceSuggestion(
-            name: place['display_name'] as String,
-            location: LatLng(
-              double.parse(place['lat']),
-              double.parse(place['lon']),
-            ),
-            address: place['display_name'] as String,
-            photoReference: null,
-            importance: place['importance'] as double?,
-          );
-        }).toList();
-
-        suggestions.sort((a, b) {
-          final impA = a.importance ?? 0.0;
-          final impB = b.importance ?? 0.0;
-          return impB.compareTo(impA);
-        });
-
-        return suggestions.take(5).toList();
+      if (response.statusCode != 200) {
+        return [];
       }
+
+      final List results = json.decode(response.body);
+
+      var suggestions = results.map((place) {
+        return PlaceSuggestion(
+          name: place['display_name'] as String,
+          location: LatLng(
+            double.parse(place['lat']),
+            double.parse(place['lon']),
+          ),
+          address: place['display_name'] as String,
+          photoReference: null,
+          importance: place['importance'] as double?,
+        );
+      }).toList();
+
+      suggestions.sort((a, b) {
+        final impA = a.importance ?? 0.0;
+        final impB = b.importance ?? 0.0;
+        return impB.compareTo(impA);
+      });
+
+      return suggestions.take(5).toList();
+    } on http.ClientException {
       return [];
     } catch (e) {
-      print('Nominatim search error: $e');
       return [];
+    } finally {
+      if (shouldCloseClient) {
+        httpClient.close();
+      }
     }
   }
 
@@ -91,8 +103,12 @@ class NominatimSearchService {
     String? city,
     String? country,
     String? building,
+    http.Client? client,
   }) async {
     await _ensureRateLimit();
+
+    final httpClient = client ?? http.Client();
+    final shouldCloseClient = client == null;
 
     final params = <String, String>{
       'format': 'json',
@@ -109,33 +125,39 @@ class NominatimSearchService {
     final url = Uri.parse('$_baseUrl/search').replace(queryParameters: params);
 
     try {
-      final response = await http.get(
+      final response = await httpClient.get(
         url,
         headers: {
           'User-Agent': 'TripPlanner/1.0 (contact: dawid.dyl2@wp.pl)',
         },
       ).timeout(const Duration(seconds: 5));
 
-      if (response.statusCode == 200) {
-        final List results = json.decode(response.body);
-
-        return results.map((place) {
-          return PlaceSuggestion(
-            name: place['display_name'] as String,
-            location: LatLng(
-              double.parse(place['lat']),
-              double.parse(place['lon']),
-            ),
-            address: place['display_name'] as String,
-            photoReference: null,
-            importance: place['importance'] as double?,
-          );
-        }).toList();
+      if (response.statusCode != 200) {
+        return [];
       }
+
+      final List results = json.decode(response.body);
+
+      return results.map((place) {
+        return PlaceSuggestion(
+          name: place['display_name'] as String,
+          location: LatLng(
+            double.parse(place['lat']),
+            double.parse(place['lon']),
+          ),
+          address: place['display_name'] as String,
+          photoReference: null,
+          importance: place['importance'] as double?,
+        );
+      }).toList();
+    } on http.ClientException {
       return [];
     } catch (e) {
-      print('Nominatim structured search error: $e');
       return [];
+    } finally {
+      if (shouldCloseClient) {
+        httpClient.close();
+      }
     }
   }
 
@@ -155,85 +177,72 @@ class NominatimSearchService {
         'out center tags 20;');
 
     try {
-      final response = await http.get(url).timeout(
-            const Duration(seconds: 10),
-          );
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final elements = data['elements'] as List;
+      if (response.statusCode != 200) {
+        return [];
+      }
 
-        print('🔍 Found ${elements.length} places');
+      final data = json.decode(response.body);
+      final elements = data['elements'] as List;
 
-        final suggestions = <PlaceSuggestion>[];
+      final suggestions = <PlaceSuggestion>[];
 
-        for (final element in elements) {
-          final tags = element['tags'] as Map<String, dynamic>? ?? {};
-          final name = tags['name'] as String? ?? 'Nieznane miejsce';
+      for (final element in elements) {
+        final tags = element['tags'] as Map<String, dynamic>? ?? {};
+        final name = tags['name'] as String?;
 
-          if (name == 'Nieznane miejsce') continue;
+        if (name == null || name.isEmpty) continue;
 
-          double lat, lon;
-          if (element['type'] == 'way' && element['center'] != null) {
-            lat = element['center']['lat'] as double;
-            lon = element['center']['lon'] as double;
-          } else {
-            lat = element['lat'] as double;
-            lon = element['lon'] as double;
-          }
-
-          print('📍 Place: $name');
-          print('   Tags: ${tags.keys.toList()}');
-
-          String? photoUrl;
-
-          final wikimedia = tags['wikimedia_commons'] as String?;
-          if (wikimedia != null) {
-            print('   ✅ Has wikimedia_commons: $wikimedia');
-            photoUrl = await _getWikimediaImage(wikimedia);
-          }
-
-          if (photoUrl == null) {
-            final wikidata = tags['wikidata'] as String?;
-            if (wikidata != null) {
-              print('   ✅ Has wikidata: $wikidata');
-              photoUrl = await _getWikidataImage(wikidata);
-            }
-          }
-
-          if (photoUrl == null) {
-            final wikipedia = tags['wikipedia'] as String?;
-            if (wikipedia != null) {
-              print('   ✅ Has wikipedia: $wikipedia');
-              photoUrl = await _getWikipediaImage(wikipedia);
-            }
-          }
-
-          if (photoUrl == null) {
-            final imageTag = tags['image'] as String?;
-            if (imageTag != null && imageTag.startsWith('http')) {
-              print('   ✅ Has image tag: $imageTag');
-              photoUrl = imageTag;
-            }
-          }
-
-          print('   📷 Final photo: ${photoUrl ?? "NO PHOTO"}');
-
-          suggestions.add(PlaceSuggestion(
-            name: name,
-            location: LatLng(lat, lon),
-            address: tags['name'] as String?,
-            photoReference: photoUrl,
-          ));
+        double lat, lon;
+        if (element['type'] == 'way' && element['center'] != null) {
+          lat = element['center']['lat'] as double;
+          lon = element['center']['lon'] as double;
+        } else {
+          lat = element['lat'] as double;
+          lon = element['lon'] as double;
         }
 
-        print('✅ Returning ${suggestions.length} suggestions');
-        return suggestions;
+        String? photoUrl;
+
+        final wikimedia = tags['wikimedia_commons'] as String?;
+        if (wikimedia != null) {
+          photoUrl = await _getWikimediaImage(wikimedia);
+        }
+
+        if (photoUrl == null) {
+          final wikidata = tags['wikidata'] as String?;
+          if (wikidata != null) {
+            photoUrl = await _getWikidataImage(wikidata);
+          }
+        }
+
+        if (photoUrl == null) {
+          final wikipedia = tags['wikipedia'] as String?;
+          if (wikipedia != null) {
+            photoUrl = await _getWikipediaImage(wikipedia);
+          }
+        }
+
+        if (photoUrl == null) {
+          final imageTag = tags['image'] as String?;
+          if (imageTag != null && imageTag.startsWith('http')) {
+            photoUrl = imageTag;
+          }
+        }
+
+        suggestions.add(PlaceSuggestion(
+          name: name,
+          location: LatLng(lat, lon),
+          address: name,
+          photoReference: photoUrl,
+        ));
       }
+
+      return suggestions;
     } catch (e) {
-      print('❌ Nearby places error: $e');
+      return [];
     }
-    return [];
   }
 
   static Future<String?> _getWikimediaImage(String wikimediaRef) async {
@@ -253,29 +262,30 @@ class NominatimSearchService {
           '&iiurlwidth=400'
           '&format=json');
 
-      final response = await http.get(url).timeout(
-            const Duration(seconds: 5),
-          );
+      final response = await http.get(url).timeout(const Duration(seconds: 5));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final pages = data['query']?['pages'] as Map<String, dynamic>?;
-
-        if (pages != null) {
-          final page = pages.values.first;
-          final imageInfo = page['imageinfo'] as List?;
-
-          if (imageInfo != null && imageInfo.isNotEmpty) {
-            final thumbUrl = imageInfo[0]['thumburl'] as String?;
-            print('   🖼️ Wikimedia photo URL: $thumbUrl');
-            return thumbUrl;
-          }
-        }
+      if (response.statusCode != 200) {
+        return null;
       }
+
+      final data = json.decode(response.body);
+      final pages = data['query']?['pages'] as Map<String, dynamic>?;
+
+      if (pages == null) {
+        return null;
+      }
+
+      final page = pages.values.first;
+      final imageInfo = page['imageinfo'] as List?;
+
+      if (imageInfo != null && imageInfo.isNotEmpty) {
+        return imageInfo[0]['thumburl'] as String?;
+      }
+
+      return null;
     } catch (e) {
-      print('   ❌ Wikimedia image error: $e');
+      return null;
     }
-    return null;
   }
 
   static Future<String?> _getWikidataImage(String wikidataId) async {
@@ -286,27 +296,28 @@ class NominatimSearchService {
           '&property=P18'
           '&format=json');
 
-      final response = await http.get(url).timeout(
-            const Duration(seconds: 5),
-          );
+      final response = await http.get(url).timeout(const Duration(seconds: 5));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final claims = data['claims']?['P18'] as List?;
+      if (response.statusCode != 200) {
+        return null;
+      }
 
-        if (claims != null && claims.isNotEmpty) {
-          final imageName =
-              claims[0]['mainsnak']?['datavalue']?['value'] as String?;
+      final data = json.decode(response.body);
+      final claims = data['claims']?['P18'] as List?;
 
-          if (imageName != null) {
-            return _getWikimediaImage('File:$imageName');
-          }
+      if (claims != null && claims.isNotEmpty) {
+        final imageName =
+            claims[0]['mainsnak']?['datavalue']?['value'] as String?;
+
+        if (imageName != null) {
+          return _getWikimediaImage('File:$imageName');
         }
       }
+
+      return null;
     } catch (e) {
-      print('   ❌ Wikidata image error: $e');
+      return null;
     }
-    return null;
   }
 
   static Future<String?> _getWikipediaImage(String wikipediaRef) async {
@@ -324,24 +335,23 @@ class NominatimSearchService {
           '&pithumbsize=400'
           '&format=json');
 
-      final response = await http.get(url).timeout(
-            const Duration(seconds: 5),
-          );
+      final response = await http.get(url).timeout(const Duration(seconds: 5));
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final pages = data['query']?['pages'] as Map<String, dynamic>?;
-
-        if (pages != null) {
-          final page = pages.values.first;
-          final thumbnail = page['thumbnail']?['source'] as String?;
-          print('   🖼️ Wikipedia photo URL: $thumbnail');
-          return thumbnail;
-        }
+      if (response.statusCode != 200) {
+        return null;
       }
+
+      final data = json.decode(response.body);
+      final pages = data['query']?['pages'] as Map<String, dynamic>?;
+
+      if (pages == null) {
+        return null;
+      }
+
+      final page = pages.values.first;
+      return page['thumbnail']?['source'] as String?;
     } catch (e) {
-      print('   ❌ Wikipedia image error: $e');
+      return null;
     }
-    return null;
   }
 }
