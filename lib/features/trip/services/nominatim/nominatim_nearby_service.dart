@@ -9,13 +9,35 @@ import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
 /// - Atrakcji turystycznych
 /// - Miejsc historycznych
 /// - Restauracji i kawiarni
+/// - Obiektów przyrodniczych
 class NominatimNearbyService {
+  static Future<List<PlaceSuggestion>> getNearbyPlacesInBounds(
+    LatLngBounds bounds,
+  ) async {
+    final query = _buildOverpassBboxQuery(bounds);
+    final url = Uri.parse('${NominatimConfig.overpassUrl}?data=$query');
+
+    try {
+      final response = await http.get(url).timeout(const Duration(seconds: 10));
+
+      if (response.statusCode != 200) {
+        return [];
+      }
+
+      final data = json.decode(response.body);
+      final elements = data['elements'] as List;
+
+      return await _processElements(elements);
+    } catch (e) {
+      return [];
+    }
+  }
+
   static Future<List<PlaceSuggestion>> getNearbyPlaces(
     LatLng position, {
     int radiusKm = 2,
   }) async {
     final radiusMeters = radiusKm * 1000;
-
     final query = _buildOverpassQuery(position, radiusMeters);
     final url = Uri.parse('${NominatimConfig.overpassUrl}?data=$query');
 
@@ -33,6 +55,27 @@ class NominatimNearbyService {
     } catch (e) {
       return [];
     }
+  }
+
+  static String _buildOverpassBboxQuery(LatLngBounds bounds) {
+    final south = bounds.southwest.latitude;
+    final west = bounds.southwest.longitude;
+    final north = bounds.northeast.latitude;
+    final east = bounds.northeast.longitude;
+
+    return '[out:json][bbox:$south,$west,$north,$east];'
+        '('
+        'node["tourism"];'
+        'node["historic"];'
+        'node["amenity"~"restaurant|cafe|bar"];'
+        'node["natural"];'
+        'node["leisure"~"park|garden"];'
+        'way["tourism"];'
+        'way["historic"];'
+        'way["natural"];'
+        'way["leisure"~"park|garden"];'
+        ');'
+        'out center tags 30;';
   }
 
   static String _buildOverpassQuery(LatLng position, int radiusMeters) {
@@ -59,13 +102,19 @@ class NominatimNearbyService {
       final coordinates = _extractCoordinates(element);
       if (coordinates == null) continue;
 
+      final category = PlaceCategory.fromTags(tags);
+
+      final details = PlaceDetails.fromTags(tags);
+
       final photoUrl = await NominatimImageService.getImageFromTags(tags);
 
       suggestions.add(PlaceSuggestion(
         name: name,
         location: coordinates,
-        address: name,
+        address: _buildAddress(tags),
         photoReference: photoUrl,
+        category: category,
+        details: details,
       ));
     }
 
@@ -88,5 +137,20 @@ class NominatimNearbyService {
     } catch (e) {
       return null;
     }
+  }
+
+  static String _buildAddress(Map<String, dynamic> tags) {
+    final parts = <String>[];
+
+    if (tags['addr:street'] != null) {
+      parts.add(tags['addr:street'] as String);
+    }
+    if (tags['addr:city'] != null) {
+      parts.add(tags['addr:city'] as String);
+    }
+
+    return parts.isEmpty
+        ? (tags['name'] as String? ?? 'Nieznana lokalizacja')
+        : parts.join(', ');
   }
 }

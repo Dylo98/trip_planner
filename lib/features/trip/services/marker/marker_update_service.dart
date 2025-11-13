@@ -78,6 +78,36 @@ class MarkerUpdateService extends BaseTripService {
     await tripRef.update({'markerPoints': markers});
   }
 
+  Future<void> updateMarkerDescription({
+    required String tripId,
+    required String markerId,
+    required String description,
+  }) async {
+    requireUserId();
+
+    final tripRef = getTripRef(tripId);
+
+    final tripSnap = await tripRef.get();
+    if (!tripSnap.exists || tripSnap.data() == null) {
+      return;
+    }
+
+    final data = tripSnap.data()!;
+
+    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
+      return;
+    }
+
+    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
+    final index = markers.indexWhere((m) => m['id'] == markerId);
+
+    if (index == -1) return;
+
+    markers[index]['description'] = description;
+
+    await tripRef.update({'markerPoints': markers});
+  }
+
   /// Aktualizuje wydatek dla markera
   Future<void> updateMarkerExpense({
     required String tripId,

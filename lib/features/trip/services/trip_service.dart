@@ -191,6 +191,18 @@ class TripService {
   /// Usuwa podróż wraz ze wszystkimi powiązanymi zasobami
   Future<void> deleteTrip(String tripId) =>
       _tripDeletionService.deleteTrip(tripId);
+
+  /// Aktualizuje opis dla markera
+  Future<void> updateMarkerDescription({
+    required String tripId,
+    required String markerId,
+    required String description,
+  }) =>
+      _markerUpdateService.updateMarkerDescription(
+        tripId: tripId,
+        markerId: markerId,
+        description: description,
+      );
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {

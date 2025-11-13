@@ -93,6 +93,28 @@ class MarkerDetailsState {
     }
   }
 
+  Future<void> updateDescription(
+    String description,
+    Function(void Function()) setState,
+  ) async {
+    if (isNewTrip) {
+      final updated = _currentMarker.copyWith(description: description);
+      setState(() => _currentMarker = updated);
+      onUpdate?.call(updated);
+
+      ref.read(tripMarkersProvider.notifier).updateMarker(
+            _currentMarker.id,
+            updated,
+          );
+    } else {
+      await ref.read(tripServiceProvider).updateMarkerDescription(
+            tripId: tripId!,
+            markerId: _currentMarker.id,
+            description: description,
+          );
+    }
+  }
+
   Future<void> pickAndAddImage(Function(void Function()) setState) async {
     await pickImageLock.run(() async {
       final picker = ImagePicker();

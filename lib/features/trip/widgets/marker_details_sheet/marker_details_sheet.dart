@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
+import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
+import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_state.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_dates_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_transport_section.dart';
@@ -12,6 +14,9 @@ import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_a
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
 import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
+import 'package:trip_planner/features/trip/services/nominatim/place_details_dialog.dart';
+import 'package:trip_planner/features/trip/widgets/select_transport.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_description_section.dart';
 
 class MarkerDetailsSheet extends ConsumerStatefulWidget {
   const MarkerDetailsSheet({
@@ -130,10 +135,71 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                       await _state.updateExpense(expense, setState);
                     },
                   ),
+                  MarkerDescriptionSection(
+                    initialDescription: displayMarker.description,
+                    onDescriptionChanged: (description) async {
+                      await _state.updateDescription(description, setState);
+                    },
+                  ),
                   MarkerNearbyPlacesSection(
                     places: _nearbyPlaces,
                     isLoading: _isLoadingPlaces,
-                    onPlaceSelected: (place) {},
+                    onPlaceSelected: (place) async {
+                      final shouldAdd =
+                          await showPlaceDetailsDialog(context, place);
+                      if (!shouldAdd || !mounted) return;
+                      final transport = await selectTransport(context);
+                      if (transport == null || !mounted) return;
+
+                      final newMarker = MarkerPoint(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        position: place.location,
+                        name: place.name,
+                        description: place.address,
+                        transportMode: transport,
+                        imageUrl: null,
+                        arrivalDateTime: null,
+                        departureDateTime: null,
+                        expense: null,
+                      );
+
+                      if (_state.isNewTrip) {
+                        ref
+                            .read(tripMarkersProvider.notifier)
+                            .addMarker(newMarker);
+                      } else {
+                        await ref.read(tripServiceProvider).addMarkerToTrip(
+                              widget.tripId!,
+                              newMarker,
+                            );
+
+                        if (mounted) {
+                          Navigator.pop(context);
+                        }
+                      }
+
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Row(
+                              children: [
+                                const Icon(Icons.check_circle,
+                                    color: Colors.white),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Text(
+                                    'Dodano: ${place.name} (${_getTransportName(transport)})',
+                                  ),
+                                ),
+                              ],
+                            ),
+                            backgroundColor: Colors.green,
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      }
+                    },
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
@@ -181,5 +247,18 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
         ),
       ],
     );
+  }
+
+  String _getTransportName(String mode) {
+    switch (mode) {
+      case 'plane':
+        return 'Samolot';
+      case 'walk':
+        return 'Pieszo';
+      case 'car':
+        return 'Samochód';
+      default:
+        return 'Inne';
+    }
   }
 }
