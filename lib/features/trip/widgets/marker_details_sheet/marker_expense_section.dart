@@ -1,4 +1,3 @@
-// lib/features/trip/widgets/marker_details_sheet/marker_expense_section.dart
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 

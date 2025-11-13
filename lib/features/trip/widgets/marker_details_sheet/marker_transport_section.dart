@@ -1,4 +1,3 @@
-// lib/features/trip/widgets/marker_details_sheet/marker_transport_section.dart
 import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 

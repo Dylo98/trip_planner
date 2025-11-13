@@ -1,4 +1,3 @@
-// lib/features/trip/widgets/marker_details_sheet/marker_details_state.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +18,6 @@ class MarkerDetailsState {
   DateTime? arrivalDateTime;
   DateTime? departureDateTime;
 
-  // Locks
   final pickImageLock = ActionLock();
   final deleteLock = ActionLock();
   final updateDatesLock = ActionLock();
@@ -38,7 +36,6 @@ class MarkerDetailsState {
 
   MarkerPoint get currentMarker => _currentMarker;
 
-  // ✅ UPDATE DATES
   Future<void> updateMarkerDates({
     required DateTime arrival,
     required DateTime departure,
@@ -74,7 +71,6 @@ class MarkerDetailsState {
     }
   }
 
-  // ✅ UPDATE EXPENSE
   Future<void> updateExpense(
     double expense,
     Function(void Function()) setState,
@@ -97,7 +93,6 @@ class MarkerDetailsState {
     }
   }
 
-  // ✅ PICK AND ADD IMAGE
   Future<void> pickAndAddImage(Function(void Function()) setState) async {
     await pickImageLock.run(() async {
       final picker = ImagePicker();
@@ -131,7 +126,6 @@ class MarkerDetailsState {
     });
   }
 
-  // ✅ DELETE MARKER
   Future<void> deleteMarker() async {
     await deleteLock.run(() async {
       final confirmed = await showDialog<bool>(

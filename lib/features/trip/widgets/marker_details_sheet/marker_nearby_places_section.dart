@@ -1,6 +1,5 @@
-// lib/features/trip/widgets/marker_details_sheet/marker_nearby_places_section.dart
 import 'package:flutter/material.dart';
-import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
+import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
 
 class MarkerNearbyPlacesSection extends StatelessWidget {
   const MarkerNearbyPlacesSection({

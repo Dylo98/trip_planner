@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:http/http.dart' as http;
 import 'package:trip_planner/core/theme/input_style.dart';
-import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
+import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
+
 import 'package:trip_planner/core/utils/debouncer.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 

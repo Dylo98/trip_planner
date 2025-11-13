@@ -5,412 +5,197 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
+import 'package:trip_planner/features/trip/services/trip_crud_service.dart';
+import 'package:trip_planner/features/trip/services/trip_image_service.dart';
+import 'package:trip_planner/features/trip/services/trip_deletion_service.dart';
+import 'package:trip_planner/features/trip/services/marker/marker_crud_service.dart';
+import 'package:trip_planner/features/trip/services/marker/marker_update_service.dart';
+import 'package:trip_planner/features/trip/services/marker/marker_image_service.dart';
 
+/// Główny serwis TripService - Facade Pattern
+///
+/// Deleguje odpowiedzialności do wyspecjalizowanych serwisów:
+/// - TripCrudService - podstawowe operacje CRUD na podróżach
+/// - TripImageService - zarządzanie zdjęciami podróży
+/// - TripDeletionService - usuwanie podróży z zasobami
+/// - MarkerCrudService - operacje CRUD na markerach
+/// - MarkerUpdateService - aktualizacja danych markerów
+/// - MarkerImageService - zarządzanie zdjęciami markerów
 class TripService {
-  TripService(this._firestore, this._auth);
+  TripService(
+    FirebaseFirestore firestore,
+    FirebaseAuth auth, [
+    FirebaseStorage? storage,
+  ])  : _firestore = firestore,
+        _auth = auth,
+        _storage = storage ?? FirebaseStorage.instance {
+    _tripCrudService = TripCrudService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+    );
+
+    _tripImageService = TripImageService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+    );
+
+    _tripDeletionService = TripDeletionService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+    );
+
+    _markerCrudService = MarkerCrudService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+    );
+
+    _markerUpdateService = MarkerUpdateService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+    );
+
+    _markerImageService = MarkerImageService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+      tripCrudService: _tripCrudService,
+    );
+  }
 
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseStorage _storage;
+
+  late final TripCrudService _tripCrudService;
+  late final TripImageService _tripImageService;
+  late final TripDeletionService _tripDeletionService;
+  late final MarkerCrudService _markerCrudService;
+  late final MarkerUpdateService _markerUpdateService;
+  late final MarkerImageService _markerImageService;
 
   // =============================
   // TRIPS – ZAPIS / ODCZYT PODRÓŻY
   // =============================
 
-  Future<void> saveTrip(Trip trip) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
+  /// Zapisuje podróż do Firestore
+  Future<void> saveTrip(Trip trip) => _tripCrudService.saveTrip(trip);
 
-    await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(trip.id)
-        .set(trip.toJson());
-  }
+  /// Pobiera pojedynczą podróż po ID
+  Future<Trip?> getTrip(String tripId) => _tripCrudService.getTrip(tripId);
 
-  Future<Trip?> getTrip(String tripId) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) return null;
+  /// Obserwuje zmiany w podróży w czasie rzeczywistym
+  Stream<Trip> watchTrip(String tripId) => _tripCrudService.watchTrip(tripId);
 
-    final doc = await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .get();
-
-    if (!doc.exists || doc.data() == null) {
-      return null;
-    }
-
-    return Trip.fromJson(doc.data()!);
-  }
-
-  Stream<Trip> watchTrip(String tripId) {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      return Stream.error(Exception('Użytkownik niezalogowany'));
-    }
-
-    return _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .snapshots()
-        .map((doc) {
-      if (!doc.exists || doc.data() == null) {
-        throw Exception('Podróż nie istnieje');
-      }
-      return Trip.fromJson(doc.data()!);
-    });
-  }
-
-  Stream<List<Trip>> getTrips(String uid) {
-    return _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .snapshots()
-        .map((snapshot) {
-      final trips = <Trip>[];
-      for (final doc in snapshot.docs) {
-        try {
-          if (doc.data().isNotEmpty) {
-            trips.add(Trip.fromJson(doc.data()));
-          }
-        } catch (_) {
-          // Skip invalid trip documents
-        }
-      }
-      return trips;
-    });
-  }
+  /// Pobiera wszystkie podróże użytkownika jako Stream
+  Stream<List<Trip>> getTrips(String uid) => _tripCrudService.getTrips(uid);
 
   // =============================
   // TRIPS – ZDJĘCIA
   // =============================
 
-  Future<String> uploadTripImage(File imageFile, String tripId) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
+  /// Uploaduje zdjęcie główne podróży do Firebase Storage
+  Future<String> uploadTripImage(File imageFile, String tripId) =>
+      _tripImageService.uploadTripImage(imageFile, tripId);
 
-    final tripDoc = await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .get();
-
-    String? oldImageUrl;
-    if (tripDoc.exists && tripDoc.data() != null) {
-      oldImageUrl = tripDoc.data()!['tripPhotoUrl'] as String?;
-    }
-
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final storageRef = _storage
-        .ref()
-        .child('users/$uid/trips/$tripId/trip_photo_$timestamp.jpg');
-
-    await storageRef.putFile(imageFile);
-    final downloadUrl = await storageRef.getDownloadURL();
-
-    if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
-      try {
-        final oldRef = _storage.refFromURL(oldImageUrl);
-        await oldRef.delete();
-      } catch (_) {
-        // Ignore deletion errors
-      }
-    }
-
-    return downloadUrl;
-  }
+  /// Usuwa zdjęcie podróży z Firebase Storage
+  Future<void> deleteTripImage(String imageUrl) =>
+      _tripImageService.deleteTripImage(imageUrl);
 
   // =============================
-  // MARKERY – DODAWANIE / AKTUALIZACJA
+  // MARKERY – DODAWANIE / USUWANIE
   // =============================
 
-  Future<void> addMarkerToTrip(String tripId, MarkerPoint marker) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
+  /// Dodaje nowy marker do podróży
+  Future<void> addMarkerToTrip(String tripId, MarkerPoint marker) =>
+      _markerCrudService.addMarkerToTrip(tripId, marker);
 
-    final tripRef =
-        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
+  /// Usuwa marker z podróży wraz ze wszystkimi jego zdjęciami
+  Future<void> deleteMarkerFromTrip(String tripId, String markerId) =>
+      _markerCrudService.deleteMarkerFromTrip(tripId, markerId);
 
-    final doc = await tripRef.get();
-    if (!doc.exists || doc.data() == null) {
-      throw Exception('Podróż nie istnieje');
-    }
+  // =============================
+  // MARKERY – AKTUALIZACJA
+  // =============================
 
-    final trip = Trip.fromJson(doc.data()!);
-    final updatedMarkers = [...trip.markerPoints, marker];
-
-    await tripRef.update({
-      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-    });
-  }
-
+  /// Aktualizuje daty przyjazdu i wyjazdu dla markera
   Future<void> updateMarkerDates({
     required String tripId,
     required String markerId,
     required DateTime arrival,
     required DateTime departure,
-  }) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
+  }) =>
+      _markerUpdateService.updateMarkerDates(
+        tripId: tripId,
+        markerId: markerId,
+        arrival: arrival,
+        departure: departure,
+      );
 
-    final tripRef =
-        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
-
-    final doc = await tripRef.get();
-    if (!doc.exists || doc.data() == null) {
-      throw Exception('Podróż nie istnieje');
-    }
-
-    final trip = Trip.fromJson(doc.data()!);
-
-    final updatedMarkers = trip.markerPoints.map((marker) {
-      if (marker.id == markerId) {
-        return marker.copyWith(
-          arrivalDateTime: arrival,
-          departureDateTime: departure,
-        );
-      }
-      return marker;
-    }).toList();
-
-    await tripRef.update({
-      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-    });
-  }
-
+  /// Aktualizuje środek transportu dla markera
   Future<void> updateMarkerTransportMode({
     required String tripId,
     required String markerId,
     required String transportMode,
-  }) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
+  }) =>
+      _markerUpdateService.updateMarkerTransportMode(
+        tripId: tripId,
+        markerId: markerId,
+        transportMode: transportMode,
+      );
 
-    final tripRef =
-        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
-
-    final tripSnap = await tripRef.get();
-    if (!tripSnap.exists || tripSnap.data() == null) {
-      return;
-    }
-
-    final data = tripSnap.data()!;
-
-    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
-      return;
-    }
-
-    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
-    final index = markers.indexWhere((m) => m['id'] == markerId);
-
-    if (index == -1) return;
-
-    markers[index]['transportMode'] = transportMode;
-
-    await tripRef.update({'markerPoints': markers});
-  }
-
+  /// Aktualizuje wydatek dla markera
   Future<void> updateMarkerExpense({
     required String tripId,
     required String markerId,
     required double expense,
-  }) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
-
-    final tripRef =
-        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
-
-    final tripSnap = await tripRef.get();
-    if (!tripSnap.exists || tripSnap.data() == null) {
-      return;
-    }
-
-    final data = tripSnap.data()!;
-
-    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
-      return;
-    }
-
-    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
-    final index = markers.indexWhere((m) => m['id'] == markerId);
-
-    if (index == -1) return;
-
-    markers[index]['expense'] = expense;
-
-    await tripRef.update({'markerPoints': markers});
-  }
+  }) =>
+      _markerUpdateService.updateMarkerExpense(
+        tripId: tripId,
+        markerId: markerId,
+        expense: expense,
+      );
 
   // =============================
   // MARKERY – ZDJĘCIA
   // =============================
 
+  /// Dodaje zdjęcie do markera
   Future<void> addImageToMarker({
     required String tripId,
     required String markerId,
     required File image,
     DateTime? arrival,
     DateTime? departure,
-  }) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
+  }) =>
+      _markerImageService.addImageToMarker(
+        tripId: tripId,
+        markerId: markerId,
+        image: image,
+        arrival: arrival,
+        departure: departure,
+      );
 
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final storageRef = _storage.ref().child(
-        'users/$uid/trips/$tripId/markers/$markerId/image_$timestamp.jpg');
-
-    await storageRef.putFile(image);
-    final imageUrl = await storageRef.getDownloadURL();
-
-    final tripDoc = await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .get();
-
-    if (!tripDoc.exists || tripDoc.data() == null) {
-      throw Exception('Podróż nie istnieje');
-    }
-
-    final trip = Trip.fromJson(tripDoc.data()!);
-
-    final updatedMarkers = trip.markerPoints.map((marker) {
-      if (marker.id == markerId) {
-        final updatedUrls = List<String>.from(marker.imageUrl ?? [])
-          ..add(imageUrl);
-        return marker.copyWith(
-          imageUrl: updatedUrls,
-          arrivalDateTime: arrival ?? marker.arrivalDateTime,
-          departureDateTime: departure ?? marker.departureDateTime,
-        );
-      }
-      return marker;
-    }).toList();
-
-    final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
-    await saveTrip(updatedTrip);
-  }
-
-  // =============================
-  // MARKERY – USUWANIE
-  // =============================
-
-  Future<void> deleteMarkerFromTrip(String tripId, String markerId) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
-
-    final tripRef =
-        _firestore.collection('users').doc(uid).collection('trips').doc(tripId);
-
-    final doc = await tripRef.get();
-    if (!doc.exists || doc.data() == null) {
-      throw Exception('Podróż nie istnieje');
-    }
-
-    final trip = Trip.fromJson(doc.data()!);
-
-    final markerToDelete = trip.markerPoints.firstWhere(
-      (m) => m.id == markerId,
-      orElse: () => throw Exception('Marker nie istnieje'),
-    );
-
-    if (markerToDelete.imageUrl != null) {
-      for (final imageUrl in markerToDelete.imageUrl!) {
-        try {
-          final imageRef = _storage.refFromURL(imageUrl);
-          await imageRef.delete();
-        } catch (_) {
-          // Ignore deletion errors
-        }
-      }
-    }
-
-    final updatedMarkers =
-        trip.markerPoints.where((marker) => marker.id != markerId).toList();
-
-    await tripRef.update({
-      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-    });
-  }
+  /// Usuwa zdjęcie markera z Firebase Storage
+  Future<void> deleteMarkerImage(String imageUrl) =>
+      _markerImageService.deleteMarkerImage(imageUrl);
 
   // =============================
   // TRIPS – USUWANIE
   // =============================
 
-  Future<void> deleteTrip(String tripId) async {
-    final uid = _auth.currentUser?.uid;
-    if (uid == null) {
-      throw Exception('Użytkownik niezalogowany');
-    }
-
-    final tripDoc = await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .get();
-
-    if (tripDoc.exists && tripDoc.data() != null) {
-      final trip = Trip.fromJson(tripDoc.data()!);
-
-      if (trip.tripPhotoUrl != null) {
-        try {
-          final photoRef = _storage.refFromURL(trip.tripPhotoUrl!);
-          await photoRef.delete();
-        } catch (_) {
-          // Ignore deletion errors
-        }
-      }
-
-      for (final marker in trip.markerPoints) {
-        if (marker.imageUrl != null) {
-          for (final imageUrl in marker.imageUrl!) {
-            try {
-              final imageRef = _storage.refFromURL(imageUrl);
-              await imageRef.delete();
-            } catch (_) {
-              // Ignore deletion errors
-            }
-          }
-        }
-      }
-    }
-
-    await _firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .delete();
-  }
+  /// Usuwa podróż wraz ze wszystkimi powiązanymi zasobami
+  Future<void> deleteTrip(String tripId) =>
+      _tripDeletionService.deleteTrip(tripId);
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {
-  return TripService(FirebaseFirestore.instance, FirebaseAuth.instance);
+  return TripService(
+    FirebaseFirestore.instance,
+    FirebaseAuth.instance,
+  );
 });

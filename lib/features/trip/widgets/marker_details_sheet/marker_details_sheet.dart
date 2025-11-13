@@ -1,4 +1,3 @@
-// lib/features/trip/widgets/marker_details_sheet/marker_details_sheet.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -12,7 +11,7 @@ import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_n
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_add_image_button.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
-import 'package:trip_planner/features/trip/services/nominatim_search_service.dart';
+import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
 
 class MarkerDetailsSheet extends ConsumerStatefulWidget {
   const MarkerDetailsSheet({
@@ -52,7 +51,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
 
   Future<void> _fetchNearbyPlaces() async {
     try {
-      final places = await NominatimSearchService.getNearbyPlaces(
+      final places = await NominatimNearbyService.getNearbyPlaces(
         widget.marker.position,
         radiusKm: 2,
       );
@@ -114,42 +113,28 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                     ),
                   ),
                   const SizedBox(height: 16),
-
-                  // ✅ Dates section
                   MarkerDatesSection(
                     state: _state,
                     onDatesUpdated: () => setState(() {}),
                   ),
-
                   const Divider(height: 32),
-
-                  // ✅ Transport section
                   MarkerTransportSection(
                     transportMode: displayMarker.transportMode,
                     onTransportChanged: (mode) async {
-                      // Handle transport change
                       setState(() {});
                     },
                   ),
-
-                  // ✅ Expense section
                   MarkerExpenseSection(
                     initialExpense: displayMarker.expense,
                     onExpenseChanged: (expense) async {
                       await _state.updateExpense(expense, setState);
                     },
                   ),
-
-                  // ✅ Nearby places section
                   MarkerNearbyPlacesSection(
                     places: _nearbyPlaces,
                     isLoading: _isLoadingPlaces,
-                    onPlaceSelected: (place) {
-                      // Handle place selection
-                    },
+                    onPlaceSelected: (place) {},
                   ),
-
-                  // ✅ Delete button
                   Padding(
                     padding: const EdgeInsets.only(top: 16),
                     child: Center(

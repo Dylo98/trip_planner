@@ -1,15 +1,9 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
-import 'package:trip_planner/features/trip/services/direction_service.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_sheet.dart';
+import 'package:trip_planner/features/trip/controller/trip_map_controller.dart';
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
-import 'package:trip_planner/features/trip/utils/handle_place_selected.dart';
-import 'package:trip_planner/features/trip/utils/generate_polylines.dart';
 
 class TripDetailsMapScreen extends ConsumerStatefulWidget {
   const TripDetailsMapScreen({super.key, required this.tripId});
@@ -22,37 +16,43 @@ class TripDetailsMapScreen extends ConsumerStatefulWidget {
 }
 
 class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
-  final _placeSelectLock = ActionLock();
-  late final ProviderSubscription _tripListener;
-  final Completer<GoogleMapController> _controller =
-      Completer<GoogleMapController>();
-
-  bool _hasDrawnPolylines = false;
+  late final TripMapController _mapController;
   Set<Polyline> _polylines = {};
+  bool _hasInitializedPolylines = false;
 
   @override
   void initState() {
     super.initState();
-
-    _tripListener = ref.listenManual(
-      watchTripProvider(widget.tripId),
-      (previous, next) {
-        if (next is AsyncData) {
-          final trip = next.value;
-          final newPolylines =
-              DirectionService.drawPolylines(trip.markerPoints);
-          setState(() {
-            _polylines = newPolylines.toSet();
-          });
-        }
-      },
+    _mapController = TripMapController(
+      ref: ref,
+      context: context,
+      tripId: widget.tripId,
     );
   }
 
   @override
   void dispose() {
-    _tripListener.close();
+    _mapController.dispose();
     super.dispose();
+  }
+
+  void _updatePolylines(Set<Polyline> newPolylines) {
+    if (mounted) {
+      setState(() {
+        _polylines = newPolylines;
+      });
+    }
+  }
+
+  Future<void> _handlePlaceSelected(LatLng position, String name) async {
+    if (_mapController.isPlaceLocked) return;
+
+    await _mapController.handleAddMarkerToTrip(
+      tripId: widget.tripId,
+      position: position,
+      name: name,
+      onPolylinesUpdate: _updatePolylines,
+    );
   }
 
   @override
@@ -63,15 +63,18 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
       data: (trip) {
         final markers = trip.markerPoints;
 
-        if (!_hasDrawnPolylines) {
-          final newPolylines = generatePolylines(markers);
+        if (!_hasInitializedPolylines && markers.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            setState(() {
-              _polylines = newPolylines;
-              _hasDrawnPolylines = true;
-            });
+            if (mounted) {
+              setState(() {
+                _polylines = _mapController.generatePolylines(markers);
+                _hasInitializedPolylines = true;
+              });
+            }
           });
         }
+
+        final mapMarkers = _mapController.createMapMarkers(markers);
 
         return Stack(
           children: [
@@ -82,56 +85,18 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
                     : const LatLng(52.2297, 21.0122),
                 zoom: 5,
               ),
-              markers: {
-                for (final marker in markers)
-                  Marker(
-                    markerId: MarkerId(marker.id),
-                    position: marker.position,
-                    infoWindow: InfoWindow(title: marker.name),
-                    onTap: () async {
-                      await showMaterialModalBottomSheet(
-                        context: context,
-                        builder: (context) => SingleChildScrollView(
-                          controller: ModalScrollController.of(context),
-                          child: MarkerDetailsSheet(
-                            marker: marker,
-                            tripId: widget.tripId,
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-              },
+              markers: mapMarkers,
               polylines: _polylines,
-              onMapCreated: (controller) {
-                if (!_controller.isCompleted) {
-                  _controller.complete(controller);
-                }
-              },
+              onMapCreated: _mapController.setMapController,
             ),
             Positioned(
               top: 16,
               left: 16,
               right: 16,
-              child: SearchLocation(
-                onPlaceSelected: (LatLng position, String name) async {
-                  await _placeSelectLock.run(() async {
-                    final controller = await _controller.future;
-                    await handlePlaceSelected(
-                      context: context,
-                      ref: ref,
-                      tripId: widget.tripId,
-                      position: position,
-                      name: name,
-                      controller: controller,
-                      updatePolylines: (newPolylines) {
-                        setState(() {
-                          _polylines = newPolylines;
-                        });
-                      },
-                    );
-                  });
-                },
+              child: SafeArea(
+                child: SearchLocation(
+                  onPlaceSelected: _handlePlaceSelected,
+                ),
               ),
             ),
           ],

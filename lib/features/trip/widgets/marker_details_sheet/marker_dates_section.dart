@@ -1,4 +1,3 @@
-// lib/features/trip/widgets/marker_details_sheet/marker_dates_section.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_state.dart';
