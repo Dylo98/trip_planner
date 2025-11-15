@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
 import 'place_details_dialog.dart';
 
@@ -76,7 +75,6 @@ class NearbyPlacesList extends StatelessWidget {
             children: [
               _buildPlaceImage(place),
               const SizedBox(width: 12),
-
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,7 +88,6 @@ class NearbyPlacesList extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
-
                     Row(
                       children: [
                         Text(
@@ -107,7 +104,6 @@ class NearbyPlacesList extends StatelessWidget {
                         ),
                       ],
                     ),
-
                     if (place.details?.openingHours != null) ...[
                       const SizedBox(height: 4),
                       Row(
@@ -137,7 +133,6 @@ class NearbyPlacesList extends StatelessWidget {
                   ],
                 ),
               ),
-
               Icon(
                 Icons.chevron_right,
                 color: Colors.grey.shade400,

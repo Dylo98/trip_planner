@@ -9,12 +9,11 @@ import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_d
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_dates_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_transport_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_expense_section.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_nearby_places_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_add_image_button.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
-import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
-import 'package:trip_planner/features/trip/services/nominatim/place_details_dialog.dart';
+import 'package:trip_planner/features/trip/services/google_places_service.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet/google_nearby_places_section.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_description_section.dart';
 
@@ -38,8 +37,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
   late final MarkerDetailsState _state;
 
   int _currentImageIndex = 0;
-  List<PlaceSuggestion> _nearbyPlaces = [];
-  bool _isLoadingPlaces = true;
 
   @override
   void initState() {
@@ -51,24 +48,8 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
       tripId: widget.tripId,
       onUpdate: widget.onUpdate,
     );
-    _fetchNearbyPlaces();
-  }
 
-  Future<void> _fetchNearbyPlaces() async {
-    try {
-      final places = await NominatimNearbyService.getNearbyPlaces(
-        widget.marker.position,
-        radiusKm: 2,
-      );
-      if (!mounted) return;
-      setState(() {
-        _nearbyPlaces = places;
-        _isLoadingPlaces = false;
-      });
-    } catch (_) {
-      if (!mounted) return;
-      setState(() => _isLoadingPlaces = false);
-    }
+    GooglePlacesService.loadDailyStats();
   }
 
   @override
@@ -141,64 +122,10 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                       await _state.updateDescription(description, setState);
                     },
                   ),
-                  MarkerNearbyPlacesSection(
-                    places: _nearbyPlaces,
-                    isLoading: _isLoadingPlaces,
+                  GoogleNearbyPlacesSection(
+                    markerPosition: displayMarker.position,
                     onPlaceSelected: (place) async {
-                      final shouldAdd =
-                          await showPlaceDetailsDialog(context, place);
-                      if (!shouldAdd || !mounted) return;
-                      final transport = await selectTransport(context);
-                      if (transport == null || !mounted) return;
-
-                      final newMarker = MarkerPoint(
-                        id: DateTime.now().millisecondsSinceEpoch.toString(),
-                        position: place.location,
-                        name: place.name,
-                        description: place.address,
-                        transportMode: transport,
-                        imageUrl: null,
-                        arrivalDateTime: null,
-                        departureDateTime: null,
-                        expense: null,
-                      );
-
-                      if (_state.isNewTrip) {
-                        ref
-                            .read(tripMarkersProvider.notifier)
-                            .addMarker(newMarker);
-                      } else {
-                        await ref.read(tripServiceProvider).addMarkerToTrip(
-                              widget.tripId!,
-                              newMarker,
-                            );
-
-                        if (mounted) {
-                          Navigator.pop(context);
-                        }
-                      }
-
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Row(
-                              children: [
-                                const Icon(Icons.check_circle,
-                                    color: Colors.white),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    'Dodano: ${place.name} (${_getTransportName(transport)})',
-                                  ),
-                                ),
-                              ],
-                            ),
-                            backgroundColor: Colors.green,
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      }
+                      await _handleGooglePlaceSelected(place);
                     },
                   ),
                   Padding(
@@ -247,6 +174,59 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
         ),
       ],
     );
+  }
+
+  Future<void> _handleGooglePlaceSelected(GooglePlace place) async {
+    if (!mounted) return;
+
+    final transport = await selectTransport(context);
+    if (transport == null || !mounted) return;
+
+    final newMarker = MarkerPoint(
+      id: place.placeId,
+      position: place.location,
+      name: place.name,
+      description: place.vicinity,
+      transportMode: transport,
+      imageUrl: null,
+      arrivalDateTime: null,
+      departureDateTime: null,
+      expense: null,
+    );
+
+    if (_state.isNewTrip) {
+      ref.read(tripMarkersProvider.notifier).addMarker(newMarker);
+    } else {
+      await ref.read(tripServiceProvider).addMarkerToTrip(
+            widget.tripId!,
+            newMarker,
+          );
+
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Dodano: ${place.name} (${_getTransportName(transport)})',
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.green,
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   String _getTransportName(String mode) {

@@ -11,8 +11,11 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:trip_planner/core/theme/app_theme.dart';
 import 'firebase_options.dart';
 
+import 'package:intl/date_symbol_data_local.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('pl_PL', null);
   await dotenv.load(fileName: ".env");
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

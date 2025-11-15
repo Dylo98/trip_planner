@@ -10,6 +10,7 @@ import 'package:trip_planner/features/profile/screens/notification_settings.dart
 import 'package:trip_planner/features/profile/screens/profile.dart';
 import 'package:trip_planner/features/trip/screens/main_new_trip.dart';
 import 'package:trip_planner/features/trip/screens/my_trips.dart';
+import 'package:trip_planner/features/friends/screens/friends_screen.dart';
 
 class GoRouterRefreshStream extends ChangeNotifier {
   GoRouterRefreshStream(Stream<dynamic> stream) {
@@ -63,6 +64,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/my-trips',
       builder: (context, state) => const MyTripsScreen(),
+    ),
+    GoRoute(
+      path: '/friends',
+      builder: (context, state) => const FriendsScreen(),
     ),
     GoRoute(
       path: '/profile',
