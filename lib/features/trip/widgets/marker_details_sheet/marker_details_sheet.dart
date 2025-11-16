@@ -8,7 +8,6 @@ import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_state.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_dates_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_transport_section.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_expense_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_add_image_button.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_picker.dart';
@@ -16,6 +15,7 @@ import 'package:trip_planner/features/trip/services/google_places_service.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/google_nearby_places_section.dart';
 import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_description_section.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_expenses_section.dart';
 
 class MarkerDetailsSheet extends ConsumerStatefulWidget {
   const MarkerDetailsSheet({
@@ -110,10 +110,11 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                       setState(() {});
                     },
                   ),
-                  MarkerExpenseSection(
-                    initialExpense: displayMarker.expense,
-                    onExpenseChanged: (expense) async {
-                      await _state.updateExpense(expense, setState);
+                  MarkerExpensesSection(
+                    marker: displayMarker,
+                    tripId: widget.tripId,
+                    onExpensesChanged: (expenses) async {
+                      await _state.updateExpenses(expenses, setState);
                     },
                   ),
                   MarkerDescriptionSection(
@@ -191,7 +192,7 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
       imageUrl: null,
       arrivalDateTime: null,
       departureDateTime: null,
-      expense: null,
+      expenses: null,
     );
 
     if (_state.isNewTrip) {

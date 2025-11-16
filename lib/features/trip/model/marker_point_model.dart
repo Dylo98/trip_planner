@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
 
 class MarkerPoint {
   final String id;
@@ -9,6 +10,10 @@ class MarkerPoint {
   final DateTime? arrivalDateTime;
   final DateTime? departureDateTime;
   final String? transportMode;
+
+  final List<ExpenseItem>? expenses;
+
+  @Deprecated('Użyj expenses zamiast expense')
   final double? expense;
 
   MarkerPoint({
@@ -20,8 +25,21 @@ class MarkerPoint {
     this.arrivalDateTime,
     this.departureDateTime,
     this.transportMode,
+    this.expenses,
     this.expense,
   });
+
+  double get totalExpense {
+    if (expenses == null || expenses!.isEmpty) {
+      return expense ?? 0.0;
+    }
+    return expenses!.fold(0.0, (sum, item) => sum + item.amount);
+  }
+
+  bool get hasExpenses {
+    return (expenses != null && expenses!.isNotEmpty) ||
+        (expense != null && expense! > 0);
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -36,7 +54,8 @@ class MarkerPoint {
       'arrivalDateTime': arrivalDateTime?.toIso8601String(),
       'departureDateTime': departureDateTime?.toIso8601String(),
       'transportMode': transportMode,
-      'expense': expense,
+      'expenses': expenses?.map((e) => e.toJson()).toList(),
+      if (expense != null) 'expense': expense,
     };
   }
 
@@ -45,6 +64,19 @@ class MarkerPoint {
       throw FormatException('Invalid marker data: missing required fields');
     }
     final position = json['position'] as Map<String, dynamic>;
+
+    List<ExpenseItem>? expensesList;
+    if (json['expenses'] != null) {
+      expensesList = (json['expenses'] as List)
+          .map((e) => ExpenseItem.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+
+    double? oldExpense;
+    if (json['expense'] != null) {
+      oldExpense = (json['expense'] as num).toDouble();
+    }
+
     return MarkerPoint(
       id: json['id'] as String,
       position: LatLng(
@@ -62,8 +94,8 @@ class MarkerPoint {
           ? DateTime.parse(json['departureDateTime'])
           : null,
       transportMode: json['transportMode'] as String?,
-      expense:
-          json['expense'] != null ? (json['expense'] as num).toDouble() : null,
+      expenses: expensesList,
+      expense: oldExpense,
     );
   }
 
@@ -76,6 +108,7 @@ class MarkerPoint {
     DateTime? arrivalDateTime,
     DateTime? departureDateTime,
     String? transportMode,
+    List<ExpenseItem>? expenses,
     double? expense,
   }) {
     return MarkerPoint(
@@ -87,6 +120,7 @@ class MarkerPoint {
       arrivalDateTime: arrivalDateTime ?? this.arrivalDateTime,
       departureDateTime: departureDateTime ?? this.departureDateTime,
       transportMode: transportMode ?? this.transportMode,
+      expenses: expenses ?? this.expenses,
       expense: expense ?? this.expense,
     );
   }

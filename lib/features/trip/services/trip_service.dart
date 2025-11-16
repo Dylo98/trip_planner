@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_crud_service.dart';
 import 'package:trip_planner/features/trip/services/trip_image_service.dart';
@@ -148,7 +149,20 @@ class TripService {
         transportMode: transportMode,
       );
 
-  /// Aktualizuje wydatek dla markera
+  /// Aktualizuje listę wydatków dla markera (NOWA METODA)
+  Future<void> updateMarkerExpenses({
+    required String tripId,
+    required String markerId,
+    required List<ExpenseItem> expenses,
+  }) =>
+      _markerUpdateService.updateMarkerExpenses(
+        tripId: tripId,
+        markerId: markerId,
+        expenses: expenses,
+      );
+
+  /// Aktualizuje wydatek dla markera (DEPRECATED)
+  @Deprecated('Użyj updateMarkerExpenses zamiast updateMarkerExpense')
   Future<void> updateMarkerExpense({
     required String tripId,
     required String markerId,

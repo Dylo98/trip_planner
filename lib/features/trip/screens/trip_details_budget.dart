@@ -6,6 +6,7 @@ import 'package:trip_planner/features/trip/widgets/budget/budget_empty_state.dar
 import 'package:trip_planner/features/trip/widgets/budget/budget_expense_list.dart';
 import 'package:trip_planner/features/trip/widgets/budget/budget_statistics_card.dart';
 import 'package:trip_planner/features/trip/widgets/budget/budget_summary_card.dart';
+import 'package:trip_planner/features/trip/widgets/budget/budget_payers_summary.dart';
 
 class TripDetailsBudgetScreen extends ConsumerWidget {
   final String tripId;
@@ -35,10 +36,18 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
                   BudgetSummaryCard(
                     totalExpense: statistics.totalExpense,
                     locationCount: statistics.locationCount,
+                    totalItems: statistics.totalExpenseItems,
                   ),
+                  const SizedBox(height: 24),
+                  if (statistics.payerSummaries.isNotEmpty)
+                    BudgetPayersSummary(
+                      payerSummaries: statistics.payerSummaries,
+                      totalExpense: statistics.totalExpense,
+                    ),
                   const SizedBox(height: 24),
                   BudgetExpenseList(
                     expensesByLocation: statistics.expensesByLocation,
+                    expenseItemsByLocation: statistics.expenseItemsByLocation,
                     totalExpense: statistics.totalExpense,
                   ),
                   const SizedBox(height: 24),

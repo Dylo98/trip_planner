@@ -1,4 +1,5 @@
 import 'package:trip_planner/features/trip/model/trip_model.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
 
 /// Serwis odpowiedzialny za aktualizację danych markerów
@@ -6,7 +7,7 @@ import 'package:trip_planner/features/trip/services/base_trip_service.dart';
 /// Zawiera metody do:
 /// - Aktualizacji dat przyjazdu/wyjazdu
 /// - Aktualizacji środka transportu
-/// - Aktualizacji wydatków
+/// - Aktualizacji wydatków (nowa lista wydatków)
 class MarkerUpdateService extends BaseTripService {
   MarkerUpdateService({
     required super.firestore,
@@ -108,7 +109,37 @@ class MarkerUpdateService extends BaseTripService {
     await tripRef.update({'markerPoints': markers});
   }
 
-  /// Aktualizuje wydatek dla markera
+  /// Aktualizuje listę wydatków dla markera (NOWA METODA)
+  Future<void> updateMarkerExpenses({
+    required String tripId,
+    required String markerId,
+    required List<ExpenseItem> expenses,
+  }) async {
+    requireUserId();
+
+    final tripRef = getTripRef(tripId);
+
+    final doc = await tripRef.get();
+    if (!doc.exists || doc.data() == null) {
+      throw Exception('Podróż nie istnieje');
+    }
+
+    final trip = Trip.fromJson(doc.data()!);
+
+    final updatedMarkers = trip.markerPoints.map((marker) {
+      if (marker.id == markerId) {
+        return marker.copyWith(expenses: expenses);
+      }
+      return marker;
+    }).toList();
+
+    await tripRef.update({
+      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
+    });
+  }
+
+  /// Aktualizuje wydatek dla markera (DEPRECATED - zachowane dla kompatybilności)
+  @Deprecated('Użyj updateMarkerExpenses zamiast updateMarkerExpense')
   Future<void> updateMarkerExpense({
     required String tripId,
     required String markerId,

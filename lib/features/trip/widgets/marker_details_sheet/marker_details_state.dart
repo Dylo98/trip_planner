@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
@@ -21,6 +22,7 @@ class MarkerDetailsState {
   final pickImageLock = ActionLock();
   final deleteLock = ActionLock();
   final updateDatesLock = ActionLock();
+  final updateExpensesLock = ActionLock();
 
   bool get isNewTrip => tripId == null;
 
@@ -71,26 +73,41 @@ class MarkerDetailsState {
     }
   }
 
+  Future<void> updateExpenses(
+    List<ExpenseItem> expenses,
+    Function(void Function()) setState,
+  ) async {
+    await updateExpensesLock.run(() async {
+      if (isNewTrip) {
+        final updated = _currentMarker.copyWith(expenses: expenses);
+        setState(() => _currentMarker = updated);
+        onUpdate?.call(updated);
+
+        ref.read(tripMarkersProvider.notifier).updateMarker(
+              _currentMarker.id,
+              updated,
+            );
+      } else {
+        await ref.read(tripServiceProvider).updateMarkerExpenses(
+              tripId: tripId!,
+              markerId: _currentMarker.id,
+              expenses: expenses,
+            );
+      }
+    });
+  }
+
+  @Deprecated('Użyj updateExpenses zamiast updateExpense')
   Future<void> updateExpense(
     double expense,
     Function(void Function()) setState,
   ) async {
-    if (isNewTrip) {
-      final updated = _currentMarker.copyWith(expense: expense);
-      setState(() => _currentMarker = updated);
-      onUpdate?.call(updated);
-
-      ref.read(tripMarkersProvider.notifier).updateMarker(
-            _currentMarker.id,
-            updated,
-          );
-    } else {
-      await ref.read(tripServiceProvider).updateMarkerExpense(
-            tripId: tripId!,
-            markerId: _currentMarker.id,
-            expense: expense,
-          );
-    }
+    final expenseItem = ExpenseItem(
+      id: '${_currentMarker.id}_default',
+      title: 'Wydatek',
+      amount: expense,
+    );
+    await updateExpenses([expenseItem], setState);
   }
 
   Future<void> updateDescription(

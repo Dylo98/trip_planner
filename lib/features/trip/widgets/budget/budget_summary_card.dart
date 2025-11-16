@@ -5,10 +5,12 @@ class BudgetSummaryCard extends StatelessWidget {
     super.key,
     required this.totalExpense,
     required this.locationCount,
+    this.totalItems,
   });
 
   final double totalExpense;
   final int locationCount;
+  final int? totalItems;
 
   String _getPlaceWord(int count) {
     if (count == 1) return 'miejsca';
@@ -18,6 +20,16 @@ class BudgetSummaryCard extends StatelessWidget {
       return 'miejsca';
     }
     return 'miejsc';
+  }
+
+  String _getItemWord(int count) {
+    if (count == 1) return 'wydatek';
+    if (count % 10 >= 2 &&
+        count % 10 <= 4 &&
+        (count % 100 < 10 || count % 100 >= 20)) {
+      return 'wydatki';
+    }
+    return 'wydatków';
   }
 
   @override
@@ -47,13 +59,22 @@ class BudgetSummaryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Na podstawie $locationCount ${_getPlaceWord(locationCount)}',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black54,
+            if (totalItems != null && totalItems! > 0)
+              Text(
+                '$totalItems ${_getItemWord(totalItems!)} w $locationCount ${_getPlaceWord(locationCount)}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              )
+            else
+              Text(
+                'Na podstawie $locationCount ${_getPlaceWord(locationCount)}',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
               ),
-            ),
           ],
         ),
       ),
