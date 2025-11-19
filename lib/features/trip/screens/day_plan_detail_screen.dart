@@ -140,6 +140,7 @@ class _DayPlanDetailScreenState extends ConsumerState<DayPlanDetailScreen> {
               return DayPlanItemCard(
                 key: ValueKey(item.id),
                 item: item,
+                tripId: widget.tripId,
                 onTap: () => _editItem(item),
                 onDelete: () => _deleteItem(item),
               );

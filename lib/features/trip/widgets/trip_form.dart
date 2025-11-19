@@ -87,7 +87,7 @@ class _TripFormState extends ConsumerState<TripForm> {
           ),
           const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(8),
@@ -153,17 +153,16 @@ class _TripFormState extends ConsumerState<TripForm> {
           ),
           const SizedBox(height: 20),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: _selectedTripType == TripType.planned ? 120 : 80,
+            padding: const EdgeInsets.all(16),
             width: double.infinity,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(height: 5),
-                Text(
+                const Text(
                   'Data podróży',
                   style: TextStyle(
                     fontSize: 16,
@@ -171,15 +170,100 @@ class _TripFormState extends ConsumerState<TripForm> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                Divider(
+                const Divider(
                   color: Colors.grey,
                   thickness: 1,
                 ),
-                if (_selectedTripType == TripType.planned)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextFormField(
+                const SizedBox(height: 8),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: 65,
+                  ),
+                  child: _selectedTripType == TripType.planned
+                      ? Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                controller: _startDateController,
+                                decoration: AppInputStyle.inputDecoration(
+                                  icon: Icons.calendar_today,
+                                  labelText: 'Data rozpoczęcia',
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Wymagane';
+                                  }
+                                  return null;
+                                },
+                                onTap: () async {
+                                  FocusScope.of(context)
+                                      .requestFocus(FocusNode());
+                                  await _uiLock.run(() async {
+                                    final pickedDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(2100),
+                                    );
+                                    if (pickedDate != null) {
+                                      setState(() {
+                                        _startDateController.text =
+                                            DateFormat('yyyy.MM.dd')
+                                                .format(pickedDate);
+                                      });
+                                      ref
+                                          .read(tripFormProvider.notifier)
+                                          .setStartDate(pickedDate);
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8),
+                              child: Icon(Icons.arrow_right_alt_outlined),
+                            ),
+                            Expanded(
+                              child: TextFormField(
+                                controller: _endDateController,
+                                decoration: AppInputStyle.inputDecoration(
+                                  icon: Icons.calendar_today,
+                                  labelText: 'Data zakończenia',
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Wymagane';
+                                  }
+                                  return null;
+                                },
+                                onTap: () async {
+                                  FocusScope.of(context)
+                                      .requestFocus(FocusNode());
+                                  await _uiLock.run(() async {
+                                    final pickedDate = await showDatePicker(
+                                      context: context,
+                                      initialDate: DateTime.now(),
+                                      firstDate: DateTime(2000),
+                                      lastDate: DateTime(2100),
+                                    );
+
+                                    if (pickedDate != null) {
+                                      setState(() {
+                                        _endDateController.text =
+                                            DateFormat('yyyy.MM.dd')
+                                                .format(pickedDate);
+                                      });
+                                      ref
+                                          .read(tripFormProvider.notifier)
+                                          .setEndDate(pickedDate);
+                                    }
+                                  });
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                      : TextFormField(
                           controller: _startDateController,
                           decoration: AppInputStyle.inputDecoration(
                             icon: Icons.calendar_today,
@@ -187,7 +271,7 @@ class _TripFormState extends ConsumerState<TripForm> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Wymagane';
+                              return 'Data rozpoczęcia jest wymagana';
                             }
                             return null;
                           },
@@ -213,81 +297,7 @@ class _TripFormState extends ConsumerState<TripForm> {
                             });
                           },
                         ),
-                      ),
-                      Icon(Icons.arrow_right_alt_outlined),
-                      Expanded(
-                        child: TextFormField(
-                          controller: _endDateController,
-                          decoration: AppInputStyle.inputDecoration(
-                            icon: Icons.calendar_today,
-                            labelText: 'Data zakończenia',
-                          ),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Wymagane';
-                            }
-                            return null;
-                          },
-                          onTap: () async {
-                            FocusScope.of(context).requestFocus(FocusNode());
-                            await _uiLock.run(() async {
-                              final pickedDate = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime(2000),
-                                lastDate: DateTime(2100),
-                              );
-
-                              if (pickedDate != null) {
-                                setState(() {
-                                  _endDateController.text =
-                                      DateFormat('yyyy.MM.dd')
-                                          .format(pickedDate);
-                                });
-                                ref
-                                    .read(tripFormProvider.notifier)
-                                    .setEndDate(pickedDate);
-                              }
-                            });
-                          },
-                        ),
-                      ),
-                    ],
-                  )
-                else
-                  TextFormField(
-                    controller: _startDateController,
-                    decoration: AppInputStyle.inputDecoration(
-                      icon: Icons.calendar_today,
-                      labelText: 'Data rozpoczęcia',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Data rozpoczęcia jest wymagana';
-                      }
-                      return null;
-                    },
-                    onTap: () async {
-                      FocusScope.of(context).requestFocus(FocusNode());
-                      await _uiLock.run(() async {
-                        final pickedDate = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(2000),
-                          lastDate: DateTime(2100),
-                        );
-                        if (pickedDate != null) {
-                          setState(() {
-                            _startDateController.text =
-                                DateFormat('yyyy.MM.dd').format(pickedDate);
-                          });
-                          ref
-                              .read(tripFormProvider.notifier)
-                              .setStartDate(pickedDate);
-                        }
-                      });
-                    },
-                  ),
+                ),
               ],
             ),
           ),

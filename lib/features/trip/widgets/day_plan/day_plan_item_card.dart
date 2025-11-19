@@ -1,20 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 
-class DayPlanItemCard extends StatelessWidget {
+class DayPlanItemCard extends ConsumerWidget {
   final DayPlanItem item;
   final VoidCallback onTap;
   final VoidCallback onDelete;
+  final String tripId;
 
   const DayPlanItemCard({
     super.key,
     required this.item,
     required this.onTap,
     required this.onDelete,
+    required this.tripId,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Dismissible(
@@ -83,7 +87,7 @@ class DayPlanItemCard extends StatelessWidget {
                   _buildTimeColumn(),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: _buildContentColumn(),
+                    child: _buildContentColumn(ref),
                   ),
                   _buildTrailingIcon(),
                 ],
@@ -134,7 +138,7 @@ class DayPlanItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildContentColumn() {
+  Widget _buildContentColumn(WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -155,6 +159,10 @@ class DayPlanItemCard extends StatelessWidget {
             ),
           ],
         ),
+        if (item.markerId != null) ...[
+          const SizedBox(height: 6),
+          _buildLocationInfo(ref),
+        ],
         if (item.description != null && item.description!.isNotEmpty) ...[
           const SizedBox(height: 6),
           Text(
@@ -179,6 +187,67 @@ class DayPlanItemCard extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildLocationInfo(WidgetRef ref) {
+    final tripAsync = ref.watch(watchTripProvider(tripId));
+
+    return tripAsync.when(
+      data: (trip) {
+        final marker = trip.markerPoints.firstWhere(
+          (m) => m.id == item.markerId,
+          orElse: () => null as dynamic,
+        );
+
+        if (marker == null) {
+          return const SizedBox.shrink();
+        }
+
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          decoration: BoxDecoration(
+            color: item.type == DayPlanItemType.marker
+                ? Colors.blue.shade50
+                : Colors.green.shade50,
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: item.type == DayPlanItemType.marker
+                  ? Colors.blue.shade200
+                  : Colors.green.shade200,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.location_on,
+                size: 14,
+                color: item.type == DayPlanItemType.marker
+                    ? Colors.blue.shade700
+                    : Colors.green.shade700,
+              ),
+              const SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  marker.name ?? 'Bez nazwy',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: item.type == DayPlanItemType.marker
+                        ? Colors.blue.shade900
+                        : Colors.green.shade900,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 

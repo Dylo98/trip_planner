@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uuid/uuid.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
@@ -603,6 +604,17 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
       );
     }
 
+    String? finalMarkerId;
+    LatLng? finalLocation;
+
+    if (isMarkerTab && _selectedMarker != null) {
+      finalMarkerId = _selectedMarker!.id;
+      finalLocation = _selectedMarker!.position;
+    } else if (!isMarkerTab && _selectedLocationMarker != null) {
+      finalMarkerId = _selectedLocationMarker!.id;
+      finalLocation = _selectedLocationMarker!.position;
+    }
+
     final item = DayPlanItem(
       id: _isEditing ? widget.editItem!.id : const Uuid().v4(),
       type: isMarkerTab ? DayPlanItemType.marker : DayPlanItemType.custom,
@@ -612,10 +624,8 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
       description: _descriptionController.text.trim().isEmpty
           ? null
           : _descriptionController.text.trim(),
-      markerId: isMarkerTab ? _selectedMarker?.id : _selectedLocationMarker?.id,
-      location: isMarkerTab
-          ? _selectedMarker?.position
-          : _selectedLocationMarker?.position,
+      markerId: finalMarkerId,
+      location: finalLocation,
       icon: _selectedIcon,
       order: _isEditing ? widget.editItem!.order : 0,
     );

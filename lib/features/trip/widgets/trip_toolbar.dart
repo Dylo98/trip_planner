@@ -76,6 +76,9 @@ class SortOptionsBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 20),
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.7,
+      ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -87,19 +90,24 @@ class SortOptionsBottomSheet extends StatelessWidget {
             ),
           ),
           const Divider(height: 20),
-          ...SortOption.values.map((option) {
-            return ListTile(
-              leading: Icon(TripSortingHelper.getSortIcon(option)),
-              title: Text(TripSortingHelper.getSortLabel(option)),
-              trailing: selectedSort == option
-                  ? const Icon(Icons.check, color: Colors.blue)
-                  : null,
-              onTap: () {
-                onSortSelected(option);
-                Navigator.pop(context);
-              },
-            );
-          }),
+          Flexible(
+            child: ListView(
+              shrinkWrap: true,
+              children: SortOption.values.map((option) {
+                return ListTile(
+                  leading: Icon(TripSortingHelper.getSortIcon(option)),
+                  title: Text(TripSortingHelper.getSortLabel(option)),
+                  trailing: selectedSort == option
+                      ? const Icon(Icons.check, color: Colors.blue)
+                      : null,
+                  onTap: () {
+                    onSortSelected(option);
+                    Navigator.pop(context);
+                  },
+                );
+              }).toList(),
+            ),
+          ),
         ],
       ),
     );
