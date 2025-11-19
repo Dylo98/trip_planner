@@ -78,6 +78,12 @@ class AppDrawer extends ConsumerWidget {
           },
         ),
         const DrawerMenuItem(
+          icon: Icons.bar_chart,
+          iconColor: Colors.deepOrange,
+          title: 'Statystyki',
+          route: '/statistics',
+        ),
+        const DrawerMenuItem(
           icon: Icons.person,
           iconColor: Colors.pink,
           title: 'Profil',
