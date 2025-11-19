@@ -7,10 +7,7 @@ class MarkerPoint {
   final String? name;
   final String? description;
   final List<String>? imageUrl;
-  final DateTime? arrivalDateTime;
-  final DateTime? departureDateTime;
   final String? transportMode;
-
   final List<ExpenseItem>? expenses;
 
   @Deprecated('Użyj expenses zamiast expense')
@@ -22,8 +19,6 @@ class MarkerPoint {
     this.name,
     this.description,
     this.imageUrl,
-    this.arrivalDateTime,
-    this.departureDateTime,
     this.transportMode,
     this.expenses,
     this.expense,
@@ -51,8 +46,6 @@ class MarkerPoint {
       'name': name,
       'description': description,
       'imageUrl': imageUrl,
-      'arrivalDateTime': arrivalDateTime?.toIso8601String(),
-      'departureDateTime': departureDateTime?.toIso8601String(),
       'transportMode': transportMode,
       'expenses': expenses?.map((e) => e.toJson()).toList(),
       if (expense != null) 'expense': expense,
@@ -87,12 +80,6 @@ class MarkerPoint {
       description: json['description'] as String?,
       imageUrl:
           json['imageUrl'] != null ? List<String>.from(json['imageUrl']) : null,
-      arrivalDateTime: json['arrivalDateTime'] != null
-          ? DateTime.parse(json['arrivalDateTime'])
-          : null,
-      departureDateTime: json['departureDateTime'] != null
-          ? DateTime.parse(json['departureDateTime'])
-          : null,
       transportMode: json['transportMode'] as String?,
       expenses: expensesList,
       expense: oldExpense,
@@ -105,8 +92,6 @@ class MarkerPoint {
     String? name,
     String? description,
     List<String>? imageUrl,
-    DateTime? arrivalDateTime,
-    DateTime? departureDateTime,
     String? transportMode,
     List<ExpenseItem>? expenses,
     double? expense,
@@ -117,8 +102,6 @@ class MarkerPoint {
       name: name ?? this.name,
       description: description ?? this.description,
       imageUrl: imageUrl ?? this.imageUrl,
-      arrivalDateTime: arrivalDateTime ?? this.arrivalDateTime,
-      departureDateTime: departureDateTime ?? this.departureDateTime,
       transportMode: transportMode ?? this.transportMode,
       expenses: expenses ?? this.expenses,
       expense: expense ?? this.expense,

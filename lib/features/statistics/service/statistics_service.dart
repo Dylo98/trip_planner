@@ -117,7 +117,6 @@ class StatisticsService {
         placeName: placeName,
         latitude: marker.position.latitude,
         longitude: marker.position.longitude,
-        visitDate: marker.arrivalDateTime,
       );
 
       if (!placesByCountry.containsKey(country)) {

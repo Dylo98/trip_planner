@@ -123,20 +123,6 @@ class TripService {
   // MARKERY – AKTUALIZACJA
   // =============================
 
-  /// Aktualizuje daty przyjazdu i wyjazdu dla markera
-  Future<void> updateMarkerDates({
-    required String tripId,
-    required String markerId,
-    required DateTime arrival,
-    required DateTime departure,
-  }) =>
-      _markerUpdateService.updateMarkerDates(
-        tripId: tripId,
-        markerId: markerId,
-        arrival: arrival,
-        departure: departure,
-      );
-
   /// Aktualizuje środek transportu dla markera
   Future<void> updateMarkerTransportMode({
     required String tripId,
@@ -190,8 +176,6 @@ class TripService {
         tripId: tripId,
         markerId: markerId,
         image: image,
-        arrival: arrival,
-        departure: departure,
       );
 
   /// Usuwa zdjęcie markera z Firebase Storage

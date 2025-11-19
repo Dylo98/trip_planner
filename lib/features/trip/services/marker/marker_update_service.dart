@@ -15,39 +15,6 @@ class MarkerUpdateService extends BaseTripService {
     required super.storage,
   });
 
-  /// Aktualizuje daty przyjazdu i wyjazdu dla markera
-  Future<void> updateMarkerDates({
-    required String tripId,
-    required String markerId,
-    required DateTime arrival,
-    required DateTime departure,
-  }) async {
-    requireUserId();
-
-    final tripRef = getTripRef(tripId);
-
-    final doc = await tripRef.get();
-    if (!doc.exists || doc.data() == null) {
-      throw Exception('Podróż nie istnieje');
-    }
-
-    final trip = Trip.fromJson(doc.data()!);
-
-    final updatedMarkers = trip.markerPoints.map((marker) {
-      if (marker.id == markerId) {
-        return marker.copyWith(
-          arrivalDateTime: arrival,
-          departureDateTime: departure,
-        );
-      }
-      return marker;
-    }).toList();
-
-    await tripRef.update({
-      'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
-    });
-  }
-
   /// Aktualizuje środek transportu dla markera
   Future<void> updateMarkerTransportMode({
     required String tripId,

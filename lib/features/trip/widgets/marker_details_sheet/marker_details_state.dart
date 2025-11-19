@@ -16,12 +16,9 @@ class MarkerDetailsState {
   final void Function(MarkerPoint)? onUpdate;
 
   MarkerPoint _currentMarker;
-  DateTime? arrivalDateTime;
-  DateTime? departureDateTime;
 
   final pickImageLock = ActionLock();
   final deleteLock = ActionLock();
-  final updateDatesLock = ActionLock();
   final updateExpensesLock = ActionLock();
 
   bool get isNewTrip => tripId == null;
@@ -32,46 +29,9 @@ class MarkerDetailsState {
     required this.marker,
     this.tripId,
     this.onUpdate,
-  })  : _currentMarker = marker,
-        arrivalDateTime = marker.arrivalDateTime,
-        departureDateTime = marker.departureDateTime;
+  }) : _currentMarker = marker;
 
   MarkerPoint get currentMarker => _currentMarker;
-
-  Future<void> updateMarkerDates({
-    required DateTime arrival,
-    required DateTime departure,
-    required Function(void Function()) setState,
-  }) async {
-    if (isNewTrip) {
-      final updated = _currentMarker.copyWith(
-        arrivalDateTime: arrival,
-        departureDateTime: departure,
-      );
-      setState(() {
-        _currentMarker = updated;
-        arrivalDateTime = arrival;
-        departureDateTime = departure;
-      });
-      onUpdate?.call(updated);
-
-      ref.read(tripMarkersProvider.notifier).updateMarker(
-            _currentMarker.id,
-            updated,
-          );
-    } else {
-      await ref.read(tripServiceProvider).updateMarkerDates(
-            tripId: tripId!,
-            markerId: _currentMarker.id,
-            arrival: arrival,
-            departure: departure,
-          );
-      setState(() {
-        arrivalDateTime = arrival;
-        departureDateTime = departure;
-      });
-    }
-  }
 
   Future<void> updateExpenses(
     List<ExpenseItem> expenses,
@@ -158,8 +118,6 @@ class MarkerDetailsState {
               tripId: tripId!,
               markerId: _currentMarker.id,
               image: file,
-              arrival: arrivalDateTime,
-              departure: departureDateTime,
             );
       }
     });

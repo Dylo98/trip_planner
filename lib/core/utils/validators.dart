@@ -1,3 +1,5 @@
+import 'package:trip_planner/features/trip/model/trip_model.dart';
+
 class Validators {
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -110,5 +112,72 @@ class Validators {
       return '$fieldName jest wymagane';
     }
     return null;
+  }
+
+  static String? validateTripDatesWithConflicts({
+    required DateTime? startDate,
+    required DateTime? endDate,
+    required List<Trip> existingTrips,
+    String? currentTripId,
+  }) {
+    final basicError = validateTripDates(
+      startDate: startDate,
+      endDate: endDate,
+    );
+    if (basicError != null) return basicError;
+
+    if (startDate == null) return 'Data rozpoczęcia jest wymagana';
+
+    final ongoingTrips = existingTrips.where((trip) {
+      return trip.id != currentTripId &&
+          trip.tripType == TripType.ongoing &&
+          trip.status == TripStatus.ongoing;
+    }).toList();
+
+    if (endDate == null) {
+      if (ongoingTrips.isNotEmpty) {
+        return 'Możesz mieć tylko jedną trwającą podróż. Zakończ obecną podróż "${ongoingTrips.first.name}" przed utworzeniem nowej.';
+      }
+
+      final now = DateTime.now();
+      final thirtyDaysFromNow = now.add(const Duration(days: 30));
+
+      final conflictingPlanned = existingTrips.where((trip) {
+        if (trip.id == currentTripId) return false;
+        if (trip.startDate == null) return false;
+
+        return trip.startDate!.isAfter(now) &&
+            trip.startDate!.isBefore(thirtyDaysFromNow);
+      }).toList();
+
+      if (conflictingPlanned.isNotEmpty) {
+        return 'Masz zaplanowaną podróż "${conflictingPlanned.first.name}" w ciągu 30 dni. Zakończ bieżącą podróż lub przesuń datę zaplanowanej.';
+      }
+    } else {
+      final conflictingTrips = existingTrips.where((trip) {
+        if (trip.id == currentTripId) return false;
+        if (trip.startDate == null) return false;
+
+        final tripStart = trip.startDate!;
+        final tripEnd = trip.endDate ?? tripStart;
+
+        final overlaps = (startDate.isBefore(tripEnd) ||
+                startDate.isAtSameMomentAs(tripEnd)) &&
+            (endDate.isAfter(tripStart) || endDate.isAtSameMomentAs(tripStart));
+
+        return overlaps;
+      }).toList();
+
+      if (conflictingTrips.isNotEmpty) {
+        final conflicting = conflictingTrips.first;
+        return 'Podróż nakłada się z "${conflicting.name}" (${_formatDate(conflicting.startDate!)} - ${_formatDate(conflicting.endDate ?? conflicting.startDate!)})';
+      }
+    }
+
+    return null;
+  }
+
+  static String _formatDate(DateTime date) {
+    return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
 }

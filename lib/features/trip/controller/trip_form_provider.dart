@@ -16,6 +16,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
           imageUrl: [],
           tripPhotoUrl: null,
           markerPoints: [],
+          tripType: TripType.planned,
         ));
 
   final TripService _tripService;
@@ -44,6 +45,13 @@ class TripFormNotifier extends StateNotifier<Trip> {
     state = state.copyWith(tripPhotoUrl: tripPhotoUrl);
   }
 
+  void setTripType(TripType tripType) {
+    state = state.copyWith(tripType: tripType);
+    if (tripType == TripType.ongoing) {
+      state = state.copyWith(endDate: null);
+    }
+  }
+
   Future<void> save(File? image, List<MarkerPoint> markers) async {
     if (state.name.trim().isEmpty) {
       throw Exception('Nazwa podróży jest wymagana');
@@ -51,6 +59,10 @@ class TripFormNotifier extends StateNotifier<Trip> {
 
     if (state.startDate == null) {
       throw Exception('Data rozpoczęcia jest wymagana');
+    }
+
+    if (state.tripType == TripType.planned && state.endDate == null) {
+      throw Exception('Zaplanowana podróż musi mieć datę zakończenia');
     }
 
     if (state.endDate != null && state.endDate!.isBefore(state.startDate!)) {
@@ -69,6 +81,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
       startDate: state.startDate,
       markerPoints: markers,
       tripPhotoUrl: tripPhotoUrl,
+      tripType: state.tripType,
     );
 
     await _tripService.saveTrip(trip);
@@ -82,6 +95,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
       imageUrl: [],
       tripPhotoUrl: null,
       markerPoints: [],
+      tripType: TripType.planned,
     );
   }
 }

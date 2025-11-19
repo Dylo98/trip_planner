@@ -10,6 +10,7 @@ import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
+import 'package:trip_planner/features/trip/model/trip_model.dart';
 
 class TripForm extends ConsumerStatefulWidget {
   const TripForm({super.key, required this.formKey});
@@ -27,6 +28,7 @@ class _TripFormState extends ConsumerState<TripForm> {
   final TextEditingController _endDateController = TextEditingController();
   final _saveDebouncer = Debouncer(milliseconds: 350);
   final _uiLock = ActionLock();
+  TripType _selectedTripType = TripType.planned;
 
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
@@ -85,8 +87,74 @@ class _TripFormState extends ConsumerState<TripForm> {
           ),
           const SizedBox(height: 20),
           Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Typ podróży',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: RadioListTile<TripType>(
+                        title: const Text('Zaplanowana'),
+                        subtitle: const Text('Z datą końcową'),
+                        value: TripType.planned,
+                        groupValue: _selectedTripType,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedTripType = value!;
+                            ref
+                                .read(tripFormProvider.notifier)
+                                .setTripType(value);
+                            if (value == TripType.ongoing) {
+                              _endDateController.clear();
+                              ref
+                                  .read(tripFormProvider.notifier)
+                                  .setEndDate(null);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    Expanded(
+                      child: RadioListTile<TripType>(
+                        title: const Text('Trwająca'),
+                        subtitle: const Text('Na bieżąco'),
+                        value: TripType.ongoing,
+                        groupValue: _selectedTripType,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedTripType = value!;
+                            if (value == TripType.ongoing) {
+                              _endDateController.clear();
+                              ref
+                                  .read(tripFormProvider.notifier)
+                                  .setEndDate(null);
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            height: 120,
+            height: _selectedTripType == TripType.planned ? 120 : 80,
             width: double.infinity,
             decoration: BoxDecoration(
               border: Border.all(color: Colors.grey),
@@ -107,70 +175,119 @@ class _TripFormState extends ConsumerState<TripForm> {
                   color: Colors.grey,
                   thickness: 1,
                 ),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _startDateController,
-                        decoration: AppInputStyle.inputDecoration(
-                          icon: Icons.calendar_today,
-                          labelText: 'Data rozpoczęcia',
-                        ),
-                        onTap: () async {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          await _uiLock.run(() async {
-                            final pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              setState(() {
-                                _startDateController.text =
-                                    DateFormat('yyyy.MM.dd').format(pickedDate);
-                              });
-                              ref
-                                  .read(tripFormProvider.notifier)
-                                  .setStartDate(pickedDate);
+                if (_selectedTripType == TripType.planned)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _startDateController,
+                          decoration: AppInputStyle.inputDecoration(
+                            icon: Icons.calendar_today,
+                            labelText: 'Data rozpoczęcia',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Wymagane';
                             }
-                          });
-                        },
-                      ),
-                    ),
-                    Icon(Icons.arrow_right_alt_outlined),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _endDateController,
-                        decoration: AppInputStyle.inputDecoration(
-                          icon: Icons.calendar_today,
-                          labelText: 'Data zakończenia',
+                            return null;
+                          },
+                          onTap: () async {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            await _uiLock.run(() async {
+                              final pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
+                              if (pickedDate != null) {
+                                setState(() {
+                                  _startDateController.text =
+                                      DateFormat('yyyy.MM.dd')
+                                          .format(pickedDate);
+                                });
+                                ref
+                                    .read(tripFormProvider.notifier)
+                                    .setStartDate(pickedDate);
+                              }
+                            });
+                          },
                         ),
-                        onTap: () async {
-                          FocusScope.of(context).requestFocus(FocusNode());
-                          await _uiLock.run(() async {
-                            final pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime(2100),
-                            );
+                      ),
+                      Icon(Icons.arrow_right_alt_outlined),
+                      Expanded(
+                        child: TextFormField(
+                          controller: _endDateController,
+                          decoration: AppInputStyle.inputDecoration(
+                            icon: Icons.calendar_today,
+                            labelText: 'Data zakończenia',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Wymagane';
+                            }
+                            return null;
+                          },
+                          onTap: () async {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            await _uiLock.run(() async {
+                              final pickedDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime(2100),
+                              );
 
-                            if (pickedDate != null) {
-                              setState(() {
-                                _endDateController.text =
-                                    DateFormat('yyyy.MM.dd').format(pickedDate);
-                              });
-                              ref
-                                  .read(tripFormProvider.notifier)
-                                  .setEndDate(pickedDate);
-                            }
-                          });
-                        },
+                              if (pickedDate != null) {
+                                setState(() {
+                                  _endDateController.text =
+                                      DateFormat('yyyy.MM.dd')
+                                          .format(pickedDate);
+                                });
+                                ref
+                                    .read(tripFormProvider.notifier)
+                                    .setEndDate(pickedDate);
+                              }
+                            });
+                          },
+                        ),
                       ),
+                    ],
+                  )
+                else
+                  TextFormField(
+                    controller: _startDateController,
+                    decoration: AppInputStyle.inputDecoration(
+                      icon: Icons.calendar_today,
+                      labelText: 'Data rozpoczęcia',
                     ),
-                  ],
-                ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Data rozpoczęcia jest wymagana';
+                      }
+                      return null;
+                    },
+                    onTap: () async {
+                      FocusScope.of(context).requestFocus(FocusNode());
+                      await _uiLock.run(() async {
+                        final pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now(),
+                          firstDate: DateTime(2000),
+                          lastDate: DateTime(2100),
+                        );
+                        if (pickedDate != null) {
+                          setState(() {
+                            _startDateController.text =
+                                DateFormat('yyyy.MM.dd').format(pickedDate);
+                          });
+                          ref
+                              .read(tripFormProvider.notifier)
+                              .setStartDate(pickedDate);
+                        }
+                      });
+                    },
+                  ),
               ],
             ),
           ),

@@ -5,6 +5,7 @@ import 'package:trip_planner/features/trip/screens/trip_details.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_map.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_timeline.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_budget.dart';
+import 'package:trip_planner/features/trip/screens/trip_details_day_plan.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/friends/widgets/share_trip_dialog.dart';
 import 'package:trip_planner/features/friends/widgets/manage_shared_members_dialog.dart';
@@ -32,6 +33,9 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
         tripId: widget.trip.id,
       ),
       TripDetailsTimelineScreen(
+        tripId: widget.trip.id,
+      ),
+      TripDetailsDayPlanScreen(
         tripId: widget.trip.id,
       ),
       TripDetailsBudgetScreen(
@@ -193,6 +197,8 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
         currentIndex: _selectedIndex,
         onTap: _onTabSelected,
         type: BottomNavigationBarType.fixed,
+        selectedFontSize: 12,
+        unselectedFontSize: 11,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
@@ -205,6 +211,10 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.timeline),
             label: 'Oś czasu',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Plan',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),

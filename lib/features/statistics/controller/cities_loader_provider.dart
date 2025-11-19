@@ -92,7 +92,6 @@ class CitiesLoaderNotifier extends StateNotifier<CitiesLoaderState> {
             cityName: cityName,
             latitude: marker.position.latitude,
             longitude: marker.position.longitude,
-            visitDate: marker.arrivalDateTime,
           );
 
           if (!citiesByCountry.containsKey(country)) {

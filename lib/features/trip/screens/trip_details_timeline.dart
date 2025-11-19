@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
@@ -372,66 +371,6 @@ class _CenteredTimelineTile extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactDates() {
-    final dateFormat = DateFormat('dd MMM, HH:mm');
-
-    return Container(
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        color: Colors.blue.shade50.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: Colors.blue.shade100,
-        ),
-      ),
-      child: Column(
-        children: [
-          if (marker.arrivalDateTime != null)
-            Row(
-              children: [
-                Icon(
-                  Icons.arrow_downward,
-                  size: 16,
-                  color: Colors.blue.shade700,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  dateFormat.format(marker.arrivalDateTime!),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          if (marker.arrivalDateTime != null &&
-              marker.departureDateTime != null)
-            const SizedBox(height: 6),
-          if (marker.departureDateTime != null)
-            Row(
-              children: [
-                Icon(
-                  Icons.arrow_upward,
-                  size: 16,
-                  color: Colors.orange.shade700,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  dateFormat.format(marker.departureDateTime!),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[800],
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-        ],
-      ),
-    );
-  }
-
   Color _getGradientColor(int idx) {
     final colors = [
       Colors.purple,
@@ -465,27 +404,6 @@ class _CenteredTimelineTile extends StatelessWidget {
         return Icons.directions_boat;
       default:
         return Icons.location_on;
-    }
-  }
-
-  String _getTransportLabel(String mode) {
-    switch (mode.toLowerCase()) {
-      case 'car':
-        return 'Samochodem';
-      case 'bus':
-        return 'Autobusem';
-      case 'train':
-        return 'Pociągiem';
-      case 'plane':
-        return 'Samolotem';
-      case 'walk':
-        return 'Pieszo';
-      case 'bike':
-        return 'Rowerem';
-      case 'boat':
-        return 'Łodzią';
-      default:
-        return 'Inny';
     }
   }
 

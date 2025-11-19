@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
-import 'package:trip_planner/features/friends/service/friend_service.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 

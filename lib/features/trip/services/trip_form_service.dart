@@ -5,6 +5,7 @@ import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
+import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
 
 class TripFormService {
   final WidgetRef ref;
@@ -17,9 +18,13 @@ class TripFormService {
 
     final tripState = ref.read(tripFormProvider);
 
-    final dateError = Validators.validateTripDates(
+    final existingTrips = ref.read(getTripProvider).value ?? [];
+
+    final dateError = Validators.validateTripDatesWithConflicts(
       startDate: tripState.startDate,
       endDate: tripState.endDate,
+      existingTrips: existingTrips,
+      currentTripId: null,
     );
 
     if (dateError != null) {
@@ -30,16 +35,25 @@ class TripFormService {
     final image = ref.read(tripPhotoProvider);
     final markers = ref.read(tripMarkersProvider);
 
-    await ref.read(tripFormProvider.notifier).save(image, markers);
-    ref.read(tripMarkersProvider.notifier).clear();
-    ref.read(tripPhotoProvider.notifier).state = null;
+    try {
+      await ref.read(tripFormProvider.notifier).save(image, markers);
+      ref.read(tripMarkersProvider.notifier).clear();
+      ref.read(tripPhotoProvider.notifier).state = null;
 
-    if (context.mounted) {
-      AppNotifications.showSuccess(
-        context: context,
-        message: 'Podróż została zapisana',
-      );
-      Navigator.of(context).pop();
+      if (context.mounted) {
+        AppNotifications.showSuccess(
+          context: context,
+          message: 'Podróż została zapisana',
+        );
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppNotifications.showError(
+          context: context,
+          message: e.toString(),
+        );
+      }
     }
   }
 }

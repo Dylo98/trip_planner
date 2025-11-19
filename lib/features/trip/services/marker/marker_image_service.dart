@@ -23,8 +23,6 @@ class MarkerImageService extends BaseTripService {
     required String tripId,
     required String markerId,
     required File image,
-    DateTime? arrival,
-    DateTime? departure,
   }) async {
     final uid = requireUserId();
     final imageUrl = await _uploadMarkerImage(
@@ -53,8 +51,6 @@ class MarkerImageService extends BaseTripService {
           ..add(imageUrl);
         return marker.copyWith(
           imageUrl: updatedUrls,
-          arrivalDateTime: arrival ?? marker.arrivalDateTime,
-          departureDateTime: departure ?? marker.departureDateTime,
         );
       }
       return marker;

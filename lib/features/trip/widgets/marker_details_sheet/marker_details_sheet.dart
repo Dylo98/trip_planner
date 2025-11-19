@@ -6,7 +6,6 @@ import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_state.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_dates_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_transport_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_add_image_button.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_image_carousel.dart';
@@ -99,11 +98,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  MarkerDatesSection(
-                    state: _state,
-                    onDatesUpdated: () => setState(() {}),
-                  ),
-                  const Divider(height: 32),
                   MarkerTransportSection(
                     transportMode: displayMarker.transportMode,
                     onTransportChanged: (mode) async {
@@ -190,8 +184,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
       description: place.vicinity,
       transportMode: transport,
       imageUrl: null,
-      arrivalDateTime: null,
-      departureDateTime: null,
       expenses: null,
     );
 

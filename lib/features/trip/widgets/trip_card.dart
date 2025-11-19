@@ -141,59 +141,101 @@ class TripCard extends ConsumerWidget {
                         ),
                         borderRadius: BorderRadius.circular(30),
                       ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                      child: Stack(
                         children: [
-                          Text(
-                            tripName,
-                            style: GoogleFonts.bebasNeue().copyWith(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            formattedStartDate,
-                            style: GoogleFonts.bebasNeue().copyWith(
-                              color: const Color(0xFFB9F90B),
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          if (totalBudget > 0) ...[
-                            const SizedBox(height: 8),
-                            Container(
+                          Positioned(
+                            top: 12,
+                            left: 12,
+                            child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
+                                horizontal: 10,
+                                vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.blue.withValues(alpha: 0.8),
+                                color: _getStatusColor(trip.status),
                                 borderRadius: BorderRadius.circular(20),
+                                border:
+                                    Border.all(color: Colors.white, width: 2),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(
-                                    Icons.account_balance_wallet,
+                                  Icon(
+                                    _getStatusIcon(trip.status),
                                     color: Colors.white,
                                     size: 14,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    '${totalBudget.toStringAsFixed(2)} PLN',
+                                    _getStatusLabel(trip.status),
                                     style: const TextStyle(
                                       color: Colors.white,
-                                      fontSize: 12,
+                                      fontSize: 11,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
+                          ),
+
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  tripName,
+                                  style: GoogleFonts.bebasNeue().copyWith(
+                                    color: Colors.white,
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  formattedStartDate,
+                                  style: GoogleFonts.bebasNeue().copyWith(
+                                    color: const Color(0xFFB9F90B),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (totalBudget > 0) ...[
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.withValues(alpha: 0.8),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(
+                                          Icons.account_balance_wallet,
+                                          color: Colors.white,
+                                          size: 14,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${totalBudget.toStringAsFixed(2)} PLN',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -271,5 +313,38 @@ class _TripCardImage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+Color _getStatusColor(TripStatus status) {
+  switch (status) {
+    case TripStatus.upcoming:
+      return Colors.blue;
+    case TripStatus.ongoing:
+      return Colors.green;
+    case TripStatus.completed:
+      return Colors.grey;
+  }
+}
+
+IconData _getStatusIcon(TripStatus status) {
+  switch (status) {
+    case TripStatus.upcoming:
+      return Icons.schedule;
+    case TripStatus.ongoing:
+      return Icons.flight_takeoff;
+    case TripStatus.completed:
+      return Icons.check_circle;
+  }
+}
+
+String _getStatusLabel(TripStatus status) {
+  switch (status) {
+    case TripStatus.upcoming:
+      return 'Przyszła';
+    case TripStatus.ongoing:
+      return 'Trwa';
+    case TripStatus.completed:
+      return 'Zakończona';
   }
 }

@@ -8,13 +8,20 @@ enum SortOption {
   budgetHighest,
   nameAZ,
   nameZA,
+  statusUpcoming,
+  statusOngoing,
+  statusCompleted,
 }
 
 class TripSortingHelper {
   static double calculateTotalBudget(Trip trip) {
     double total = 0;
     for (final marker in trip.markerPoints) {
-      if (marker.expense != null) {
+      if (marker.expenses != null) {
+        for (final expense in marker.expenses!) {
+          total += expense.amount;
+        }
+      } else if (marker.expense != null) {
         total += marker.expense!;
       }
     }
@@ -27,7 +34,7 @@ class TripSortingHelper {
     SortOption sortOption,
   ) {
     final query = searchQuery.trim().toLowerCase();
-    final filteredTrips = trips.where((trip) {
+    var filteredTrips = trips.where((trip) {
       final tripName = (trip.name ?? '').toLowerCase();
       return query.isEmpty ? true : tripName.contains(query);
     }).toList();
@@ -67,6 +74,25 @@ class TripSortingHelper {
       case SortOption.nameZA:
         filteredTrips.sort((a, b) => (b.name ?? '').compareTo(a.name ?? ''));
         break;
+
+      case SortOption.statusUpcoming:
+        filteredTrips = filteredTrips
+            .where((trip) => trip.status == TripStatus.upcoming)
+            .toList();
+        filteredTrips.sort((a, b) => a.startDate!.compareTo(b.startDate!));
+        break;
+      case SortOption.statusOngoing:
+        filteredTrips = filteredTrips
+            .where((trip) => trip.status == TripStatus.ongoing)
+            .toList();
+        filteredTrips.sort((a, b) => a.startDate!.compareTo(b.startDate!));
+        break;
+      case SortOption.statusCompleted:
+        filteredTrips = filteredTrips
+            .where((trip) => trip.status == TripStatus.completed)
+            .toList();
+        filteredTrips.sort((a, b) => b.startDate!.compareTo(a.startDate!));
+        break;
     }
 
     return filteredTrips;
@@ -86,6 +112,12 @@ class TripSortingHelper {
         return 'Nazwa: A-Z';
       case SortOption.nameZA:
         return 'Nazwa: Z-A';
+      case SortOption.statusUpcoming:
+        return 'Status: Przyszłe';
+      case SortOption.statusOngoing:
+        return 'Status: Trwające';
+      case SortOption.statusCompleted:
+        return 'Status: Zakończone';
     }
   }
 
@@ -100,6 +132,12 @@ class TripSortingHelper {
       case SortOption.nameAZ:
       case SortOption.nameZA:
         return Icons.sort_by_alpha;
+      case SortOption.statusUpcoming:
+        return Icons.schedule;
+      case SortOption.statusOngoing:
+        return Icons.flight_takeoff;
+      case SortOption.statusCompleted:
+        return Icons.check_circle;
     }
   }
 }
