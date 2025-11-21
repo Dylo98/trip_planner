@@ -176,10 +176,12 @@ class DayPlanItemCard extends ConsumerWidget {
           ),
         ],
         const SizedBox(height: 8),
-        Row(
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
           children: [
             _buildDurationChip(),
-            const SizedBox(width: 8),
+            if (item.hasExpenses) _buildExpenseChip(),
             if (item.isMarkerLinked && item.type == DayPlanItemType.marker)
               _buildMarkerChip(),
             if (item.isMarkerLinked && item.type == DayPlanItemType.custom)
@@ -298,6 +300,35 @@ class DayPlanItemCard extends ConsumerWidget {
             style: TextStyle(
               fontSize: 12,
               color: Colors.grey.shade700,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseChip() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.orange.shade100,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.account_balance_wallet,
+            size: 14,
+            color: Colors.orange.shade700,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            '${item.totalExpense.toStringAsFixed(2)} PLN',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.orange.shade700,
               fontWeight: FontWeight.w600,
             ),
           ),

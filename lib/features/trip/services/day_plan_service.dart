@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:trip_planner/features/trip/model/day_plan_model.dart';
 import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
 
 class DayPlanService {
   final FirebaseFirestore _firestore;
@@ -148,6 +149,30 @@ class DayPlanService {
     final dayPlan = DayPlan.fromJson(doc.data()!);
     final updatedItems = dayPlan.items.map((item) {
       return item.id == updatedItem.id ? updatedItem : item;
+    }).toList();
+
+    final updatedPlan = dayPlan.copyWith(items: updatedItems);
+    await docRef.set(updatedPlan.toJson());
+  }
+
+  Future<void> updateItemExpenses(
+    String tripId,
+    DateTime date,
+    String itemId,
+    List<ExpenseItem> expenses,
+  ) async {
+    final dateKey = _formatDateKey(date);
+    final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+
+    final doc = await docRef.get();
+    if (!doc.exists || doc.data() == null) return;
+
+    final dayPlan = DayPlan.fromJson(doc.data()!);
+    final updatedItems = dayPlan.items.map((item) {
+      if (item.id == itemId) {
+        return item.copyWith(expenses: expenses);
+      }
+      return item;
     }).toList();
 
     final updatedPlan = dayPlan.copyWith(items: updatedItems);

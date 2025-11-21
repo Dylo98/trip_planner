@@ -12,6 +12,8 @@ import 'package:trip_planner/features/trip/services/trip_deletion_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_crud_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_update_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_image_service.dart';
+import 'package:trip_planner/features/trip/services/trip_expense_service.dart';
+import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
 
 /// Główny serwis TripService - Facade Pattern
 ///
@@ -66,6 +68,12 @@ class TripService {
       storage: _storage,
       tripCrudService: _tripCrudService,
     );
+
+    _tripExpenseService = TripExpenseService(
+      firestore: _firestore,
+      auth: _auth,
+      storage: _storage,
+    );
   }
 
   final FirebaseFirestore _firestore;
@@ -78,6 +86,7 @@ class TripService {
   late final MarkerCrudService _markerCrudService;
   late final MarkerUpdateService _markerUpdateService;
   late final MarkerImageService _markerImageService;
+  late final TripExpenseService _tripExpenseService;
 
   // =============================
   // TRIPS – ZAPIS / ODCZYT PODRÓŻY
@@ -201,6 +210,44 @@ class TripService {
         markerId: markerId,
         description: description,
       );
+
+  // =============================
+  // TRIP EXPENSES – OGÓLNE WYDATKI PODRÓŻY
+  // =============================
+
+  /// Dodaje nowy wydatek ogólny do podróży
+  Future<void> addTripExpense({
+    required String tripId,
+    required TripExpenseItem expense,
+  }) =>
+      _tripExpenseService.addTripExpense(
+        tripId: tripId,
+        expense: expense,
+      );
+
+  /// Usuwa wydatek ogólny z podróży
+  Future<void> deleteTripExpense({
+    required String tripId,
+    required String expenseId,
+  }) =>
+      _tripExpenseService.deleteTripExpense(
+        tripId: tripId,
+        expenseId: expenseId,
+      );
+
+  /// Aktualizuje wydatek ogólny w podróży
+  Future<void> updateTripExpense({
+    required String tripId,
+    required TripExpenseItem expense,
+  }) =>
+      _tripExpenseService.updateTripExpense(
+        tripId: tripId,
+        expense: expense,
+      );
+
+  /// Pobiera wszystkie wydatki ogólne z podróży
+  Future<List<TripExpenseItem>> getTripExpenses(String tripId) =>
+      _tripExpenseService.getTripExpenses(tripId);
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {

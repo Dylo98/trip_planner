@@ -1,4 +1,5 @@
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
+import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
 
 enum TripType {
   planned,
@@ -20,6 +21,7 @@ class Trip {
   final List<String>? imageUrl;
   final String? tripPhotoUrl;
   final List<MarkerPoint> markerPoints;
+  final List<TripExpenseItem>? tripExpenses;
   final TripType tripType;
 
   Trip({
@@ -31,6 +33,7 @@ class Trip {
     this.imageUrl,
     this.tripPhotoUrl,
     required this.markerPoints,
+    this.tripExpenses,
     TripType? tripType,
   }) : tripType =
             tripType ?? (endDate == null ? TripType.ongoing : TripType.planned);
@@ -66,6 +69,7 @@ class Trip {
       'imageUrl': imageUrl,
       'tripPhotoUrl': tripPhotoUrl,
       'markerPoints': markerPoints.map((marker) => marker.toJson()).toList(),
+      'tripExpenses': tripExpenses?.map((expense) => expense.toJson()).toList(),
       'tripType': tripType.name,
     };
   }
@@ -96,6 +100,11 @@ class Trip {
               .map((m) => MarkerPoint.fromJson(m))
               .toList()
           : [],
+      tripExpenses: json['tripExpenses'] != null
+          ? (json['tripExpenses'] as List)
+              .map((e) => TripExpenseItem.fromJson(e))
+              .toList()
+          : null,
       tripType: parsedType,
     );
   }
@@ -109,6 +118,7 @@ class Trip {
     List<String>? imageUrl,
     String? tripPhotoUrl,
     List<MarkerPoint>? markerPoints,
+    List<TripExpenseItem>? tripExpenses,
     TripType? tripType,
   }) {
     return Trip(
@@ -120,6 +130,7 @@ class Trip {
       imageUrl: imageUrl ?? this.imageUrl,
       tripPhotoUrl: tripPhotoUrl ?? this.tripPhotoUrl,
       markerPoints: markerPoints ?? this.markerPoints,
+      tripExpenses: tripExpenses ?? this.tripExpenses,
       tripType: tripType ?? this.tripType,
     );
   }

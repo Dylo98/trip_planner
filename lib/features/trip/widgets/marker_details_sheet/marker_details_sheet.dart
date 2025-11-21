@@ -98,19 +98,6 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  MarkerTransportSection(
-                    transportMode: displayMarker.transportMode,
-                    onTransportChanged: (mode) async {
-                      setState(() {});
-                    },
-                  ),
-                  MarkerExpensesSection(
-                    marker: displayMarker,
-                    tripId: widget.tripId,
-                    onExpensesChanged: (expenses) async {
-                      await _state.updateExpenses(expenses, setState);
-                    },
-                  ),
                   MarkerDescriptionSection(
                     initialDescription: displayMarker.description,
                     onDescriptionChanged: (description) async {

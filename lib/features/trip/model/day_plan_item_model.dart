@@ -1,4 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
 
 enum DayPlanItemType {
   marker,
@@ -17,6 +18,7 @@ class DayPlanItem {
   final String? icon;
   final String? color;
   final int order;
+  final List<ExpenseItem>? expenses;
 
   DayPlanItem({
     required this.id,
@@ -30,7 +32,19 @@ class DayPlanItem {
     this.icon,
     this.color,
     required this.order,
+    this.expenses,
   });
+
+  double get totalExpense {
+    if (expenses == null || expenses!.isEmpty) {
+      return 0.0;
+    }
+    return expenses!.fold(0.0, (sum, item) => sum + item.amount);
+  }
+
+  bool get hasExpenses {
+    return expenses != null && expenses!.isNotEmpty;
+  }
 
   int get durationMinutes {
     if (endTime == null) return 60;
@@ -70,6 +84,7 @@ class DayPlanItem {
       'icon': icon,
       'color': color,
       'order': order,
+      'expenses': expenses?.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -81,6 +96,13 @@ class DayPlanItem {
         (loc['latitude'] as num).toDouble(),
         (loc['longitude'] as num).toDouble(),
       );
+    }
+
+    List<ExpenseItem>? expensesList;
+    if (json['expenses'] != null) {
+      expensesList = (json['expenses'] as List)
+          .map((e) => ExpenseItem.fromJson(e as Map<String, dynamic>))
+          .toList();
     }
 
     return DayPlanItem(
@@ -100,6 +122,7 @@ class DayPlanItem {
       icon: json['icon'] as String?,
       color: json['color'] as String?,
       order: json['order'] as int? ?? 0,
+      expenses: expensesList,
     );
   }
 
@@ -115,6 +138,7 @@ class DayPlanItem {
     String? icon,
     String? color,
     int? order,
+    List<ExpenseItem>? expenses,
   }) {
     return DayPlanItem(
       id: id ?? this.id,
@@ -128,6 +152,7 @@ class DayPlanItem {
       icon: icon ?? this.icon,
       color: color ?? this.color,
       order: order ?? this.order,
+      expenses: expenses ?? this.expenses,
     );
   }
 }

@@ -16,6 +16,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
           imageUrl: [],
           tripPhotoUrl: null,
           markerPoints: [],
+          tripExpenses: [],
           tripType: TripType.planned,
         ));
 
@@ -95,6 +96,7 @@ class TripFormNotifier extends StateNotifier<Trip> {
       imageUrl: [],
       tripPhotoUrl: null,
       markerPoints: [],
+      tripExpenses: [],
       tripType: TripType.planned,
     );
   }

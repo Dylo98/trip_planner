@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:trip_planner/features/trip/controller/day_plan_provider.dart';
+import 'package:trip_planner/features/schedule/controller/day_plan_provider.dart';
 import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
 import 'package:trip_planner/features/trip/widgets/day_plan/add_day_plan_item_dialog.dart';
 import 'package:trip_planner/features/trip/widgets/day_plan/day_plan_item_card.dart';

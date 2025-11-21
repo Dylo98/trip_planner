@@ -1,5 +1,7 @@
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/trip/model/day_plan_model.dart';
 
 class PayerSummary {
   final String payerName;
@@ -19,6 +21,7 @@ class BudgetStatistics {
   final double totalExpense;
   final Map<String, double> expensesByLocation;
   final Map<String, List<ExpenseItem>> expenseItemsByLocation;
+  final List<TripExpenseItem> tripExpenses;
   final List<PayerSummary> payerSummaries;
   final double averageExpense;
   final double highestExpense;
@@ -28,6 +31,7 @@ class BudgetStatistics {
     required this.totalExpense,
     required this.expensesByLocation,
     required this.expenseItemsByLocation,
+    required this.tripExpenses,
     required this.payerSummaries,
     required this.averageExpense,
     required this.highestExpense,
@@ -41,7 +45,11 @@ class BudgetStatistics {
 }
 
 class BudgetCalculatorService {
-  static BudgetStatistics calculateStatistics(List<MarkerPoint> markers) {
+  static BudgetStatistics calculateStatistics(
+    List<MarkerPoint> markers, {
+    List<TripExpenseItem>? tripExpenses,
+    List<DayPlan>? dayPlans,
+  }) {
     double totalExpense = 0;
     final expensesByLocation = <String, double>{};
     final expenseItemsByLocation = <String, List<ExpenseItem>>{};
@@ -92,11 +100,69 @@ class BudgetCalculatorService {
       }
     }
 
+    if (dayPlans != null && dayPlans.isNotEmpty) {
+      for (final dayPlan in dayPlans) {
+        for (final item in dayPlan.items) {
+          if (item.expenses != null && item.expenses!.isNotEmpty) {
+            String? locationName;
+
+            if (item.markerId != null) {
+              final marker = markers.firstWhere(
+                (m) => m.id == item.markerId,
+                orElse: () => null as dynamic,
+              );
+
+              if (marker != null) {
+                locationName = marker.name ?? 'Nieznane miejsce';
+              }
+            }
+
+            locationName ??= item.title;
+
+            double locationTotal = expensesByLocation[locationName] ?? 0;
+            final locationExpenses = List<ExpenseItem>.from(
+                expenseItemsByLocation[locationName] ?? []);
+
+            for (final expenseItem in item.expenses!) {
+              totalExpense += expenseItem.amount;
+              locationTotal += expenseItem.amount;
+              locationExpenses.add(expenseItem);
+
+              final payerName = expenseItem.displayPayerName;
+              payerTotals[payerName] =
+                  (payerTotals[payerName] ?? 0) + expenseItem.amount;
+              payerUserIds[payerName] = expenseItem.payerUserId;
+              payerExpenseCounts[payerName] =
+                  (payerExpenseCounts[payerName] ?? 0) + 1;
+            }
+
+            expensesByLocation[locationName] = locationTotal;
+            expenseItemsByLocation[locationName] = locationExpenses;
+          }
+        }
+      }
+    }
+
+    final processedTripExpenses = <TripExpenseItem>[];
+    if (tripExpenses != null && tripExpenses.isNotEmpty) {
+      for (final expense in tripExpenses) {
+        totalExpense += expense.amount;
+        processedTripExpenses.add(expense);
+
+        final payerName = expense.displayPayerName;
+        payerTotals[payerName] = (payerTotals[payerName] ?? 0) + expense.amount;
+        payerUserIds[payerName] = expense.payerUserId;
+        payerExpenseCounts[payerName] =
+            (payerExpenseCounts[payerName] ?? 0) + 1;
+      }
+    }
+
     if (totalExpense == 0) {
       return const BudgetStatistics(
         totalExpense: 0,
         expensesByLocation: {},
         expenseItemsByLocation: {},
+        tripExpenses: [],
         payerSummaries: [],
         averageExpense: 0,
         highestExpense: 0,
@@ -123,6 +189,7 @@ class BudgetCalculatorService {
       totalExpense: totalExpense,
       expensesByLocation: expensesByLocation,
       expenseItemsByLocation: expenseItemsByLocation,
+      tripExpenses: processedTripExpenses,
       payerSummaries: payerSummaries,
       averageExpense: averageExpense,
       highestExpense: highestExpense,

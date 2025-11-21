@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:uuid/uuid.dart';
 import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
+import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/trip/widgets/day_plan/day_plan_item_expenses_section.dart';
 
 class AddDayPlanItemDialog extends ConsumerStatefulWidget {
   final String tripId;
@@ -36,6 +40,8 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
 
   MarkerPoint? _selectedMarker;
 
+  List<ExpenseItem> _expenses = [];
+
   bool get _isEditing => widget.editItem != null;
 
   @override
@@ -52,6 +58,8 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
         _endTime = TimeOfDay.fromDateTime(item.endTime!);
       }
       _selectedIcon = item.icon;
+
+      _expenses = item.expenses ?? [];
 
       if (item.type == DayPlanItemType.marker) {
         _tabController.index = 1;
@@ -78,19 +86,6 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            TabBar(
-              controller: _tabController,
-              tabs: const [
-                Tab(
-                  icon: Icon(Icons.edit),
-                  text: 'Własna',
-                ),
-                Tab(
-                  icon: Icon(Icons.place),
-                  text: 'Z mapy',
-                ),
-              ],
-            ),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
@@ -111,23 +106,19 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppColors.surface,
         border: Border(
-          bottom: BorderSide(color: Colors.grey.shade300),
+          bottom: BorderSide(color: AppColors.borderPrimaryLight),
         ),
       ),
       child: Row(
         children: [
-          Icon(Icons.schedule, color: Colors.blue.shade700),
+          Icon(Icons.schedule, color: AppColors.textPrimary),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               _isEditing ? 'Edytuj aktywność' : 'Dodaj aktywność',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue.shade900,
-              ),
+              style: AppTextStyles.heading3,
             ),
           ),
           IconButton(
@@ -177,6 +168,23 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
           _buildTimeSection(),
           const SizedBox(height: 16),
           _buildIconSelection(),
+          const SizedBox(height: 24),
+          DayPlanItemExpensesSection(
+            item: DayPlanItem(
+              id: widget.editItem?.id ?? '',
+              type: DayPlanItemType.custom,
+              startTime: DateTime.now(),
+              title: '',
+              order: 0,
+              expenses: _expenses,
+            ),
+            onExpensesChanged: (expenses) {
+              setState(() {
+                _expenses = expenses;
+              });
+            },
+            tripId: widget.tripId,
+          ),
         ],
       ),
     );
@@ -242,7 +250,7 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
       children: [
         Text(
           label,
-          style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+          style: AppTextStyles.labelSmall,
         ),
         const SizedBox(height: 4),
         InkWell(
@@ -250,24 +258,28 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade400),
+              border: Border.all(color: AppColors.borderDark),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
-                Icon(Icons.access_time, size: 20, color: Colors.grey.shade700),
+                Icon(Icons.access_time,
+                    size: 20, color: AppColors.textSecondary),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     time != null ? time.format(context) : 'Brak',
-                    style: const TextStyle(fontSize: 16),
+                    style: AppTextStyles.labelHint,
                   ),
                 ),
                 if (canClear && time != null)
                   GestureDetector(
                     onTap: onClear,
-                    child: Icon(Icons.clear,
-                        size: 20, color: Colors.grey.shade600),
+                    child: Icon(
+                      Icons.clear,
+                      size: 20,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
               ],
             ),
@@ -329,17 +341,9 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
           children: [
             const Text(
               'Lokalizacja (opcjonalne)',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: AppTextStyles.labelLarge,
             ),
             const SizedBox(width: 8),
-            Tooltip(
-              message: 'Wybierz punkt z mapy jako lokalizację',
-              child: Icon(
-                Icons.info_outline,
-                size: 16,
-                color: Colors.grey.shade600,
-              ),
-            ),
           ],
         ),
         const SizedBox(height: 8),
@@ -351,18 +355,18 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
               return Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: AppColors.lightGrey,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: AppColors.borderDark),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.location_off, color: Colors.grey.shade600),
+                    Icon(Icons.location_off, color: AppColors.textSecondary),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Brak punktów na mapie',
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -372,26 +376,27 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
 
             return Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: AppColors.borderDark),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Column(
                 children: [
                   if (_selectedLocationMarker != null)
                     ListTile(
-                      leading: Icon(Icons.place, color: Colors.blue.shade700),
+                      leading:
+                          Icon(Icons.place, color: AppColors.textSecondary),
                       title: Text(
                         _selectedLocationMarker!.name ?? 'Bez nazwy',
-                        style: const TextStyle(fontWeight: FontWeight.w600),
+                        style: AppTextStyles.bodyText,
                       ),
                       trailing: IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear,
+                            color: AppColors.textSecondary),
                         onPressed: () {
                           setState(() => _selectedLocationMarker = null);
                         },
                         tooltip: 'Usuń lokalizację',
                       ),
-                      tileColor: Colors.blue.shade50,
                     )
                   else
                     InkWell(
@@ -401,19 +406,19 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
                         child: Row(
                           children: [
                             Icon(Icons.add_location,
-                                color: Colors.blue.shade700),
+                                color: AppColors.textSecondary),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
                                 'Wybierz lokalizację z mapy',
                                 style: TextStyle(
-                                  color: Colors.blue.shade700,
+                                  color: AppColors.textSecondary,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
                             Icon(Icons.chevron_right,
-                                color: Colors.grey.shade400),
+                                color: AppColors.textSecondary),
                           ],
                         ),
                       ),
@@ -429,9 +434,9 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
           error: (e, _) => Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color: AppColors.error,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.red.shade300),
+              border: Border.all(color: AppColors.borderError),
             ),
             child: Text('Błąd: $e'),
           ),
@@ -554,7 +559,7 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: Colors.grey.shade300),
+          top: BorderSide(color: AppColors.borderLight),
         ),
       ),
       child: Row(
@@ -628,6 +633,7 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
       location: finalLocation,
       icon: _selectedIcon,
       order: _isEditing ? widget.editItem!.order : 0,
+      expenses: _expenses,
     );
 
     Navigator.pop(context, item);
