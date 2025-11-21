@@ -1,4 +1,4 @@
-import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
 
 class DayPlan {
   final DateTime date;

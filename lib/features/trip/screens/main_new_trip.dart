@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
-import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
-import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
+import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
+import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
+import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/screens/new_trip.dart';
 import 'package:trip_planner/features/trip/screens/new_trip_map.dart';
 import 'package:trip_planner/features/trip/services/trip_form_service.dart';

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 import 'package:trip_planner/features/schedule/controller/day_plan_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/screens/day_plan_detail_screen.dart';
+import 'package:trip_planner/features/schedule/screens/day_plan_detail_screen.dart';
 
 class TripDetailsDayPlanScreen extends ConsumerStatefulWidget {
   final String tripId;

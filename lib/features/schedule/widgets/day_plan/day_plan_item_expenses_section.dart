@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
-import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/expense_item_dialog.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/budget/widgets/expense_item_dialog.dart';
 
 /// Widget sekcji wydatków dla aktywności w planie dnia
 ///

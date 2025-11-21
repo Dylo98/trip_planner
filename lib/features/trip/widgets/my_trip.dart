@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 import 'package:trip_planner/features/trip/widgets/trip_sorting_helper.dart';

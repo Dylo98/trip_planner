@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
-import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 
 class DayPlanItemCard extends ConsumerWidget {
   final DayPlanItem item;

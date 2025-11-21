@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 
 class BudgetTripExpensesList extends StatelessWidget {
   const BudgetTripExpensesList({

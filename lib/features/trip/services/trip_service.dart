@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_crud_service.dart';
 import 'package:trip_planner/features/trip/services/trip_image_service.dart';
@@ -12,8 +12,8 @@ import 'package:trip_planner/features/trip/services/trip_deletion_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_crud_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_update_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_image_service.dart';
-import 'package:trip_planner/features/trip/services/trip_expense_service.dart';
-import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/budget/services/trip_expense_service.dart';
+import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 
 /// Główny serwis TripService - Facade Pattern
 ///

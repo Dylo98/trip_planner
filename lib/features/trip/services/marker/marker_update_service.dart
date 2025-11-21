@@ -1,5 +1,5 @@
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
 
 /// Serwis odpowiedzialny za aktualizację danych markerów

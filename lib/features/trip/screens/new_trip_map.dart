@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:trip_planner/features/trip/controller/trip_form_provider.dart';
-import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
-import 'package:trip_planner/features/trip/controller/trip_map_controller.dart';
-import 'package:trip_planner/features/trip/controller/trip_photo_provider.dart';
+import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
+import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
+import 'package:trip_planner/features/trip/controllers/trip_map_controller.dart';
+import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/widgets/map/map_location_fab.dart';
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 import 'package:trip_planner/features/trip/services/current_location.dart';

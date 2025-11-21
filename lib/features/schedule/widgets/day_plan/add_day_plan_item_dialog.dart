@@ -4,11 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:uuid/uuid.dart';
-import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
-import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
-import 'package:trip_planner/features/trip/widgets/day_plan/day_plan_item_expenses_section.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
+import 'package:trip_planner/features/schedule/widgets/day_plan/day_plan_item_expenses_section.dart';
 
 class AddDayPlanItemDialog extends ConsumerStatefulWidget {
   final String tripId;

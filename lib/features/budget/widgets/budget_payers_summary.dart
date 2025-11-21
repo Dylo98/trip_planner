@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trip_planner/features/trip/services/budget_calculator_service.dart';
+import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
 
 class BudgetPayersSummary extends StatelessWidget {
   const BudgetPayersSummary({

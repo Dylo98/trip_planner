@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/statistics/model/traveler_statistics.dart';
 import 'package:trip_planner/features/statistics/controller/cities_loader_provider.dart';
-import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 
 class StatisticsOverview extends ConsumerStatefulWidget {
   final TravelerStatistics statistics;

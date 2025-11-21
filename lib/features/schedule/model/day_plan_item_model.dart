@@ -1,5 +1,5 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 
 enum DayPlanItemType {
   marker,

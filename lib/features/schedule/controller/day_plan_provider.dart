@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/model/day_plan_model.dart';
-import 'package:trip_planner/features/trip/services/day_plan_service.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_model.dart';
+import 'package:trip_planner/features/schedule/services/day_plan_service.dart';
 
 final dayPlanServiceProvider = Provider<DayPlanService>((ref) {
   return DayPlanService();

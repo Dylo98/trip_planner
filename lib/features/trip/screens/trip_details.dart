@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
-import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/widgets/trip_details/trip_date_range.dart';
 import 'package:trip_planner/features/trip/widgets/trip_details/trip_header_image.dart';

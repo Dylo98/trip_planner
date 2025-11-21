@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
 import 'package:trip_planner/features/friends/service/shared_trip_service.dart';

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/expense_item_dialog.dart';
+import 'package:trip_planner/features/budget/widgets/expense_item_dialog.dart';
 
 class MarkerExpensesSection extends ConsumerStatefulWidget {
   const MarkerExpensesSection({

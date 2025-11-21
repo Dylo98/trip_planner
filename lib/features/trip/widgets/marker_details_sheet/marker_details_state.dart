@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
-import 'package:trip_planner/features/trip/controller/trip_markers_provider.dart';
+import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 
 class MarkerDetailsState {

@@ -7,7 +7,7 @@ import 'package:trip_planner/features/home/widgets/home_content.dart';
 import 'package:trip_planner/features/home/widgets/add_trip_box.dart';
 import 'package:trip_planner/features/home/widgets/home_carousel.dart';
 import 'package:trip_planner/features/home/widgets/home_empty_carousel.dart';
-import 'package:trip_planner/features/trip/controller/get_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});

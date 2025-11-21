@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:trip_planner/features/trip/model/day_plan_model.dart';
-import 'package:trip_planner/features/trip/model/day_plan_item_model.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_model.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 
 class DayPlanService {
   final FirebaseFirestore _firestore;

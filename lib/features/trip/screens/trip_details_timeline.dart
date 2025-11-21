@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeline_tile/timeline_tile.dart';
-import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 class TripDetailsTimelineScreen extends ConsumerWidget {

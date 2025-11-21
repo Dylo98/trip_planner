@@ -1,7 +1,7 @@
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/trip/model/expense_item_model.dart';
-import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
-import 'package:trip_planner/features/trip/model/day_plan_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/schedule/model/day_plan_model.dart';
 
 class PayerSummary {
   final String payerName;

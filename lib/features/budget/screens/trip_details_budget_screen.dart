@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/controller/watch_trip_provider.dart';
+import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 import 'package:trip_planner/features/schedule/controller/day_plan_provider.dart';
-import 'package:trip_planner/features/trip/model/trip_expense_item_model.dart';
-import 'package:trip_planner/features/trip/services/budget_calculator_service.dart';
+import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
-import 'package:trip_planner/features/trip/widgets/budget/budget_empty_state.dart';
-import 'package:trip_planner/features/trip/widgets/budget/budget_expense_list.dart';
-import 'package:trip_planner/features/trip/widgets/budget/budget_statistics_card.dart';
-import 'package:trip_planner/features/trip/widgets/budget/budget_summary_card.dart';
-import 'package:trip_planner/features/trip/widgets/budget/budget_payers_summary.dart';
-import 'package:trip_planner/features/trip/widgets/budget/budget_trip_expenses_list.dart';
-import 'package:trip_planner/features/trip/widgets/budget/trip_expense_dialog.dart';
+import 'package:trip_planner/features/budget/widgets/budget_empty_state.dart';
+import 'package:trip_planner/features/budget/widgets/budget_expense_list.dart';
+import 'package:trip_planner/features/budget/widgets/budget_statistics_card.dart';
+import 'package:trip_planner/features/budget/widgets/budget_summary_card.dart';
+import 'package:trip_planner/features/budget/widgets/budget_payers_summary.dart';
+import 'package:trip_planner/features/budget/widgets/budget_trip_expenses_list.dart';
+import 'package:trip_planner/features/budget/widgets/trip_expense_dialog.dart';
 
 class TripDetailsBudgetScreen extends ConsumerWidget {
   final String tripId;
