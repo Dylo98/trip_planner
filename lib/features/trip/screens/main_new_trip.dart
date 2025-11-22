@@ -16,9 +16,9 @@ class MainNewTripScreen extends ConsumerStatefulWidget {
 
 class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  int _selectedIndex = 0;
   late final List<Widget> _screens;
 
+  int _selectedIndex = 0;
   bool _isSaving = false;
 
   @override

@@ -8,6 +8,8 @@ import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/widgets/map/map_location_fab.dart';
 import 'package:trip_planner/features/trip/widgets/search_location.dart';
 import 'package:trip_planner/features/trip/services/current_location.dart';
+import 'package:trip_planner/features/trip/widgets/starting_location_dialog.dart';
+import 'package:trip_planner/features/trip/widgets/starting_location_banner.dart';
 
 final hasStartingLocationProvider = StateProvider<bool>((ref) => false);
 final isSelectingStartingLocationProvider = StateProvider<bool>((ref) => false);
@@ -95,7 +97,7 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
     await showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _StartingLocationDialog(
+      builder: (context) => StartingLocationDialog(
         onUseCurrentLocation: _handleUseCurrentLocation,
         onSearchLocation: _handleSearchStartingLocation,
       ),
@@ -130,6 +132,11 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
   void _handleSearchStartingLocation() {
     Navigator.of(context).pop();
     ref.read(isSelectingStartingLocationProvider.notifier).state = true;
+  }
+
+  void _handleBannerClose() {
+    ref.read(isSelectingStartingLocationProvider.notifier).state = false;
+    _showStartingLocationDialog();
   }
 
   @override
@@ -176,59 +183,8 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
                 child: Column(
                   children: [
                     if (isSelectingStart)
-                      Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade700,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_outline,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Text(
-                                'Wyszukaj miejsce rozpoczęcia podróży',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                              onPressed: () {
-                                ref
-                                    .read(isSelectingStartingLocationProvider
-                                        .notifier)
-                                    .state = false;
-                                _showStartingLocationDialog();
-                              },
-                            ),
-                          ],
-                        ),
+                      StartingLocationBanner(
+                        onClose: _handleBannerClose,
                       ),
                     SearchLocation(
                       key: ValueKey(_searchLocationKey),
@@ -266,150 +222,6 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
         floatingActionButton: MapLocationFab(
           onPressed: _handleMyLocation,
           isLoading: _mapController.isMyLocationLocked,
-        ),
-      ),
-    );
-  }
-}
-
-class _StartingLocationDialog extends StatelessWidget {
-  const _StartingLocationDialog({
-    required this.onUseCurrentLocation,
-    required this.onSearchLocation,
-  });
-
-  final VoidCallback onUseCurrentLocation;
-  final VoidCallback onSearchLocation;
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.place,
-              color: Colors.blue.shade700,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Miejsce rozpoczęcia',
-              style: TextStyle(fontSize: 20),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Wybierz punkt startowy swojej podróży',
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 14,
-            ),
-          ),
-          const SizedBox(height: 24),
-          _OptionCard(
-            icon: Icons.my_location,
-            iconColor: Colors.green,
-            title: 'Użyj obecnej lokalizacji',
-            subtitle: 'Automatycznie ustaw punkt startowy',
-            onTap: onUseCurrentLocation,
-          ),
-          const SizedBox(height: 12),
-          _OptionCard(
-            icon: Icons.search,
-            iconColor: Colors.blue,
-            title: 'Wyszukaj miejsce',
-            subtitle: 'Wybierz punkt na mapie',
-            onTap: onSearchLocation,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _OptionCard extends StatelessWidget {
-  const _OptionCard({
-    required this.icon,
-    required this.iconColor,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final Color iconColor;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: iconColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                icon,
-                color: iconColor,
-                size: 28,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(
-              Icons.chevron_right,
-              color: Colors.grey.shade400,
-            ),
-          ],
         ),
       ),
     );

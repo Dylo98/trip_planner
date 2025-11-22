@@ -36,7 +36,7 @@ class TripFormService {
     final markers = ref.read(tripMarkersProvider);
 
     try {
-      await ref.read(tripFormProvider.notifier).save(image, markers);
+      await ref.read(tripFormProvider.notifier).save(markers);
       ref.read(tripMarkersProvider.notifier).clear();
       ref.read(tripPhotoProvider.notifier).state = null;
 

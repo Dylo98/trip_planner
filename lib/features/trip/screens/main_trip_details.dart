@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/screens/trip_details.dart';
 import 'package:trip_planner/features/trip/screens/trip_details_map.dart';
-import 'package:trip_planner/features/trip/screens/trip_details_timeline.dart';
+import 'package:trip_planner/features/timeline/screens/timeline_screen.dart';
 import 'package:trip_planner/features/budget/screens/trip_details_budget_screen.dart';
 import 'package:trip_planner/features/schedule/widgets/trip_details_day_plan.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/friends/widgets/share_trip_dialog.dart';
 import 'package:trip_planner/features/friends/widgets/manage_shared_members_dialog.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/trip/widgets/delete_trip_dialog.dart';
 
 class MainTripDetailsScreen extends ConsumerStatefulWidget {
   const MainTripDetailsScreen({super.key, required this.trip});
@@ -21,8 +22,8 @@ class MainTripDetailsScreen extends ConsumerStatefulWidget {
 }
 
 class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
-  int _selectedIndex = 0;
   late final List<Widget> _screens;
+  int _selectedIndex = 0;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
       TripDetailsMapScreen(
         tripId: widget.trip.id,
       ),
-      TripDetailsTimelineScreen(
+      TimelineScreen(
         tripId: widget.trip.id,
       ),
       TripDetailsDayPlanScreen(
@@ -53,23 +54,8 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
   Future<void> _deleteTrip() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Usuń podróż'),
-        content: Text(
-          'Czy na pewno chcesz usunąć podróż "${widget.trip.name}"?\n\n'
-          'Ta akcja jest nieodwracalna i usunie wszystkie zdjęcia, markery i dane podróży.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Anuluj'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Usuń'),
-          ),
-        ],
+      builder: (context) => DeleteTripDialog(
+        tripName: widget.trip.name,
       ),
     );
 

@@ -2,12 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
 import 'place_details_dialog.dart';
 
-/// Widget wyświetlający listę ciekawych miejsc w pobliżu
-///
-/// UŻYCIE:
-/// 1. Pobierz bounds z mapy: await mapController.getVisibleRegion()
-/// 2. Wywołaj getNearbyPlacesInBounds(bounds)
-/// 3. Wyświetl NearbyPlacesList z pobranymi miejscami
 class NearbyPlacesList extends StatelessWidget {
   final List<PlaceSuggestion> places;
   final Function(PlaceSuggestion) onPlaceSelected;

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:trip_planner/features/trip/services/google_places_service.dart';
+import 'package:trip_planner/features/trip/services/google_places/google_places_service.dart';
+import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 
 enum PlaceCategory {
   all('Wszystko', Icons.explore, []),
@@ -51,6 +52,7 @@ class _GoogleNearbyPlacesSectionState extends State<GoogleNearbyPlacesSection> {
   String? _errorMessage;
   CostStatistics? _stats;
   PlaceCategory _selectedCategory = PlaceCategory.all;
+  final _googlePlacesService = GooglePlacesService();
 
   @override
   void initState() {
@@ -65,7 +67,7 @@ class _GoogleNearbyPlacesSectionState extends State<GoogleNearbyPlacesSection> {
     });
 
     try {
-      var places = await GooglePlacesService.getNearbyPlaces(
+      var places = await _googlePlacesService.getNearbyPlaces(
         location: widget.markerPosition,
         radiusMeters: 1500,
         types: _selectedCategory != PlaceCategory.all
@@ -74,7 +76,7 @@ class _GoogleNearbyPlacesSectionState extends State<GoogleNearbyPlacesSection> {
       );
 
       if (places.isEmpty) {
-        places = await GooglePlacesService.getNearbyPlaces(
+        places = await _googlePlacesService.getNearbyPlaces(
           location: widget.markerPosition,
           radiusMeters: 5000,
           types: _selectedCategory != PlaceCategory.all
@@ -83,7 +85,7 @@ class _GoogleNearbyPlacesSectionState extends State<GoogleNearbyPlacesSection> {
         );
       }
 
-      final stats = GooglePlacesService.getCostStatistics();
+      final stats = await _googlePlacesService.getStatistics();
 
       if (mounted) {
         setState(() {
@@ -492,8 +494,9 @@ class _GooglePlaceCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
+    final googlePlacesService = GooglePlacesService();
     final photoUrl = place.photoReference != null
-        ? GooglePlacesService.getPhotoUrl(place.photoReference!, maxWidth: 400)
+        ? googlePlacesService.getPhotoUrl(place.photoReference!, maxWidth: 400)
         : null;
 
     if (photoUrl != null) {
@@ -565,8 +568,9 @@ class _EnhancedPlaceDetailsDialogState
   }
 
   Future<void> _loadDetails() async {
+    final googlePlacesService = GooglePlacesService();
     final details =
-        await GooglePlacesService.getPlaceDetails(widget.place.placeId);
+        await googlePlacesService.getPlaceDetails(widget.place.placeId);
     if (mounted) {
       setState(() {
         _details = details;
@@ -596,8 +600,9 @@ class _EnhancedPlaceDetailsDialogState
   }
 
   Widget _buildHeader() {
+    final googlePlacesService = GooglePlacesService();
     final photoUrl = widget.place.photoReference != null
-        ? GooglePlacesService.getPhotoUrl(
+        ? googlePlacesService.getPhotoUrl(
             widget.place.photoReference!,
             maxWidth: 600,
           )

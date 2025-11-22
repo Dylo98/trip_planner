@@ -30,6 +30,10 @@ class TripMarkersNotifier extends StateNotifier<List<MarkerPoint>> {
     }).toList();
   }
 
+  void setMarkers(List<MarkerPoint> markers) {
+    state = markers;
+  }
+
   void clear() {
     state = [];
   }
