@@ -79,24 +79,6 @@ class BudgetCalculatorService {
 
         expensesByLocation[locationName] = locationTotal;
         expenseItemsByLocation[locationName] = locationExpenses;
-      } else if (marker.expense != null && marker.expense! > 0) {
-        totalExpense += marker.expense!;
-        expensesByLocation[locationName] = marker.expense!;
-
-        final legacyExpense = ExpenseItem(
-          id: '${marker.id}_legacy',
-          title: 'Wydatek',
-          amount: marker.expense!,
-          payerName: null,
-        );
-        expenseItemsByLocation[locationName] = [legacyExpense];
-
-        const unknownPayer = 'Nie określono';
-        payerTotals[unknownPayer] =
-            (payerTotals[unknownPayer] ?? 0) + marker.expense!;
-        payerUserIds[unknownPayer] = null;
-        payerExpenseCounts[unknownPayer] =
-            (payerExpenseCounts[unknownPayer] ?? 0) + 1;
       }
     }
 
@@ -112,9 +94,7 @@ class BudgetCalculatorService {
                 orElse: () => null as dynamic,
               );
 
-              if (marker != null) {
-                locationName = marker.name ?? 'Nieznane miejsce';
-              }
+              locationName = marker.name ?? 'Nieznane miejsce';
             }
 
             locationName ??= item.title;

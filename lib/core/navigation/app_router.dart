@@ -8,8 +8,8 @@ import 'package:trip_planner/features/profile/screens/change_password.dart';
 import 'package:trip_planner/features/profile/screens/edit_profile.dart';
 import 'package:trip_planner/features/profile/screens/notification_settings.dart';
 import 'package:trip_planner/features/profile/screens/profile.dart';
-import 'package:trip_planner/features/trip/screens/main_new_trip.dart';
-import 'package:trip_planner/features/trip/screens/my_trips.dart';
+import 'package:trip_planner/features/trip/screens/new_trip/new_trip_screen.dart';
+import 'package:trip_planner/features/trip/screens/trip_list/trips_list_screen.dart';
 import 'package:trip_planner/features/friends/screens/friends_screen.dart';
 import 'package:trip_planner/features/statistics/screens/statistics_screen.dart';
 
@@ -60,7 +60,7 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/add-trip',
-      builder: (context, state) => const MainNewTripScreen(),
+      builder: (context, state) => const NewTripScreen(),
     ),
     GoRoute(
       path: '/my-trips',

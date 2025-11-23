@@ -6,34 +6,77 @@ class TripDateRange extends StatelessWidget {
     super.key,
     required this.startDate,
     this.endDate,
+    this.onEditPressed,
+    this.isEditable = false,
   });
 
   final DateTime? startDate;
   final DateTime? endDate;
+  final VoidCallback? onEditPressed;
+  final bool isEditable;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          startDate != null
-              ? DateFormat('dd-MM-yyyy').format(startDate!)
-              : 'Brak daty',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+    return InkWell(
+      onTap: isEditable ? onEditPressed : null,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
         ),
-        const Icon(Icons.arrow_right, size: 24),
-        Text(
-          endDate != null ? DateFormat('dd-MM-yyyy').format(endDate!) : '...',
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        decoration: BoxDecoration(
+          border: Border.all(
+            color: isEditable ? Colors.blue.shade200 : Colors.transparent,
+            width: 1,
           ),
+          borderRadius: BorderRadius.circular(8),
         ),
-      ],
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (isEditable) ...[
+              const Icon(
+                Icons.edit_calendar,
+                size: 18,
+                color: Colors.blue,
+              ),
+              const SizedBox(width: 8),
+            ],
+            Text(
+              startDate != null
+                  ? DateFormat('dd-MM-yyyy').format(startDate!)
+                  : 'Brak daty',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Icon(Icons.arrow_right, size: 24),
+            ),
+            Text(
+              endDate != null
+                  ? DateFormat('dd-MM-yyyy').format(endDate!)
+                  : '...',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            if (isEditable) ...[
+              const SizedBox(width: 8),
+              const Icon(
+                Icons.chevron_right,
+                size: 18,
+                color: Colors.blue,
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

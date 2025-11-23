@@ -4,9 +4,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
-import 'package:trip_planner/features/trip/services/current_location.dart';
+import 'package:trip_planner/features/trip/services/location/current_location.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
-import 'package:trip_planner/features/trip/widgets/select_transport.dart';
+import 'package:trip_planner/features/trip/utils/transport_helper.dart';
 import 'marker_details_controller.dart';
 
 /// Kontroler odpowiedzialny za zarządzanie markerami (dodawanie, usuwanie, aktualizacja)
@@ -49,7 +49,7 @@ class MarkerManagementController {
     required String name,
   }) async {
     return _placeLock.run(() async {
-      final transportMode = await selectTransport(context);
+      final transportMode = await TransportHelper.selectTransport(context);
       if (transportMode == null) return;
 
       final tripService = ref.read(tripServiceProvider);
@@ -142,7 +142,7 @@ class MarkerManagementController {
     String? id,
     String? tripId,
   }) async {
-    final transportMode = await selectTransport(context);
+    final transportMode = await TransportHelper.selectTransport(context);
     if (transportMode == null) return;
 
     final markers = ref.read(tripMarkersProvider);

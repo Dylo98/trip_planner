@@ -15,17 +15,10 @@ enum SortOption {
 
 class TripSortingHelper {
   static double calculateTotalBudget(Trip trip) {
-    double total = 0;
-    for (final marker in trip.markerPoints) {
-      if (marker.expenses != null) {
-        for (final expense in marker.expenses!) {
-          total += expense.amount;
-        }
-      } else if (marker.expense != null) {
-        total += marker.expense!;
-      }
-    }
-    return total;
+    return trip.markerPoints.fold(
+      0.0,
+      (sum, marker) => sum + marker.totalExpense,
+    );
   }
 
   static List<Trip> filterAndSort(
@@ -35,7 +28,7 @@ class TripSortingHelper {
   ) {
     final query = searchQuery.trim().toLowerCase();
     var filteredTrips = trips.where((trip) {
-      final tripName = (trip.name ?? '').toLowerCase();
+      final tripName = (trip.name).toLowerCase();
       return query.isEmpty ? true : tripName.contains(query);
     }).toList();
 
@@ -69,10 +62,10 @@ class TripSortingHelper {
         });
         break;
       case SortOption.nameAZ:
-        filteredTrips.sort((a, b) => (a.name ?? '').compareTo(b.name ?? ''));
+        filteredTrips.sort((a, b) => (a.name).compareTo(b.name));
         break;
       case SortOption.nameZA:
-        filteredTrips.sort((a, b) => (b.name ?? '').compareTo(a.name ?? ''));
+        filteredTrips.sort((a, b) => (b.name).compareTo(a.name));
         break;
 
       case SortOption.statusUpcoming:

@@ -5,8 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'google_places_models.dart';
 
 class GooglePlacesRateLimiter {
-  static const int _maxRequestsPerMinute = 10;
-  static const int _maxRequestsPerDay = 200;
+  static const int _maxRequestsPerMinute = 20;
+  static const int _maxRequestsPerDay = 300;
 
   static const double costNearbySearch = 0.032;
   static const double costPlaceDetails = 0.017;

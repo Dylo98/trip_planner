@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
-import 'package:trip_planner/features/trip/widgets/marker_details_sheet/google_nearby_places_section.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/google_nearby_places_section.dart';
 import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_description_section.dart';
 
 class MarkerDetailsContent extends StatelessWidget {

@@ -8,6 +8,7 @@ class GooglePlace {
   final List<String> types;
   final double? rating;
   final int? userRatingsTotal;
+  final int? priceLevel;
   final String? photoReference;
   final String? vicinity;
 
@@ -18,6 +19,7 @@ class GooglePlace {
     required this.types,
     this.rating,
     this.userRatingsTotal,
+    this.priceLevel,
     this.photoReference,
     this.vicinity,
   });
@@ -41,6 +43,7 @@ class GooglePlace {
       types: (json['types'] as List?)?.cast<String>() ?? [],
       rating: (json['rating'] as num?)?.toDouble(),
       userRatingsTotal: json['user_ratings_total'] as int?,
+      priceLevel: json['price_level'] as int?,
       photoReference: photoRef,
       vicinity: json['vicinity'] as String?,
     );
@@ -59,6 +62,7 @@ class GooglePlace {
       'types': types,
       'rating': rating,
       'user_ratings_total': userRatingsTotal,
+      'price_level': priceLevel,
       'photos': photoReference != null
           ? [
               {'photo_reference': photoReference}

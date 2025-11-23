@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
-import 'package:trip_planner/features/trip/services/trip_crud_service.dart';
+import 'package:trip_planner/features/trip/services/trip/trip_crud_service.dart';
 
 /// Serwis odpowiedzialny za zarządzanie zdjęciami markerów
 ///

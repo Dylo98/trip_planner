@@ -114,6 +114,7 @@ class TimelineTileWidget extends StatelessWidget {
   }
 
   Widget _buildCard(BuildContext context, TimelineStyleHelper styleHelper) {
+    final totalExpense = marker.totalExpense;
     return Padding(
       padding: EdgeInsets.only(
         left: isLeft ? 0 : 24,
@@ -141,8 +142,8 @@ class TimelineTileWidget extends StatelessWidget {
                 if (marker.description != null &&
                     marker.description!.isNotEmpty)
                   _TimelineCardDescription(description: marker.description!),
-                if (marker.expense != null && marker.expense! > 0)
-                  _TimelineCardExpense(expense: marker.expense!),
+                if (totalExpense > 0)
+                  _TimelineCardExpense(expense: totalExpense),
               ],
             ),
           ),

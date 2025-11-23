@@ -42,6 +42,7 @@ class _TripFormState extends ConsumerState<TripForm> {
       if (!mounted) return;
       setState(() => _selectedImage = image);
       ref.read(tripPhotoProvider.notifier).state = image;
+      ref.read(tripFormProvider.notifier).setSelectedImage(image);
     });
   }
 

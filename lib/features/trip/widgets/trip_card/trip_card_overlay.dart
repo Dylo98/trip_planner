@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/widgets/trip_card_content.dart';
-import 'package:trip_planner/features/trip/widgets/trip_status_badge.dart';
+import 'package:trip_planner/features/trip/widgets/trip_card/trip_card_content.dart';
+import 'package:trip_planner/features/trip/widgets/trip_card/trip_status_badge.dart';
 
 class TripCardOverlay extends StatelessWidget {
   const TripCardOverlay({
@@ -24,7 +24,7 @@ class TripCardOverlay extends StatelessWidget {
           children: [
             TripStatusBadge(status: trip.status),
             TripCardContent(
-              tripName: trip.name ?? 'Bez nazwy',
+              tripName: trip.name,
               formattedStartDate: formattedStartDate,
               totalBudget: totalBudget,
             ),

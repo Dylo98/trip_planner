@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
-import 'package:trip_planner/features/trip/widgets/trip_sorting_helper.dart';
-import 'package:trip_planner/features/trip/widgets/trip_toolbar.dart';
-import 'package:trip_planner/features/trip/widgets/trip_card.dart';
+import 'package:trip_planner/features/trip/utils/trip_sorting_helper.dart';
+import 'package:trip_planner/features/trip/widgets/trip_list/trip_toolbar.dart';
+import 'package:trip_planner/features/trip/widgets/trip_card/trip_card.dart';
 
 class MyTrip extends ConsumerStatefulWidget {
   const MyTrip({super.key});

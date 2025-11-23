@@ -40,13 +40,7 @@ class StatisticsService {
       }
 
       for (final marker in trip.markerPoints) {
-        if (marker.expenses != null) {
-          for (final expense in marker.expenses!) {
-            totalExpenses += expense.amount;
-          }
-        } else if (marker.expense != null) {
-          totalExpenses += marker.expense!;
-        }
+        totalExpenses += marker.totalExpense;
 
         if (marker.transportMode != null) {
           transportModes[marker.transportMode!] =

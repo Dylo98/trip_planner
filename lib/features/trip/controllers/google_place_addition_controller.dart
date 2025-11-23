@@ -5,7 +5,6 @@ import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart'
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/utils/transport_helper.dart';
-import 'package:trip_planner/features/trip/widgets/select_transport.dart';
 
 class GooglePlaceAdditionController {
   final WidgetRef ref;
@@ -23,7 +22,7 @@ class GooglePlaceAdditionController {
   Future<void> handlePlaceSelection(GooglePlace place) async {
     if (!context.mounted) return;
 
-    final transport = await selectTransport(context);
+    final transport = await TransportHelper.selectTransport(context);
     if (transport == null || !context.mounted) return;
 
     final newMarker = _createMarkerFromPlace(place, transport);

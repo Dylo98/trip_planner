@@ -1,0 +1,74 @@
+import 'package:flutter/material.dart';
+import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/place_card.dart';
+
+class PlacesGridView extends StatelessWidget {
+  const PlacesGridView({
+    super.key,
+    required this.places,
+    required this.onPlaceSelected,
+  });
+
+  final List<GooglePlace> places;
+  final Function(GooglePlace) onPlaceSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (places.isEmpty) {
+      return _buildEmptyState(context);
+    }
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.85,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+      ),
+      padding: const EdgeInsets.all(8),
+      itemCount: places.length,
+      itemBuilder: (context, index) {
+        return PlaceCard(
+          place: places[index],
+          onPlaceSelected: onPlaceSelected,
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Nie znaleziono miejsc w tej kategorii',
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Spróbuj wybrać inną kategorię lub oddal widok mapy',
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey.shade600,
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

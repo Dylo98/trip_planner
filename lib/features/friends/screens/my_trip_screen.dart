@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/trip/widgets/my_trip.dart';
+import 'package:trip_planner/features/trip/widgets/trip_list/my_trip.dart';
 import 'package:trip_planner/features/friends/widgets/shared_trips_tab.dart';
 
 class MyTripsScreen extends ConsumerStatefulWidget {

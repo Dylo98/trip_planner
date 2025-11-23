@@ -1,6 +1,6 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/trip/services/direction_service.dart';
+import 'package:trip_planner/features/trip/services/location/direction_service.dart';
 
 /// Kontroler odpowiedzialny za generowanie i zarządzanie trasami
 class PolylineController {

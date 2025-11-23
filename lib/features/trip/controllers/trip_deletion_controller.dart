@@ -14,7 +14,7 @@ class TripDeletionController {
   });
 
   Future<bool> handleTripDeletion(Trip trip) async {
-    final confirmed = await showConfirmationDialog(trip.name ?? 'Bez nazwy');
+    final confirmed = await showConfirmationDialog(trip.name);
 
     if (!confirmed || !context.mounted) {
       return false;
@@ -22,7 +22,7 @@ class TripDeletionController {
 
     try {
       await tripService.deleteTrip(trip.id);
-      showSuccessMessage(trip.name ?? 'Bez nazwy');
+      showSuccessMessage(trip.name);
       return true;
     } catch (e) {
       showErrorMessage(e);

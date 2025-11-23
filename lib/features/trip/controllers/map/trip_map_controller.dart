@@ -10,7 +10,6 @@ import 'marker_display_controller.dart';
 import 'marker_management_controller.dart';
 import 'polyline_controller.dart';
 
-/// Główny kontroler mapy
 class TripMapController {
   TripMapController({
     required this.ref,

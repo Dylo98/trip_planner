@@ -6,9 +6,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/services/trip_crud_service.dart';
-import 'package:trip_planner/features/trip/services/trip_image_service.dart';
-import 'package:trip_planner/features/trip/services/trip_deletion_service.dart';
+import 'package:trip_planner/features/trip/services/trip/trip_crud_service.dart';
+import 'package:trip_planner/features/trip/services/trip/trip_image_service.dart';
+import 'package:trip_planner/features/trip/services/trip/trip_deletion_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_crud_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_update_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_image_service.dart';
@@ -248,6 +248,56 @@ class TripService {
   /// Pobiera wszystkie wydatki ogólne z podróży
   Future<List<TripExpenseItem>> getTripExpenses(String tripId) =>
       _tripExpenseService.getTripExpenses(tripId);
+
+  /// Aktualizuje zdjęcie główne podróży
+  Future<void> updateTripPhoto(String tripId, String? photoUrl) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception('User not logged in');
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .update({
+      'tripPhotoUrl': photoUrl,
+    });
+  }
+
+  /// Aktualizuje daty podróży
+  Future<void> updateTripDates(
+    String tripId,
+    DateTime startDate,
+    DateTime? endDate,
+  ) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception('User not logged in');
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .update({
+      'startDate': Timestamp.fromDate(startDate),
+      'endDate': endDate != null ? Timestamp.fromDate(endDate) : null,
+    });
+  }
+
+  /// Aktualizuje nazwę podróży
+  Future<void> updateTripName(String tripId, String name) async {
+    final uid = _auth.currentUser?.uid;
+    if (uid == null) throw Exception('User not logged in');
+
+    await _firestore
+        .collection('users')
+        .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .update({
+      'name': name,
+    });
+  }
 }
 
 final tripServiceProvider = Provider<TripService>((ref) {

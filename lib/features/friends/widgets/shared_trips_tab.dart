@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
-import 'package:trip_planner/features/trip/widgets/trip_card.dart';
+import 'package:trip_planner/features/trip/widgets/trip_card/trip_card.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 
 class SharedTripsTab extends ConsumerStatefulWidget {

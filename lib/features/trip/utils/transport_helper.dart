@@ -29,4 +29,59 @@ class TransportHelper {
   }
 
   static const List<String> allModes = ['plane', 'walk', 'car', 'other'];
+
+  static Future<String?> selectTransport(BuildContext context) async {
+    return await showDialog<String>(
+      context: context,
+      builder: (context) => const _TransportSelectionDialog(),
+    );
+  }
+}
+
+class _TransportSelectionDialog extends StatelessWidget {
+  const _TransportSelectionDialog();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Wybierz środek transportu'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildTransportOption(
+            context,
+            mode: 'plane',
+            label: 'Samolot',
+          ),
+          _buildTransportOption(
+            context,
+            mode: 'walk',
+            label: 'Pieszo',
+          ),
+          _buildTransportOption(
+            context,
+            mode: 'car',
+            label: 'Samochód',
+          ),
+          _buildTransportOption(
+            context,
+            mode: 'other',
+            label: 'Inne',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransportOption(
+    BuildContext context, {
+    required String mode,
+    required String label,
+  }) {
+    return ListTile(
+      leading: Icon(TransportHelper.getIcon(mode)),
+      title: Text(label),
+      onTap: () => Navigator.pop(context, mode),
+    );
+  }
 }

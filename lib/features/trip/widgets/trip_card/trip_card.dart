@@ -5,11 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/screens/main_trip_details.dart';
-import 'package:trip_planner/features/trip/widgets/trip_sorting_helper.dart';
+import 'package:trip_planner/features/trip/screens/trip_details/trip_details_screen.dart';
+import 'package:trip_planner/features/trip/utils/trip_sorting_helper.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/controllers/trip_deletion_controller.dart';
-import 'package:trip_planner/features/trip/widgets/trip_card_overlay.dart';
+import 'package:trip_planner/features/trip/widgets/trip_card/trip_card_overlay.dart';
 
 class TripCard extends ConsumerWidget {
   const TripCard({
@@ -129,7 +129,7 @@ class TripCard extends ConsumerWidget {
       tripService: ref.read(tripServiceProvider),
     );
 
-    return await controller.showConfirmationDialog(trip.name ?? 'Bez nazwy');
+    return await controller.showConfirmationDialog(trip.name);
   }
 
   Future<void> _handleDismissed(BuildContext context, WidgetRef ref) async {
@@ -140,7 +140,7 @@ class TripCard extends ConsumerWidget {
 
     try {
       await ref.read(tripServiceProvider).deleteTrip(trip.id);
-      controller.showSuccessMessage(trip.name ?? 'Bez nazwy');
+      controller.showSuccessMessage(trip.name);
     } catch (e) {
       controller.showErrorMessage(e);
     }

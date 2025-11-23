@@ -4,9 +4,15 @@ class TripHeaderImage extends StatelessWidget {
   const TripHeaderImage({
     super.key,
     required this.imageUrl,
+    this.onEditPressed,
+    this.onRemovePressed,
+    this.isEditable = false,
   });
 
   final String? imageUrl;
+  final VoidCallback? onEditPressed;
+  final VoidCallback? onRemovePressed;
+  final bool isEditable;
 
   bool get _isValidUrl =>
       imageUrl != null &&
@@ -15,17 +21,58 @@ class TripHeaderImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (_isValidUrl) {
-      return Image.network(
-        imageUrl!,
-        width: double.infinity,
-        height: 200,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-      );
-    }
-
-    return _buildPlaceholder();
+    return Stack(
+      children: [
+        if (_isValidUrl)
+          Image.network(
+            imageUrl!,
+            width: double.infinity,
+            height: 200,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+          )
+        else
+          _buildPlaceholder(),
+        if (isEditable)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.3),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+            ),
+          ),
+        if (isEditable)
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Row(
+              children: [
+                _EditButton(
+                  icon: _isValidUrl ? Icons.edit : Icons.add_photo_alternate,
+                  tooltip: _isValidUrl ? 'Zmień zdjęcie' : 'Dodaj zdjęcie',
+                  onPressed: onEditPressed,
+                ),
+                if (_isValidUrl && onRemovePressed != null) ...[
+                  const SizedBox(width: 8),
+                  _EditButton(
+                    icon: Icons.delete,
+                    tooltip: 'Usuń zdjęcie',
+                    onPressed: onRemovePressed,
+                    backgroundColor: Colors.red.shade400,
+                  ),
+                ],
+              ],
+            ),
+          ),
+      ],
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -34,12 +81,80 @@ class TripHeaderImage extends StatelessWidget {
       height: 200,
       color: Colors.grey[300],
       alignment: Alignment.center,
-      child: const Text(
-        'Brak zdjęcia',
-        style: TextStyle(
-          color: Colors.black54,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.landscape,
+            size: 48,
+            color: Colors.grey[600],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Brak zdjęcia',
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          if (isEditable && onEditPressed != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              'Kliknij + aby dodać',
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _EditButton extends StatelessWidget {
+  const _EditButton({
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
+    this.backgroundColor,
+  });
+
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: (backgroundColor ?? Colors.black).withValues(alpha: 0.6),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              icon,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
         ),
       ),
     );

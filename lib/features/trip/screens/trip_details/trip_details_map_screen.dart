@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
-import 'package:trip_planner/features/trip/controllers/trip_map_controller.dart';
-import 'package:trip_planner/features/trip/widgets/search_location.dart';
+import 'package:trip_planner/features/trip/controllers/map/trip_map_controller.dart';
+import 'package:trip_planner/features/trip/widgets/shared/search_location.dart';
 import 'package:trip_planner/core/widgets/loading_indicator.dart';
 import 'package:trip_planner/core/widgets/error_display.dart';
 

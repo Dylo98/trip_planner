@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:trip_planner/features/trip/widgets/select_transport.dart';
+import 'package:trip_planner/features/trip/utils/transport_helper.dart';
 
 class MarkerTransportSection extends StatelessWidget {
   const MarkerTransportSection({
@@ -54,7 +54,7 @@ class MarkerTransportSection extends StatelessWidget {
           title: Text(_getTransportName(transportMode)),
           trailing: const Icon(Icons.edit),
           onTap: () async {
-            final newMode = await selectTransport(context);
+            final newMode = await TransportHelper.selectTransport(context);
             if (newMode != null) {
               onTransportChanged(newMode);
             }

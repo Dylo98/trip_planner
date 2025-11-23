@@ -28,8 +28,7 @@ class GeocodingService {
             address['town'] ??
             address['village'] ??
             address['municipality'] ??
-            address['county'] ??
-            null;
+            address['county'];
       }
 
       return null;

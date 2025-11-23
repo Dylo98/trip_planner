@@ -141,7 +141,7 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
       elevation: 2,
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
+          backgroundColor: color.withValues(alpha: 0.2),
           child: Icon(icon, color: color),
         ),
         title: Text(
@@ -172,7 +172,7 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
       elevation: 2,
       child: ExpansionTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
+          backgroundColor: color.withValues(alpha: 0.2),
           child: Icon(icon, color: color),
         ),
         title: Text(
@@ -204,7 +204,7 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
       child: ExpansionTile(
         onExpansionChanged: _onCitiesExpanded,
         leading: CircleAvatar(
-          backgroundColor: Colors.orange.withOpacity(0.2),
+          backgroundColor: Colors.orange.withValues(alpha: 0.2),
           child: const Icon(Icons.location_city, color: Colors.orange),
         ),
         title: const Text(
@@ -251,7 +251,7 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.green.withOpacity(0.2),
+                  color: Colors.green.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(

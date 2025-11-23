@@ -3,32 +3,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
-import 'package:trip_planner/features/trip/screens/new_trip.dart';
-import 'package:trip_planner/features/trip/screens/new_trip_map.dart';
-import 'package:trip_planner/features/trip/services/trip_form_service.dart';
+import 'package:trip_planner/features/trip/screens/new_trip/new_trip_map_screen.dart';
+import 'package:trip_planner/features/trip/services/trip/trip_form_service.dart';
+import 'package:trip_planner/features/trip/widgets/new_trip/trip_form.dart';
 
-class MainNewTripScreen extends ConsumerStatefulWidget {
-  const MainNewTripScreen({super.key});
+class NewTripScreen extends ConsumerStatefulWidget {
+  const NewTripScreen({super.key});
 
   @override
-  ConsumerState<MainNewTripScreen> createState() => _MainNewTripScreenState();
+  ConsumerState<NewTripScreen> createState() => _NewTripScreenState();
 }
 
-class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
+class _NewTripScreenState extends ConsumerState<NewTripScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late final List<Widget> _screens;
-
   int _selectedIndex = 0;
   bool _isSaving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _screens = [
-      NewTripScreen(formKey: _formKey),
-      NewTripMapScreen(),
-    ];
-  }
 
   void _onTabSelected(int index) {
     if (_isSaving) return;
@@ -80,7 +69,10 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
         ),
         body: IndexedStack(
           index: _selectedIndex,
-          children: _screens,
+          children: [
+            _NewTripFormTab(formKey: _formKey),
+            const NewTripMapScreen(),
+          ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
@@ -95,6 +87,29 @@ class _MainNewTripScreenState extends ConsumerState<MainNewTripScreen> {
               label: 'Mapa',
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NewTripFormTab extends StatelessWidget {
+  const _NewTripFormTab({required this.formKey});
+
+  final GlobalKey<FormState> formKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              TripForm(formKey: formKey),
+            ],
+          ),
         ),
       ),
     );
