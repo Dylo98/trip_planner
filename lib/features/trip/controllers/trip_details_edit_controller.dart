@@ -7,7 +7,6 @@ import 'package:trip_planner/features/auth/controller/user_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 
-/// Kontroler odpowiedzialny za edycję szczegółów podróży
 class TripDetailsEditController {
   final WidgetRef ref;
   final BuildContext context;
@@ -20,6 +19,7 @@ class TripDetailsEditController {
   });
 
   TripService get _tripService => ref.read(tripServiceProvider);
+
   Future<bool> handlePhotoChange() async {
     try {
       final ImagePicker picker = ImagePicker();
@@ -44,13 +44,11 @@ class TripDetailsEditController {
 
       try {
         final File imageFile = File(image.path);
-        final String? photoUrl = await _tripService.uploadTripImage(
+        final String photoUrl = await _tripService.uploadTripImage(
           imageFile,
           trip.id,
         );
-        if (photoUrl == null) {
-          throw Exception('Nie udało się uploadować zdjęcia - brak URL');
-        }
+
         await _tripService.updateTripPhoto(trip.id, photoUrl);
 
         if (context.mounted) {
@@ -283,12 +281,13 @@ class TripDetailsEditController {
             onPressed: () => Navigator.pop(context, false),
             child: const Text('Anuluj'),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(
-              foregroundColor: Colors.red,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Usuń'),
+            child: const Text('Potwierdź'),
           ),
         ],
       ),
@@ -298,8 +297,6 @@ class TripDetailsEditController {
   }
 
   void _showSuccessMessage(String message) {
-    if (!context.mounted) return;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -310,15 +307,12 @@ class TripDetailsEditController {
           ],
         ),
         backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
   void _showErrorMessage(String message) {
-    if (!context.mounted) return;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -369,7 +363,6 @@ class DateChangeDialog extends StatefulWidget {
 class _DateChangeDialogState extends State<DateChangeDialog> {
   late DateTime? _startDate;
   late DateTime? _endDate;
-  late TripType _tripType;
   String? _errorMessage;
 
   @override
@@ -377,8 +370,9 @@ class _DateChangeDialogState extends State<DateChangeDialog> {
     super.initState();
     _startDate = widget.trip.startDate;
     _endDate = widget.trip.endDate;
-    _tripType = widget.trip.tripType;
   }
+
+  bool get _isOngoingTrip => widget.trip.tripType == TripType.ongoing;
 
   void _validateAndSubmit() {
     final validationError = Validators.validateTripDatesWithConflicts(
@@ -405,6 +399,13 @@ class _DateChangeDialogState extends State<DateChangeDialog> {
         endDate: _endDate,
       ),
     );
+  }
+
+  void _finishOngoingTrip() {
+    setState(() {
+      _endDate = DateTime.now();
+      _errorMessage = null;
+    });
   }
 
   Future<void> _selectStartDate() async {
@@ -442,54 +443,36 @@ class _DateChangeDialogState extends State<DateChangeDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Zmień daty podróży'),
+      title: Text(_isOngoingTrip ? 'Zarządzaj podróżą' : 'Zmień daty podróży'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Typ podróży',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+            if (_isOngoingTrip && _endDate == null) ...[
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _finishOngoingTrip,
+                  icon: const Icon(Icons.check_circle),
+                  label: const Text('Zakończ podróż'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile<TripType>(
-                    title: const Text('Zaplanowana'),
-                    value: TripType.planned,
-                    groupValue: _tripType,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (value) {
-                      setState(() {
-                        _tripType = value!;
-                        _errorMessage = null;
-                      });
-                    },
-                  ),
+              const SizedBox(height: 8),
+              Text(
+                'Ustawi datę zakończenia na dzisiaj',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade600,
                 ),
-                Expanded(
-                  child: RadioListTile<TripType>(
-                    title: const Text('Trwająca'),
-                    value: TripType.ongoing,
-                    groupValue: _tripType,
-                    contentPadding: EdgeInsets.zero,
-                    onChanged: (value) {
-                      setState(() {
-                        _tripType = value!;
-                        _endDate = null;
-                        _errorMessage = null;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
+              ),
+              const Divider(height: 24),
+            ],
             const Text(
               'Data rozpoczęcia',
               style: TextStyle(
@@ -520,7 +503,7 @@ class _DateChangeDialogState extends State<DateChangeDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            if (_tripType == TripType.planned) ...[
+            if (!_isOngoingTrip || _endDate != null) ...[
               const Text(
                 'Data zakończenia',
                 style: TextStyle(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/trip/screens/trip_list/trips_list_details_screen.dart';
+import 'package:trip_planner/features/trip/screens/trip_details/trip_details_main_screen.dart';
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_map_screen.dart';
 import 'package:trip_planner/features/timeline/screens/timeline_screen.dart';
 import 'package:trip_planner/features/budget/screens/trip_details_budget_screen.dart';

@@ -84,7 +84,7 @@ class _SharedTripsTabState extends ConsumerState<SharedTripsTab> {
                             Icon(Icons.share, size: 14, color: Colors.blue),
                             SizedBox(width: 4),
                             Text(
-                              'Współdzielona',
+                              'WspÃ³Å‚dzielona',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Colors.blue,

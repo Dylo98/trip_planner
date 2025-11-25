@@ -26,13 +26,12 @@ class PlaceCard extends StatelessWidget {
         onTap: () => _showPlaceDetails(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
             _buildImage(),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: _buildInfo(context),
-              ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: _buildInfo(context),
             ),
           ],
         ),
@@ -60,11 +59,11 @@ class PlaceCard extends StatelessWidget {
 
       return CachedNetworkImage(
         imageUrl: photoUrl,
-        height: 120,
+        height: 100,
         width: double.infinity,
         fit: BoxFit.cover,
         placeholder: (context, url) => Container(
-          height: 120,
+          height: 100,
           color: Colors.grey.shade200,
           child: const Center(
             child: CircularProgressIndicator(strokeWidth: 2),
@@ -80,7 +79,7 @@ class PlaceCard extends StatelessWidget {
 
   Widget _buildPlaceholder() {
     return Container(
-      height: 120,
+      height: 100,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -104,28 +103,32 @@ class PlaceCard extends StatelessWidget {
   Widget _buildInfo(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           place.name,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.bold,
+                fontSize: 13,
               ),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
-        const SizedBox(height: 4),
-        if (place.rating != null) _buildRating(context),
+        if (place.rating != null) ...[
+          const SizedBox(height: 4),
+          _buildRating(context),
+        ],
       ],
     );
   }
 
   Widget _buildRating(BuildContext context) {
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Icon(
           Icons.star,
-          size: 16,
+          size: 14,
           color: Colors.amber.shade700,
         ),
         const SizedBox(width: 4),
@@ -133,6 +136,7 @@ class PlaceCard extends StatelessWidget {
           place.rating!.toStringAsFixed(1),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w600,
+                fontSize: 12,
               ),
         ),
         if (place.userRatingsTotal != null) ...[
@@ -141,13 +145,14 @@ class PlaceCard extends StatelessWidget {
             '(${place.userRatingsTotal})',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Colors.grey.shade600,
-                  fontSize: 11,
+                  fontSize: 10,
                 ),
           ),
         ],
       ],
     );
   }
+
   String? _buildPhotoUrl(String photoReference) {
     final service = GooglePlacesService();
     return service.getPhotoUrl(photoReference, maxWidth: 600);

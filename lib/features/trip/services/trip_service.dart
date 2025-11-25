@@ -66,7 +66,6 @@ class TripService {
       firestore: _firestore,
       auth: _auth,
       storage: _storage,
-      tripCrudService: _tripCrudService,
     );
 
     _tripExpenseService = TripExpenseService(
@@ -156,19 +155,6 @@ class TripService {
         expenses: expenses,
       );
 
-  /// Aktualizuje wydatek dla markera (DEPRECATED)
-  @Deprecated('Użyj updateMarkerExpenses zamiast updateMarkerExpense')
-  Future<void> updateMarkerExpense({
-    required String tripId,
-    required String markerId,
-    required double expense,
-  }) =>
-      _markerUpdateService.updateMarkerExpense(
-        tripId: tripId,
-        markerId: markerId,
-        expense: expense,
-      );
-
   // =============================
   // MARKERY – ZDJĘCIA
   // =============================
@@ -254,9 +240,32 @@ class TripService {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('User not logged in');
 
-    await _firestore
+    String ownerId = uid;
+
+    final ownTripDoc = await _firestore
         .collection('users')
         .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
+
+    if (!ownTripDoc.exists) {
+      final sharedTripDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('shared_trips')
+          .doc(tripId)
+          .get();
+
+      if (sharedTripDoc.exists && sharedTripDoc.data() != null) {
+        final data = sharedTripDoc.data()!;
+        ownerId = data['ownerId'] as String? ?? uid;
+      }
+    }
+
+    await _firestore
+        .collection('users')
+        .doc(ownerId)
         .collection('trips')
         .doc(tripId)
         .update({
@@ -273,9 +282,32 @@ class TripService {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('User not logged in');
 
-    await _firestore
+    String ownerId = uid;
+
+    final ownTripDoc = await _firestore
         .collection('users')
         .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
+
+    if (!ownTripDoc.exists) {
+      final sharedTripDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('shared_trips')
+          .doc(tripId)
+          .get();
+
+      if (sharedTripDoc.exists && sharedTripDoc.data() != null) {
+        final data = sharedTripDoc.data()!;
+        ownerId = data['ownerId'] as String? ?? uid;
+      }
+    }
+
+    await _firestore
+        .collection('users')
+        .doc(ownerId)
         .collection('trips')
         .doc(tripId)
         .update({
@@ -289,9 +321,32 @@ class TripService {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('User not logged in');
 
-    await _firestore
+    String ownerId = uid;
+
+    final ownTripDoc = await _firestore
         .collection('users')
         .doc(uid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
+
+    if (!ownTripDoc.exists) {
+      final sharedTripDoc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('shared_trips')
+          .doc(tripId)
+          .get();
+
+      if (sharedTripDoc.exists && sharedTripDoc.data() != null) {
+        final data = sharedTripDoc.data()!;
+        ownerId = data['ownerId'] as String? ?? uid;
+      }
+    }
+
+    await _firestore
+        .collection('users')
+        .doc(ownerId)
         .collection('trips')
         .doc(tripId)
         .update({

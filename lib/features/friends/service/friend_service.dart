@@ -39,8 +39,9 @@ class FriendService {
 
     final currentUserDoc =
         await _firestore.collection('users').doc(currentUid).get();
-    if (!currentUserDoc.exists)
+    if (!currentUserDoc.exists) {
       throw Exception('Nie znaleziono danych użytkownika');
+    }
 
     final currentUserData = currentUserDoc.data()!;
 

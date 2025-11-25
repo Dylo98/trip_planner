@@ -15,14 +15,17 @@ class TripExpenseService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
     final updatedExpenses = [...?trip.tripExpenses, expense];
 
     await tripRef.update({
@@ -36,14 +39,17 @@ class TripExpenseService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
 
     if (trip.tripExpenses == null) return;
 
@@ -61,14 +67,17 @@ class TripExpenseService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
 
     if (trip.tripExpenses == null) return;
 
@@ -87,14 +96,17 @@ class TripExpenseService extends BaseTripService {
   Future<List<TripExpenseItem>> getTripExpenses(String tripId) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       return [];
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
     return trip.tripExpenses ?? [];
   }
 }

@@ -18,14 +18,17 @@ class MarkerCrudService extends BaseTripService {
   Future<void> addMarkerToTrip(String tripId, MarkerPoint marker) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
     final updatedMarkers = [...trip.markerPoints, marker];
 
     await tripRef.update({
@@ -37,14 +40,17 @@ class MarkerCrudService extends BaseTripService {
   Future<void> deleteMarkerFromTrip(String tripId, String markerId) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
 
     final markerToDelete = trip.markerPoints.firstWhere(
       (m) => m.id == markerId,

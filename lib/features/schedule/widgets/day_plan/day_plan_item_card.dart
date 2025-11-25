@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
+import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 
 class DayPlanItemCard extends ConsumerWidget {
@@ -197,10 +198,13 @@ class DayPlanItemCard extends ConsumerWidget {
 
     return tripAsync.when(
       data: (trip) {
-        final marker = trip.markerPoints.firstWhere(
-          (m) => m.id == item.markerId,
-          orElse: () => null as dynamic,
-        );
+        MarkerPoint? marker;
+        for (final m in trip.markerPoints) {
+          if (m.id == item.markerId) {
+            marker = m;
+            break;
+          }
+        }
 
         if (marker == null) {
           return const SizedBox.shrink();

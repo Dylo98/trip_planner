@@ -25,6 +25,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const Divider(height: 32),
         Padding(
@@ -44,7 +45,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 200,
+          height: 180,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: places.length,
@@ -61,6 +62,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
   Widget _buildLoadingState() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
       children: [
         const Divider(height: 32),
         const Padding(
@@ -71,7 +73,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
           ),
         ),
         const SizedBox(
-          height: 200,
+          height: 150,
           child: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -94,7 +96,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
     return GestureDetector(
       onTap: () => onPlaceSelected(place),
       child: Container(
-        width: 200,
+        width: 180,
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -186,7 +188,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
         child: Image.network(
           place.photoReference!,
-          height: 100,
+          height: 80,
           width: double.infinity,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stack) {
@@ -195,7 +197,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
           loadingBuilder: (context, child, prog) {
             if (prog == null) return child;
             return Container(
-              height: 100,
+              height: 80,
               decoration: BoxDecoration(
                 color: Colors.grey.shade200,
                 borderRadius: const BorderRadius.vertical(
@@ -216,7 +218,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
 
   Widget _buildEmojiPlaceholder(PlaceSuggestion place) {
     return Container(
-      height: 100,
+      height: 80,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -233,7 +235,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
       child: Center(
         child: Text(
           place.categoryEmoji,
-          style: const TextStyle(fontSize: 48),
+          style: const TextStyle(fontSize: 40),
         ),
       ),
     );

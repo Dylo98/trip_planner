@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/model/friend_model.dart';
 import 'package:trip_planner/features/friends/service/shared_trip_service.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 
@@ -64,12 +65,25 @@ class _ShareTripDialogState extends ConsumerState<ShareTripDialog> {
             const SizedBox(height: 12),
             friendsAsync.when(
               data: (friends) {
-                debugPrint('friends: ${friends.length}');
                 final sharedMembers = sharedMembersAsync.value ?? [];
                 final sharedUids = sharedMembers.map((m) => m.uid).toSet();
-                final availableFriends =
-                    friends.where((f) => !sharedUids.contains(f.uid)).toList();
-                debugPrint('availableFriends: ${availableFriends.length}');
+
+                final uniqueFriendsMap = <String, Friend>{};
+                for (final friend in friends) {
+                  uniqueFriendsMap[friend.uid] = friend;
+                }
+                final List<Friend> uniqueFriends =
+                    uniqueFriendsMap.values.toList();
+                final List<Friend> availableFriends = uniqueFriends
+                    .where((f) => !sharedUids.contains(f.uid))
+                    .toList();
+
+                final availableUids =
+                    availableFriends.map((f) => f.uid).toSet();
+                if (_selectedFriendUid != null &&
+                    !availableUids.contains(_selectedFriendUid)) {
+                  _selectedFriendUid = null;
+                }
 
                 if (friends.isEmpty) {
                   return const Padding(
@@ -94,6 +108,8 @@ class _ShareTripDialogState extends ConsumerState<ShareTripDialog> {
                 }
 
                 return DropdownButtonFormField<String>(
+                  key: ValueKey(
+                      'dropdown_${availableFriends.length}_${availableUids.join()}'),
                   isExpanded: true,
                   decoration: const InputDecoration(
                     labelText: 'Znajomy',
@@ -107,7 +123,53 @@ class _ShareTripDialogState extends ConsumerState<ShareTripDialog> {
                   items: availableFriends.map((friend) {
                     return DropdownMenuItem(
                       value: friend.uid,
-                      child: Text(friend.displayName),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.blue.shade100,
+                            backgroundImage: friend.avatar != null &&
+                                    friend.avatar!.isNotEmpty
+                                ? NetworkImage(friend.avatar!)
+                                : null,
+                            child:
+                                friend.avatar == null || friend.avatar!.isEmpty
+                                    ? Text(
+                                        friend.displayName[0].toUpperCase(),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
+                                      )
+                                    : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  friend.displayName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                Text(
+                                  friend.email,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -144,11 +206,11 @@ class _ShareTripDialogState extends ConsumerState<ShareTripDialog> {
               items: const [
                 DropdownMenuItem(
                   value: TripRole.editor,
-                  child: Text('Edytor – może dodawać i edytować punkty'),
+                  child: Text('Edytor - może dodawać i edytować punkty'),
                 ),
                 DropdownMenuItem(
                   value: TripRole.viewer,
-                  child: Text('Widz – tylko podgląd podróży'),
+                  child: Text('Widz - tylko podgląd podróży'),
                 ),
               ],
               onChanged: (value) {

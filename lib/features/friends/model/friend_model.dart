@@ -71,6 +71,15 @@ class Friend {
   bool get isPending => status == FriendshipStatus.pending;
   bool get isRejected => status == FriendshipStatus.rejected;
   bool get isBlocked => status == FriendshipStatus.blocked;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is Friend && other.uid == uid;
+  }
+
+  @override
+  int get hashCode => uid.hashCode;
 }
 
 class FriendRequest {

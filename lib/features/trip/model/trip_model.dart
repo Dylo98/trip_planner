@@ -1,5 +1,6 @@
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum TripType {
   planned,
@@ -41,15 +42,14 @@ class Trip {
   TripStatus get status {
     if (startDate == null) return TripStatus.upcoming;
     final now = DateTime.now();
-    if (tripType == TripType.ongoing) {
-      return now.isAfter(startDate!) ? TripStatus.ongoing : TripStatus.upcoming;
+
+    if (endDate != null && now.isAfter(endDate!)) {
+      return TripStatus.completed;
     }
     if (now.isBefore(startDate!)) {
       return TripStatus.upcoming;
     }
-    if (endDate != null && now.isAfter(endDate!)) {
-      return TripStatus.completed;
-    }
+
     return TripStatus.ongoing;
   }
 
@@ -72,6 +72,48 @@ class Trip {
       'tripExpenses': tripExpenses?.map((expense) => expense.toJson()).toList(),
       'tripType': tripType.name,
     };
+  }
+
+  factory Trip.fromFirestore(Map<String, dynamic> data) {
+    TripType? parsedType;
+    if (data['tripType'] != null) {
+      try {
+        parsedType = TripType.values.firstWhere(
+          (e) => e.name == data['tripType'],
+        );
+      } catch (e) {
+        parsedType = null;
+      }
+    }
+
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      if (value is Timestamp) return value.toDate();
+      if (value is String) return DateTime.parse(value);
+      return null;
+    }
+
+    return Trip(
+      id: data['id'],
+      name: data['name'],
+      startDate: parseDate(data['startDate']),
+      endDate: parseDate(data['endDate']),
+      description: data['description'] as String?,
+      imageUrl:
+          data['imageUrl'] != null ? List<String>.from(data['imageUrl']) : [],
+      tripPhotoUrl: data['tripPhotoUrl'] as String?,
+      markerPoints: data['markerPoints'] != null
+          ? (data['markerPoints'] as List)
+              .map((m) => MarkerPoint.fromJson(m))
+              .toList()
+          : [],
+      tripExpenses: data['tripExpenses'] != null
+          ? (data['tripExpenses'] as List)
+              .map((e) => TripExpenseItem.fromJson(e))
+              .toList()
+          : null,
+      tripType: parsedType,
+    );
   }
 
   factory Trip.fromJson(Map<String, dynamic> json) {

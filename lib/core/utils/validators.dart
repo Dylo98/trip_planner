@@ -138,20 +138,22 @@ class Validators {
       if (ongoingTrips.isNotEmpty) {
         return 'Możesz mieć tylko jedną trwającą podróż. Zakończ obecną podróż "${ongoingTrips.first.name}" przed utworzeniem nowej.';
       }
-
       final now = DateTime.now();
-      final thirtyDaysFromNow = now.add(const Duration(days: 30));
-
-      final conflictingPlanned = existingTrips.where((trip) {
+      final currentlyActiveTrips = existingTrips.where((trip) {
         if (trip.id == currentTripId) return false;
         if (trip.startDate == null) return false;
 
-        return trip.startDate!.isAfter(now) &&
-            trip.startDate!.isBefore(thirtyDaysFromNow);
+        final tripEnd = trip.endDate ?? trip.startDate!;
+
+        final isCurrentlyActive = !trip.startDate!.isAfter(now) &&
+            !tripEnd.isBefore(DateTime(now.year, now.month, now.day));
+
+        return isCurrentlyActive;
       }).toList();
 
-      if (conflictingPlanned.isNotEmpty) {
-        return 'Masz zaplanowaną podróż "${conflictingPlanned.first.name}" w ciągu 30 dni. Zakończ bieżącą podróż lub przesuń datę zaplanowanej.';
+      if (currentlyActiveTrips.isNotEmpty) {
+        final active = currentlyActiveTrips.first;
+        return 'Obecnie trwa podróż "${active.name}" (${_formatDate(active.startDate!)}${active.endDate != null ? ' - ${_formatDate(active.endDate!)}' : ''}). Zakończ ją przed utworzeniem nowej trwającej podróży.';
       }
     } else {
       final conflictingTrips = existingTrips.where((trip) {

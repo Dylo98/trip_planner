@@ -26,7 +26,9 @@ class TripDeletionService extends BaseTripService {
         .get();
 
     if (tripDoc.exists && tripDoc.data() != null) {
-      final trip = Trip.fromJson(tripDoc.data()!);
+      final tripData = tripDoc.data()!;
+      tripData['id'] = tripId;
+      final trip = Trip.fromFirestore(tripData);
 
       await _deleteTripMainImage(trip);
 

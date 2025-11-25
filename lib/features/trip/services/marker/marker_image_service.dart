@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
-import 'package:trip_planner/features/trip/services/trip/trip_crud_service.dart';
 
 /// Serwis odpowiedzialny za zarządzanie zdjęciami markerów
 ///
@@ -13,10 +12,7 @@ class MarkerImageService extends BaseTripService {
     required super.firestore,
     required super.auth,
     required super.storage,
-    required TripCrudService tripCrudService,
-  }) : _tripCrudService = tripCrudService;
-
-  final TripCrudService _tripCrudService;
+  });
 
   /// Dodaje zdjęcie do markera
   Future<void> addImageToMarker({
@@ -24,26 +20,27 @@ class MarkerImageService extends BaseTripService {
     required String markerId,
     required File image,
   }) async {
-    final uid = requireUserId();
+    requireUserId();
+
+    final ownerId = await getTripOwnerId(tripId);
+
     final imageUrl = await _uploadMarkerImage(
-      uid: uid,
+      uid: ownerId,
       tripId: tripId,
       markerId: markerId,
       imageFile: image,
     );
 
-    final tripDoc = await firestore
-        .collection('users')
-        .doc(uid)
-        .collection('trips')
-        .doc(tripId)
-        .get();
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
+    final tripDoc = await tripRef.get();
 
     if (!tripDoc.exists || tripDoc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(tripDoc.data()!);
+    final tripData = tripDoc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
 
     final updatedMarkers = trip.markerPoints.map((marker) {
       if (marker.id == markerId) {
@@ -57,7 +54,8 @@ class MarkerImageService extends BaseTripService {
     }).toList();
 
     final updatedTrip = trip.copyWith(markerPoints: updatedMarkers);
-    await _tripCrudService.saveTrip(updatedTrip);
+
+    await tripRef.set(updatedTrip.toJson());
   }
 
   /// Uploaduje zdjęcie markera do Firebase Storage

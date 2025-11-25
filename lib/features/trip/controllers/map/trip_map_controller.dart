@@ -90,7 +90,10 @@ class TripMapController {
       position: position,
       name: name,
     );
+
     await animateToPosition(position);
+
+    await Future.delayed(const Duration(milliseconds: 500));
 
     final tripService = ref.read(tripServiceProvider);
     final updatedTrip = await tripService.getTrip(tripId);

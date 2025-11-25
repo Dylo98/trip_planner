@@ -30,35 +30,42 @@ class TripCrudService extends BaseTripService {
   /// Pobiera pojedynczą podróż po ID
   Future<Trip?> getTrip(String tripId) async {
     try {
-      final uid = requireUserId();
+      requireUserId();
 
-      final doc = await firestore
-          .collection('users')
-          .doc(uid)
-          .collection('trips')
-          .doc(tripId)
-          .get();
+      final ownerId = await getTripOwnerId(tripId);
+      final tripRef = getTripRefWithOwner(tripId, ownerId);
+
+      final doc = await tripRef.get();
 
       if (!doc.exists || doc.data() == null) {
         return null;
       }
 
-      return Trip.fromJson(doc.data()!);
+      final tripData = doc.data()!;
+      tripData['id'] = doc.id;
+      return Trip.fromFirestore(tripData);
     } catch (e) {
       return null;
     }
   }
 
   /// Obserwuje zmiany w podróży w czasie rzeczywistym
-  Stream<Trip> watchTrip(String tripId) {
+  Stream<Trip> watchTrip(String tripId) async* {
     final uid = auth.currentUser?.uid;
     if (uid == null) {
-      return Stream.error(Exception('Użytkownik niezalogowany'));
+      throw Exception('Użytkownik niezalogowany');
+    }
+    String? ownerId;
+
+    try {
+      ownerId = await getTripOwnerId(tripId);
+    } catch (e) {
+      throw Exception('Podróż nie istnieje');
     }
 
-    return firestore
+    yield* firestore
         .collection('users')
-        .doc(uid)
+        .doc(ownerId)
         .collection('trips')
         .doc(tripId)
         .snapshots()
@@ -66,7 +73,9 @@ class TripCrudService extends BaseTripService {
       if (!doc.exists || doc.data() == null) {
         throw Exception('Podróż nie istnieje');
       }
-      return Trip.fromJson(doc.data()!);
+      final tripData = doc.data()!;
+      tripData['id'] = doc.id;
+      return Trip.fromFirestore(tripData);
     });
   }
 
@@ -82,7 +91,10 @@ class TripCrudService extends BaseTripService {
       for (final doc in snapshot.docs) {
         try {
           if (doc.data().isNotEmpty) {
-            trips.add(Trip.fromJson(doc.data()));
+            final tripData = doc.data();
+            tripData['id'] = doc.id;
+            final trip = Trip.fromFirestore(tripData);
+            trips.add(trip);
           }
         } catch (e) {
           //

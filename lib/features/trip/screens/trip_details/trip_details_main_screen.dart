@@ -7,6 +7,7 @@ import 'package:trip_planner/features/trip/controllers/trip_details_edit_control
 import 'package:trip_planner/features/trip/widgets/trip_details/trip_date_range.dart';
 import 'package:trip_planner/features/trip/widgets/trip_details/trip_header_image.dart';
 import 'package:trip_planner/features/trip/widgets/trip_details/trip_photo_grid.dart';
+import 'package:trip_planner/features/trip/widgets/trip_details/trip_status_chip.dart';
 
 class TripDetailsScreen extends ConsumerWidget {
   const TripDetailsScreen({super.key, required this.trip});
@@ -95,7 +96,7 @@ class TripDetailsScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                _buildStatusChip(liveTrip),
+                TripStatusChip(trip: liveTrip),
                 const SizedBox(height: 16),
                 TripDateRange(
                   startDate: liveTrip.startDate,
@@ -156,53 +157,6 @@ class TripDetailsScreen extends ConsumerWidget {
                 else
                   TripPhotoGrid(imageUrls: allImages),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatusChip(Trip trip) {
-    final isOngoing = trip.tripType == TripType.ongoing;
-    final isPast = trip.endDate?.isBefore(DateTime.now()) ?? false;
-
-    String label;
-    Color color;
-    IconData icon;
-
-    if (isOngoing) {
-      label = 'W trakcie';
-      color = Colors.green;
-      icon = Icons.flight_takeoff;
-    } else if (isPast) {
-      label = 'Zakończona';
-      color = Colors.grey;
-      icon = Icons.check_circle;
-    } else {
-      label = 'Zaplanowana';
-      color = Colors.blue;
-      icon = Icons.calendar_today;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: color),
-          const SizedBox(width: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
             ),
           ),
         ],

@@ -137,6 +137,9 @@ class _TripFormState extends ConsumerState<TripForm> {
                         onChanged: (value) {
                           setState(() {
                             _selectedTripType = value!;
+                            ref
+                                .read(tripFormProvider.notifier)
+                                .setTripType(value);
                             if (value == TripType.ongoing) {
                               _endDateController.clear();
                               ref

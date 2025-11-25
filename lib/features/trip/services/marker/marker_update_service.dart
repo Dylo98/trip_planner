@@ -23,7 +23,8 @@ class MarkerUpdateService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final tripSnap = await tripRef.get();
     if (!tripSnap.exists || tripSnap.data() == null) {
@@ -53,7 +54,8 @@ class MarkerUpdateService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final tripSnap = await tripRef.get();
     if (!tripSnap.exists || tripSnap.data() == null) {
@@ -84,14 +86,17 @@ class MarkerUpdateService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final doc = await tripRef.get();
     if (!doc.exists || doc.data() == null) {
       throw Exception('Podróż nie istnieje');
     }
 
-    final trip = Trip.fromJson(doc.data()!);
+    final tripData = doc.data()!;
+    tripData['id'] = tripId;
+    final trip = Trip.fromFirestore(tripData);
 
     final updatedMarkers = trip.markerPoints.map((marker) {
       if (marker.id == markerId) {
@@ -114,7 +119,8 @@ class MarkerUpdateService extends BaseTripService {
   }) async {
     requireUserId();
 
-    final tripRef = getTripRef(tripId);
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
 
     final tripSnap = await tripRef.get();
     if (!tripSnap.exists || tripSnap.data() == null) {

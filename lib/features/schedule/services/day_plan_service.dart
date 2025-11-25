@@ -20,24 +20,57 @@ class DayPlanService {
     return uid;
   }
 
-  CollectionReference<Map<String, dynamic>> _getDayPlansCollection(
-      String tripId) {
+  Future<String> _getTripOwnerId(String tripId) async {
+    final currentUid = _userId;
+
+    final ownTripDoc = await _firestore
+        .collection('users')
+        .doc(currentUid)
+        .collection('trips')
+        .doc(tripId)
+        .get();
+
+    if (ownTripDoc.exists) {
+      return currentUid;
+    }
+    final sharedTripDoc = await _firestore
+        .collection('users')
+        .doc(currentUid)
+        .collection('shared_trips')
+        .doc(tripId)
+        .get();
+
+    if (sharedTripDoc.exists && sharedTripDoc.data() != null) {
+      final ownerId = sharedTripDoc.data()!['ownerId'] as String?;
+      if (ownerId != null) {
+        return ownerId;
+      }
+    }
+
+    throw Exception('Nie znaleziono podróży');
+  }
+
+  Future<CollectionReference<Map<String, dynamic>>> _getDayPlansCollection(
+      String tripId) async {
+    final ownerId = await _getTripOwnerId(tripId);
     return _firestore
         .collection('users')
-        .doc(_userId)
+        .doc(ownerId)
         .collection('trips')
         .doc(tripId)
         .collection('dayPlans');
   }
 
   Future<void> saveDayPlan(String tripId, DayPlan dayPlan) async {
-    final docRef = _getDayPlansCollection(tripId).doc(dayPlan.dateKey);
+    final collection = await _getDayPlansCollection(tripId);
+    final docRef = collection.doc(dayPlan.dateKey);
     await docRef.set(dayPlan.toJson());
   }
 
   Future<DayPlan?> getDayPlan(String tripId, DateTime date) async {
     final dateKey = _formatDateKey(date);
-    final doc = await _getDayPlansCollection(tripId).doc(dateKey).get();
+    final collection = await _getDayPlansCollection(tripId);
+    final doc = await collection.doc(dateKey).get();
 
     if (!doc.exists || doc.data() == null) {
       return null;
@@ -48,16 +81,27 @@ class DayPlanService {
 
   Stream<DayPlan> watchDayPlan(String tripId, DateTime date) {
     final dateKey = _formatDateKey(date);
-    return _getDayPlansCollection(tripId).doc(dateKey).snapshots().map((doc) {
-      if (!doc.exists || doc.data() == null) {
-        return DayPlan.empty(date);
-      }
-      return DayPlan.fromJson(doc.data()!);
+    return Stream.fromFuture(_getTripOwnerId(tripId)).asyncExpand((ownerId) {
+      return _firestore
+          .collection('users')
+          .doc(ownerId)
+          .collection('trips')
+          .doc(tripId)
+          .collection('dayPlans')
+          .doc(dateKey)
+          .snapshots()
+          .map((doc) {
+        if (!doc.exists || doc.data() == null) {
+          return DayPlan.empty(date);
+        }
+        return DayPlan.fromJson(doc.data()!);
+      });
     });
   }
 
   Future<List<DayPlan>> getAllDayPlans(String tripId) async {
-    final snapshot = await _getDayPlansCollection(tripId).get();
+    final collection = await _getDayPlansCollection(tripId);
+    final snapshot = await collection.get();
 
     return snapshot.docs
         .map((doc) {
@@ -73,20 +117,29 @@ class DayPlanService {
   }
 
   Stream<List<DayPlan>> watchAllDayPlans(String tripId) {
-    return _getDayPlansCollection(tripId).snapshots().map((snapshot) {
-      final plans = snapshot.docs
-          .map((doc) {
-            try {
-              return DayPlan.fromJson(doc.data());
-            } catch (e) {
-              return null;
-            }
-          })
-          .whereType<DayPlan>()
-          .toList();
+    return Stream.fromFuture(_getTripOwnerId(tripId)).asyncExpand((ownerId) {
+      return _firestore
+          .collection('users')
+          .doc(ownerId)
+          .collection('trips')
+          .doc(tripId)
+          .collection('dayPlans')
+          .snapshots()
+          .map((snapshot) {
+        final plans = snapshot.docs
+            .map((doc) {
+              try {
+                return DayPlan.fromJson(doc.data());
+              } catch (e) {
+                return null;
+              }
+            })
+            .whereType<DayPlan>()
+            .toList();
 
-      plans.sort((a, b) => a.date.compareTo(b.date));
-      return plans;
+        plans.sort((a, b) => a.date.compareTo(b.date));
+        return plans;
+      });
     });
   }
 
@@ -96,7 +149,8 @@ class DayPlanService {
     DayPlanItem item,
   ) async {
     final dateKey = _formatDateKey(date);
-    final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+    final collection = await _getDayPlansCollection(tripId);
+    final docRef = collection.doc(dateKey);
 
     final doc = await docRef.get();
     DayPlan dayPlan;
@@ -118,7 +172,8 @@ class DayPlanService {
     String itemId,
   ) async {
     final dateKey = _formatDateKey(date);
-    final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+    final collection = await _getDayPlansCollection(tripId);
+    final docRef = collection.doc(dateKey);
 
     final doc = await docRef.get();
     if (!doc.exists || doc.data() == null) return;
@@ -141,7 +196,8 @@ class DayPlanService {
     DayPlanItem updatedItem,
   ) async {
     final dateKey = _formatDateKey(date);
-    final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+    final collection = await _getDayPlansCollection(tripId);
+    final docRef = collection.doc(dateKey);
 
     final doc = await docRef.get();
     if (!doc.exists || doc.data() == null) return;
@@ -162,7 +218,8 @@ class DayPlanService {
     List<ExpenseItem> expenses,
   ) async {
     final dateKey = _formatDateKey(date);
-    final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+    final collection = await _getDayPlansCollection(tripId);
+    final docRef = collection.doc(dateKey);
 
     final doc = await docRef.get();
     if (!doc.exists || doc.data() == null) return;
@@ -185,7 +242,8 @@ class DayPlanService {
     List<DayPlanItem> reorderedItems,
   ) async {
     final dateKey = _formatDateKey(date);
-    final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+    final collection = await _getDayPlansCollection(tripId);
+    final docRef = collection.doc(dateKey);
 
     final doc = await docRef.get();
     if (!doc.exists || doc.data() == null) return;
@@ -201,7 +259,8 @@ class DayPlanService {
   }
 
   Future<void> deleteAllDayPlans(String tripId) async {
-    final snapshot = await _getDayPlansCollection(tripId).get();
+    final collection = await _getDayPlansCollection(tripId);
+    final snapshot = await collection.get();
     final batch = _firestore.batch();
 
     for (final doc in snapshot.docs) {
@@ -219,12 +278,13 @@ class DayPlanService {
     final end = endDate ?? startDate;
     final days = end.difference(startDate).inDays + 1;
 
+    final collection = await _getDayPlansCollection(tripId);
     final batch = _firestore.batch();
 
     for (int i = 0; i < days; i++) {
       final date = startDate.add(Duration(days: i));
       final dateKey = _formatDateKey(date);
-      final docRef = _getDayPlansCollection(tripId).doc(dateKey);
+      final docRef = collection.doc(dateKey);
 
       final existingDoc = await docRef.get();
       if (!existingDoc.exists) {

@@ -9,7 +9,6 @@ import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/utils/transport_helper.dart';
 import 'marker_details_controller.dart';
 
-/// Kontroler odpowiedzialny za zarządzanie markerami (dodawanie, usuwanie, aktualizacja)
 class MarkerManagementController {
   MarkerManagementController({
     required this.ref,
@@ -63,13 +62,17 @@ class MarkerManagementController {
           transportMode: transportMode,
         );
       }
+
       final newMarker = MarkerPoint(
         id: name,
         name: name,
         position: position,
+        transportMode: 'other',
       );
 
       await tripService.addMarkerToTrip(tripId, newMarker);
+
+      await Future.delayed(const Duration(milliseconds: 300));
     });
   }
 

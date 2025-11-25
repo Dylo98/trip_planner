@@ -90,6 +90,7 @@ class SharedTripService {
     }
 
     final friendDoc = await _firestore.collection('users').doc(friendUid).get();
+
     if (!friendDoc.exists) {
       throw Exception('Użytkownik nie istnieje');
     }
@@ -113,7 +114,6 @@ class SharedTripService {
         .collection('shared_members')
         .doc(friendUid)
         .set(member.toJson());
-
     await _firestore
         .collection('users')
         .doc(friendUid)
@@ -221,10 +221,18 @@ class SharedTripService {
             .get();
 
         if (tripDoc.exists && tripDoc.data() != null) {
-          trips.add(Trip.fromJson(tripDoc.data()!));
+          final tripData = Map<String, dynamic>.from(tripDoc.data()!);
+
+          tripData['id'] = tripId;
+
+          try {
+            final trip = Trip.fromFirestore(tripData);
+            trips.add(trip);
+          } catch (e) {
+            //
+          }
         }
       }
-
       return trips;
     });
   }

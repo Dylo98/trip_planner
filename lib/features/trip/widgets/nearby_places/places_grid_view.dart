@@ -18,23 +18,28 @@ class PlacesGridView extends StatelessWidget {
       return _buildEmptyState(context);
     }
 
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.85,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.5,
       ),
-      padding: const EdgeInsets.all(8),
-      itemCount: places.length,
-      itemBuilder: (context, index) {
-        return PlaceCard(
-          place: places[index],
-          onPlaceSelected: onPlaceSelected,
-        );
-      },
+      child: GridView.builder(
+        shrinkWrap: false,
+        physics: const AlwaysScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.75,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+        ),
+        padding: const EdgeInsets.all(8),
+        itemCount: places.length,
+        itemBuilder: (context, index) {
+          return PlaceCard(
+            place: places[index],
+            onPlaceSelected: onPlaceSelected,
+          );
+        },
+      ),
     );
   }
 
