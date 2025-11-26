@@ -9,12 +9,14 @@ class MarkerDetailsContent extends StatelessWidget {
     super.key,
     required this.marker,
     required this.onDescriptionChanged,
+    required this.onNameChanged,
     required this.onPlaceSelected,
     required this.onDelete,
   });
 
   final MarkerPoint marker;
   final Function(String) onDescriptionChanged;
+  final Function(String) onNameChanged;
   final Function(GooglePlace) onPlaceSelected;
   final VoidCallback onDelete;
 
@@ -36,13 +38,63 @@ class MarkerDetailsContent extends StatelessWidget {
   }
 
   Widget _buildTitle(BuildContext context) {
-    return Text(
-      marker.name ?? 'Bez nazwy',
-      style: const TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            marker.name ?? 'Bez nazwy',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.edit, size: 20),
+          tooltip: 'Zmień nazwę',
+          onPressed: () => _showEditNameDialog(context),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showEditNameDialog(BuildContext context) async {
+    final controller = TextEditingController(text: marker.name ?? '');
+
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Zmień nazwę punktu'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(
+            hintText: 'Wpisz nową nazwę...',
+            border: OutlineInputBorder(),
+          ),
+          maxLength: 50,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Anuluj'),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              if (name.isNotEmpty) {
+                Navigator.pop(context, name);
+              }
+            },
+            child: const Text('Zapisz'),
+          ),
+        ],
       ),
     );
+
+    if (newName != null && newName.isNotEmpty) {
+      onNameChanged(newName);
+    }
   }
 
   Widget _buildDescription() {

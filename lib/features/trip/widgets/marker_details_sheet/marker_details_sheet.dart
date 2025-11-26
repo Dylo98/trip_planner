@@ -109,6 +109,9 @@ class _MarkerDetailsSheetState extends ConsumerState<MarkerDetailsSheet> {
       onDescriptionChanged: (description) async {
         await _state.updateDescription(description, setState);
       },
+      onNameChanged: (name) async {
+        await _state.updateName(name, setState);
+      },
       onPlaceSelected: (place) async {
         await _placeController.handlePlaceSelection(place);
       },

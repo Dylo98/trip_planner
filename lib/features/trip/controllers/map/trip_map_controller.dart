@@ -121,4 +121,6 @@ class TripMapController {
   void dispose() {
     cameraController.dispose();
   }
+
+  animateCameraToPosition(LatLng latLng, {required int zoom}) {}
 }

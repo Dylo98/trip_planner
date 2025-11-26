@@ -81,16 +81,6 @@ class _ExpenseItemDialogState extends ConsumerState<ExpenseItemDialog> {
     }
   }
 
-  void _selectSharedMember(SharedTripMember? member) {
-    if (member == null) return;
-
-    setState(() {
-      _payerMode = _PayerMode.sharedMember;
-      _payerNameController.text = member.displayName;
-      _selectedPayerUserId = member.uid;
-    });
-  }
-
   void _selectCustomName() {
     setState(() {
       _payerMode = _PayerMode.customName;

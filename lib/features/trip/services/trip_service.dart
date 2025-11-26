@@ -143,7 +143,7 @@ class TripService {
         transportMode: transportMode,
       );
 
-  /// Aktualizuje listę wydatków dla markera (NOWA METODA)
+  /// Aktualizuje listę wydatków dla markera
   Future<void> updateMarkerExpenses({
     required String tripId,
     required String markerId,
@@ -195,6 +195,18 @@ class TripService {
         tripId: tripId,
         markerId: markerId,
         description: description,
+      );
+
+  /// Aktualizuje nazwę markera
+  Future<void> updateMarkerName({
+    required String tripId,
+    required String markerId,
+    required String name,
+  }) =>
+      _markerUpdateService.updateMarkerName(
+        tripId: tripId,
+        markerId: markerId,
+        name: name,
       );
 
   // =============================

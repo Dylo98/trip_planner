@@ -32,7 +32,6 @@ class TripFormService {
       return;
     }
 
-    final image = ref.read(tripPhotoProvider);
     final markers = ref.read(tripMarkersProvider);
 
     try {

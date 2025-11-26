@@ -7,7 +7,8 @@ import 'package:trip_planner/features/trip/services/base_trip_service.dart';
 /// Zawiera metody do:
 /// - Aktualizacji dat przyjazdu/wyjazdu
 /// - Aktualizacji środka transportu
-/// - Aktualizacji wydatków (nowa lista wydatków)
+/// - Aktualizacji wydatków
+/// - Aktualizacji nazwy markera
 class MarkerUpdateService extends BaseTripService {
   MarkerUpdateService({
     required super.firestore,
@@ -78,7 +79,39 @@ class MarkerUpdateService extends BaseTripService {
     await tripRef.update({'markerPoints': markers});
   }
 
-  /// Aktualizuje listę wydatków dla markera (NOWA METODA)
+  /// Aktualizuje nazwę markera
+  Future<void> updateMarkerName({
+    required String tripId,
+    required String markerId,
+    required String name,
+  }) async {
+    requireUserId();
+
+    final ownerId = await getTripOwnerId(tripId);
+    final tripRef = getTripRefWithOwner(tripId, ownerId);
+
+    final tripSnap = await tripRef.get();
+    if (!tripSnap.exists || tripSnap.data() == null) {
+      return;
+    }
+
+    final data = tripSnap.data()!;
+
+    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
+      return;
+    }
+
+    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
+    final index = markers.indexWhere((m) => m['id'] == markerId);
+
+    if (index == -1) return;
+
+    markers[index]['name'] = name;
+
+    await tripRef.update({'markerPoints': markers});
+  }
+
+  /// Aktualizuje listę wydatków dla markera
   Future<void> updateMarkerExpenses({
     required String tripId,
     required String markerId,
@@ -108,38 +141,5 @@ class MarkerUpdateService extends BaseTripService {
     await tripRef.update({
       'markerPoints': updatedMarkers.map((m) => m.toJson()).toList(),
     });
-  }
-
-  /// Aktualizuje wydatek dla markera (DEPRECATED - zachowane dla kompatybilności)
-  @Deprecated('Użyj updateMarkerExpenses zamiast updateMarkerExpense')
-  Future<void> updateMarkerExpense({
-    required String tripId,
-    required String markerId,
-    required double expense,
-  }) async {
-    requireUserId();
-
-    final ownerId = await getTripOwnerId(tripId);
-    final tripRef = getTripRefWithOwner(tripId, ownerId);
-
-    final tripSnap = await tripRef.get();
-    if (!tripSnap.exists || tripSnap.data() == null) {
-      return;
-    }
-
-    final data = tripSnap.data()!;
-
-    if (!data.containsKey('markerPoints') || data['markerPoints'] is! List) {
-      return;
-    }
-
-    final markers = List<Map<String, dynamic>>.from(data['markerPoints']);
-    final index = markers.indexWhere((m) => m['id'] == markerId);
-
-    if (index == -1) return;
-
-    markers[index]['expense'] = expense;
-
-    await tripRef.update({'markerPoints': markers});
   }
 }

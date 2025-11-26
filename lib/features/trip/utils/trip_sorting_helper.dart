@@ -15,10 +15,18 @@ enum SortOption {
 
 class TripSortingHelper {
   static double calculateTotalBudget(Trip trip) {
-    return trip.markerPoints.fold(
+    final markerExpenses = trip.markerPoints.fold(
       0.0,
       (sum, marker) => sum + marker.totalExpense,
     );
+
+    final tripExpenses = trip.tripExpenses?.fold(
+          0.0,
+          (sum, expense) => sum + expense.amount,
+        ) ??
+        0.0;
+
+    return markerExpenses + tripExpenses;
   }
 
   static List<Trip> filterAndSort(
