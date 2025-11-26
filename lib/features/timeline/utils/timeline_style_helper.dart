@@ -33,18 +33,25 @@ class TimelineStyleHelper {
         end: Alignment.bottomRight,
         colors: [
           color,
-          color.withValues(alpha: 0.7),
+          color.withValues(alpha: 0.8),
         ],
       ),
       border: Border.all(
         color: Colors.white,
-        width: 4,
+        width: 5,
       ),
       boxShadow: [
         BoxShadow(
-          color: color.withValues(alpha: 0.4),
-          blurRadius: 12,
+          color: color.withValues(alpha: 0.5),
+          blurRadius: 16,
           spreadRadius: 2,
+          offset: const Offset(0, 4),
+        ),
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.1),
+          blurRadius: 8,
+          spreadRadius: 0,
+          offset: const Offset(0, 2),
         ),
       ],
     );
@@ -52,10 +59,13 @@ class TimelineStyleHelper {
 
   BoxDecoration getGradientDecoration() {
     return BoxDecoration(
+      shape: BoxShape.circle,
       gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
         colors: [
           color,
-          color.withValues(alpha: 0.7),
+          color.withValues(alpha: 0.8),
         ],
       ),
     );
@@ -69,25 +79,42 @@ class TimelineStyleHelper {
         end: Alignment.bottomRight,
         colors: [
           Colors.white,
-          color.withValues(alpha: 0.05),
+          color.withValues(alpha: 0.03),
         ],
       ),
       border: Border.all(
-        color: color.withValues(alpha: 0.2),
+        color: color.withValues(alpha: 0.25),
         width: 2,
       ),
+      boxShadow: [
+        BoxShadow(
+          color: color.withValues(alpha: 0.15),
+          blurRadius: 12,
+          spreadRadius: 0,
+          offset: const Offset(0, 4),
+        ),
+      ],
     );
   }
 
   BoxDecoration getBadgeDecoration() {
     return BoxDecoration(
       gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
         colors: [
           color,
-          color.withValues(alpha: 0.7),
+          color.withValues(alpha: 0.85),
         ],
       ),
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: color.withValues(alpha: 0.3),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
     );
   }
 
@@ -109,6 +136,8 @@ class TimelineStyleHelper {
         return Icons.directions_bike;
       case 'boat':
         return Icons.directions_boat;
+      case 'other':
+        return Icons.more_horiz;
       default:
         return Icons.location_on;
     }
@@ -117,10 +146,48 @@ class TimelineStyleHelper {
   static String getCleanPlaceName(String? fullName) {
     if (fullName == null || fullName.isEmpty) return 'Bez nazwy';
 
-    if (fullName.contains(',')) {
-      return fullName.split(',').first.trim();
+    String cleaned = fullName.trim();
+
+    final commaIndex = cleaned.indexOf(',');
+    final dashIndex = cleaned.indexOf('-');
+
+    if (commaIndex != -1 && dashIndex != -1) {
+      final firstSeparator = commaIndex < dashIndex ? commaIndex : dashIndex;
+      return cleaned.substring(0, firstSeparator).trim();
     }
 
-    return fullName;
+    if (commaIndex != -1) {
+      return cleaned.substring(0, commaIndex).trim();
+    }
+
+    if (dashIndex != -1) {
+      return cleaned.substring(0, dashIndex).trim();
+    }
+    return cleaned;
+  }
+
+  static String getTransportModeName(String? mode) {
+    if (mode == null) return 'Brak';
+
+    switch (mode.toLowerCase()) {
+      case 'car':
+        return 'Samochód';
+      case 'bus':
+        return 'Autobus';
+      case 'train':
+        return 'Pociąg';
+      case 'plane':
+        return 'Samolot';
+      case 'walk':
+        return 'Pieszo';
+      case 'bike':
+        return 'Rower';
+      case 'boat':
+        return 'Łódź';
+      case 'other':
+        return 'Inne';
+      default:
+        return 'Nieznany';
+    }
   }
 }

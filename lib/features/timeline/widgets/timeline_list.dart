@@ -3,10 +3,12 @@ import 'package:trip_planner/features/timeline/widgets/timeline_tile_widget.dart
 
 class TimelineList extends StatelessWidget {
   final List markers;
+  final String? tripId;
 
   const TimelineList({
     super.key,
     required this.markers,
+    this.tripId,
   });
 
   @override
@@ -37,6 +39,7 @@ class TimelineList extends StatelessWidget {
             isFirst: isFirst,
             isLast: isLast,
             isLeft: isLeft,
+            tripId: tripId,
           );
         },
       ),

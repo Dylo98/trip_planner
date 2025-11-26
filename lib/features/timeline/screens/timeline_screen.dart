@@ -28,7 +28,10 @@ class TimelineScreen extends ConsumerWidget {
             );
           }
 
-          return TimelineList(markers: markers);
+          return TimelineList(
+            markers: markers,
+            tripId: tripId,
+          );
         },
         loading: () => const LoadingIndicator(),
         error: (e, _) => ErrorDisplay(error: e),

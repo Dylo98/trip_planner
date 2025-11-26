@@ -1,15 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeline_tile/timeline_tile.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/timeline/utils/timeline_style_helper.dart';
+import 'package:trip_planner/features/trip/widgets/marker_details_sheet/marker_details_sheet.dart';
 
-class TimelineTileWidget extends StatelessWidget {
+class TimelineTileWidget extends ConsumerWidget {
   final MarkerPoint marker;
   final int index;
   final bool isFirst;
   final bool isLast;
   final bool isLeft;
+  final String? tripId;
 
   const TimelineTileWidget({
     super.key,
@@ -18,10 +21,11 @@ class TimelineTileWidget extends StatelessWidget {
     required this.isFirst,
     required this.isLast,
     required this.isLeft,
+    this.tripId,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final styleHelper = TimelineStyleHelper(index: index);
 
     return TimelineTile(
@@ -52,8 +56,9 @@ class TimelineTileWidget extends StatelessWidget {
 
     return Container(
       decoration: styleHelper.getIndicatorDecoration(),
-      child:
-          hasImage ? _buildImageIndicator(styleHelper) : _buildIconIndicator(),
+      child: hasImage
+          ? _buildImageIndicator(styleHelper)
+          : _buildIconIndicator(styleHelper),
     );
   }
 
@@ -89,65 +94,89 @@ class TimelineTileWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildIconIndicator() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            TimelineStyleHelper.getTransportIcon(marker.transportMode),
-            color: Colors.white,
-            size: 28,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            '${index + 1}',
-            style: const TextStyle(
+  Widget _buildIconIndicator(TimelineStyleHelper styleHelper) {
+    return Container(
+      decoration: styleHelper.getGradientDecoration(),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              TimelineStyleHelper.getTransportIcon(marker.transportMode),
               color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+              size: 28,
             ),
-          ),
-        ],
+            const SizedBox(height: 2),
+            Text(
+              '${index + 1}',
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildCard(BuildContext context, TimelineStyleHelper styleHelper) {
     final totalExpense = marker.totalExpense;
+
     return Padding(
       padding: EdgeInsets.only(
         left: isLeft ? 0 : 24,
         right: isLeft ? 24 : 0,
         bottom: 8,
       ),
-      child: Card(
-        elevation: 6,
-        shadowColor: styleHelper.color.withValues(alpha: 0.3),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Container(
-          decoration: styleHelper.getCardDecoration(),
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _TimelineCardHeader(
-                  index: index,
-                  markerName: marker.name,
-                  styleHelper: styleHelper,
-                ),
-                if (marker.description != null &&
-                    marker.description!.isNotEmpty)
-                  _TimelineCardDescription(description: marker.description!),
-                if (totalExpense > 0)
-                  _TimelineCardExpense(expense: totalExpense),
-              ],
+      child: InkWell(
+        onTap: () => _showMarkerDetails(context),
+        borderRadius: BorderRadius.circular(20),
+        child: Card(
+          elevation: 8,
+          shadowColor: styleHelper.color.withValues(alpha: 0.4),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            decoration: styleHelper.getCardDecoration(),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _TimelineCardHeader(
+                    index: index,
+                    markerName: marker.name,
+                    styleHelper: styleHelper,
+                  ),
+                  if (marker.description != null &&
+                      marker.description!.isNotEmpty)
+                    _TimelineCardDescription(description: marker.description!),
+                  if (totalExpense > 0) ...[
+                    const SizedBox(height: 12),
+                    _TimelineCardExpense(
+                      expense: totalExpense,
+                      color: styleHelper.color,
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _showMarkerDetails(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => MarkerDetailsSheet(
+        marker: marker,
+        tripId: tripId,
       ),
     );
   }
@@ -166,35 +195,42 @@ class _TimelineCardHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    final cleanName = TimelineStyleHelper.getCleanPlaceName(markerName);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 10,
-            vertical: 5,
-          ),
-          decoration: styleHelper.getBadgeDecoration(),
-          child: Text(
-            '${index + 1}',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 11,
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 6,
+              ),
+              decoration: styleHelper.getBadgeDecoration(),
+              child: Text(
+                '${index + 1}',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            TimelineStyleHelper.getCleanPlaceName(markerName),
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+        const SizedBox(height: 8),
+        Text(
+          cleanName,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            letterSpacing: -0.3,
+            height: 1.2,
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -209,15 +245,15 @@ class _TimelineCardDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 12),
       child: Text(
         description,
         style: TextStyle(
           fontSize: 13,
-          color: Colors.grey[700],
-          height: 1.4,
+          color: Colors.grey[600],
+          height: 1.5,
         ),
-        maxLines: 2,
+        maxLines: 3,
         overflow: TextOverflow.ellipsis,
       ),
     );
@@ -226,44 +262,46 @@ class _TimelineCardDescription extends StatelessWidget {
 
 class _TimelineCardExpense extends StatelessWidget {
   final double expense;
+  final Color color;
 
-  const _TimelineCardExpense({required this.expense});
+  const _TimelineCardExpense({
+    required this.expense,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 6,
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 10,
+        vertical: 6,
+      ),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: color.withValues(alpha: 0.3),
+          width: 1.5,
         ),
-        decoration: BoxDecoration(
-          color: Colors.green.shade50,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: Colors.green.shade200,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.account_balance_wallet,
+            size: 16,
+            color: color,
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.payments,
-              size: 14,
-              color: Colors.green.shade700,
+          const SizedBox(width: 6),
+          Text(
+            '${expense.toStringAsFixed(0)} PLN',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: color,
             ),
-            const SizedBox(width: 4),
-            Text(
-              '${expense.toStringAsFixed(0)} PLN',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Colors.green.shade700,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
