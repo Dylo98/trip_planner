@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 
 class BudgetTripExpensesList extends StatelessWidget {
@@ -28,29 +30,27 @@ class BudgetTripExpensesList extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.receipt_long, size: 24, color: Colors.green),
+            const Icon(
+              Icons.receipt_long,
+              size: 20,
+              color: AppColors.primary,
+            ),
             const SizedBox(width: 8),
             const Text(
               'Wydatki ogólne',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyles.heading3,
             ),
           ],
         ),
         const SizedBox(height: 4),
         Text(
           'Koszty nieprzypisane do konkretnych miejsc',
-          style: TextStyle(
-            fontSize: 13,
-            color: Colors.grey.shade600,
-          ),
+          style: AppTextStyles.bodyTextSecondary,
         ),
         const SizedBox(height: 12),
         Card(
-          elevation: 2,
-          color: Colors.green.shade50,
+          elevation: 4,
+          color: AppColors.limeSlice,
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -64,19 +64,12 @@ class BudgetTripExpensesList extends StatelessWidget {
                       children: [
                         const Text(
                           'Suma wydatków ogólnych',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: AppTextStyles.bodySmall,
                         ),
                         const SizedBox(height: 4),
                         Text(
                           '${_totalAmount.toStringAsFixed(2)} PLN',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade700,
-                          ),
+                          style: AppTextStyles.priceTextLarge,
                         ),
                       ],
                     ),
@@ -86,16 +79,12 @@ class BudgetTripExpensesList extends StatelessWidget {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.green.shade700,
+                        color: AppColors.primary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         '${tripExpenses.length} ${_getExpenseWord(tripExpenses.length)}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTextStyles.bodySmallWhite,
                       ),
                     ),
                   ],
@@ -124,19 +113,16 @@ class BudgetTripExpensesList extends StatelessWidget {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       leading: CircleAvatar(
-        backgroundColor: Colors.green.shade100,
+        backgroundColor: AppColors.limeSliceDark.withValues(alpha: 0.1),
         child: const Icon(
           Icons.receipt,
-          color: Colors.green,
+          color: AppColors.limeSliceDark,
           size: 20,
         ),
       ),
       title: Text(
         expense.title,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 15,
-        ),
+        style: AppTextStyles.bodyText,
       ),
       subtitle: expense.hasAssignedPayer
           ? Row(
@@ -144,15 +130,12 @@ class BudgetTripExpensesList extends StatelessWidget {
                 Icon(
                   Icons.person_outline,
                   size: 14,
-                  color: Colors.grey.shade600,
+                  color: AppColors.limeSliceDark,
                 ),
                 const SizedBox(width: 4),
                 Text(
                   expense.displayPayerName,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade700,
-                  ),
+                  style: AppTextStyles.bodyTextSecondary,
                 ),
               ],
             )
@@ -162,11 +145,7 @@ class BudgetTripExpensesList extends StatelessWidget {
         children: [
           Text(
             '${expense.amount.toStringAsFixed(2)} PLN',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
-              color: Colors.green.shade700,
-            ),
+            style: AppTextStyles.priceTextSmall,
           ),
           const SizedBox(width: 8),
           PopupMenuButton<String>(
@@ -183,9 +162,9 @@ class BudgetTripExpensesList extends StatelessWidget {
                 value: 'edit',
                 child: Row(
                   children: [
-                    Icon(Icons.edit, size: 20),
+                    Icon(Icons.edit, size: 20, color: AppColors.limeSliceDark),
                     SizedBox(width: 8),
-                    Text('Edytuj'),
+                    Text('Edytuj', style: AppTextStyles.bodySmall),
                   ],
                 ),
               ),
@@ -193,11 +172,11 @@ class BudgetTripExpensesList extends StatelessWidget {
                 value: 'delete',
                 child: Row(
                   children: [
-                    Icon(Icons.delete, color: Colors.red, size: 20),
+                    Icon(Icons.delete, color: AppColors.red, size: 20),
                     SizedBox(width: 8),
                     Text(
                       'Usuń',
-                      style: TextStyle(color: Colors.red),
+                      style: AppTextStyles.bodySmallRed,
                     ),
                   ],
                 ),

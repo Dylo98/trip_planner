@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
-import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_header.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_header.dart';
 import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_category_section.dart';
 import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_title_description_section.dart';
-import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_actions_bar.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_actions_bar.dart';
 import 'package:uuid/uuid.dart';
 
 class AddChecklistItemDialog extends StatefulWidget {
@@ -83,7 +83,10 @@ class _AddChecklistItemDialogState extends State<AddChecklistItemDialog> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DialogHeader(
-                isEditing: widget.editItem != null,
+                title: widget.editItem != null
+                    ? 'Edytuj aktywność'
+                    : 'Dodaj aktywność',
+                icon: Icons.schedule,
                 onClose: () => Navigator.pop(context),
               ),
               Expanded(

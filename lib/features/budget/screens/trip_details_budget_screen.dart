@@ -6,12 +6,11 @@ import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart'
 import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/budget/widgets/budget_empty_state.dart';
-import 'package:trip_planner/features/budget/widgets/budget_expense_list.dart';
-import 'package:trip_planner/features/budget/widgets/budget_statistics_card.dart';
-import 'package:trip_planner/features/budget/widgets/budget_summary_card.dart';
-import 'package:trip_planner/features/budget/widgets/budget_payers_summary.dart';
-import 'package:trip_planner/features/budget/widgets/budget_trip_expenses_list.dart';
-import 'package:trip_planner/features/budget/widgets/trip_expense_dialog.dart';
+import 'package:trip_planner/features/budget/widgets/expenses/budget_expense_list.dart';
+import 'package:trip_planner/features/budget/widgets/summary/budget_summary_card.dart';
+import 'package:trip_planner/features/budget/widgets/summary/budget_payers_summary.dart';
+import 'package:trip_planner/features/budget/widgets/expenses/budget_trip_expenses_list.dart';
+import 'package:trip_planner/features/budget/widgets/dialog/dialog_trip_expense.dart';
 
 class TripDetailsBudgetScreen extends ConsumerWidget {
   final String tripId;
@@ -49,8 +48,6 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
                     children: [
                       BudgetSummaryCard(
                         totalExpense: statistics.totalExpense,
-                        locationCount: statistics.locationCount,
-                        totalItems: statistics.totalExpenseItems,
                       ),
                       const SizedBox(height: 24),
                       if (statistics.tripExpenses.isNotEmpty) ...[
@@ -78,12 +75,6 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
                         ),
                       if (statistics.expensesByLocation.isNotEmpty)
                         const SizedBox(height: 24),
-                      if (statistics.expensesByLocation.isNotEmpty)
-                        BudgetStatisticsCard(
-                          averageExpense: statistics.averageExpense,
-                          highestExpense: statistics.highestExpense,
-                          lowestExpense: statistics.lowestExpense,
-                        ),
                       const SizedBox(height: 80),
                     ],
                   ),
@@ -131,7 +122,7 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
   Future<void> _addTripExpense(BuildContext context, WidgetRef ref) async {
     final result = await showDialog<TripExpenseItem>(
       context: context,
-      builder: (context) => TripExpenseDialog(tripId: tripId),
+      builder: (context) => DialogTripExpense(tripId: tripId),
     );
 
     if (result != null) {
@@ -171,7 +162,7 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
   ) async {
     final result = await showDialog<TripExpenseItem>(
       context: context,
-      builder: (context) => TripExpenseDialog(
+      builder: (context) => DialogTripExpense(
         tripId: tripId,
         expenseItem: expense,
       ),

@@ -62,6 +62,12 @@ class AppTextStyles {
     color: AppColors.primary,
   );
 
+  static const bodySmallWhite = TextStyle(
+    fontSize: 14,
+    fontFamily: "Oswald",
+    color: AppColors.white,
+  );
+
   static const bodyTextSecondary = TextStyle(
     fontSize: 12,
     fontFamily: "Oswald",
@@ -195,6 +201,13 @@ class AppTextStyles {
   );
 
   // ========== SPECIAL ==========
+  static const priceTextSmall = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    fontFamily: "Oswald",
+    color: AppColors.primary,
+  );
+
   static const priceText = TextStyle(
     fontSize: 20,
     fontWeight: FontWeight.bold,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class AppInputStyle {
   static InputDecoration inputDecoration({
@@ -29,10 +30,7 @@ class AppInputStyle {
         color: AppColors.grey,
         fontSize: 14,
       ),
-      hintStyle: const TextStyle(
-        color: AppColors.grey,
-        fontSize: 14,
-      ),
+      hintStyle: AppTextStyles.labelHint,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(50),
         borderSide: const BorderSide(

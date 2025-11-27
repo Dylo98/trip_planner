@@ -3,12 +3,14 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 
 class DialogHeader extends StatelessWidget {
-  final bool isEditing;
+  final String title;
+  final IconData icon;
   final VoidCallback onClose;
 
   const DialogHeader({
     super.key,
-    required this.isEditing,
+    required this.title,
+    required this.icon,
     required this.onClose,
   });
 
@@ -27,11 +29,11 @@ class DialogHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.schedule, color: AppColors.textPrimary),
+          Icon(icon, color: AppColors.textPrimary),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              isEditing ? 'Edytuj aktywność' : 'Dodaj aktywność',
+              title,
               style: AppTextStyles.heading3,
             ),
           ),

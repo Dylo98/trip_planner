@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
 import 'package:trip_planner/features/schedule/controller/activity_dialog_controller.dart';
-import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_actions_bar.dart';
-import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_header.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_actions_bar.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_header.dart';
 import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_location_marker_tab.dart';
 import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_time_section.dart';
 import 'package:trip_planner/features/schedule/widgets/dialog/dialog_components/dialog_category_section.dart';
@@ -124,7 +124,10 @@ class _AddDayPlanItemDialogState extends ConsumerState<AddDayPlanItemDialog>
             mainAxisSize: MainAxisSize.min,
             children: [
               DialogHeader(
-                isEditing: _controller.isEditing,
+                title: widget.editItem != null
+                    ? 'Edytuj aktywność'
+                    : 'Dodaj aktywność',
+                icon: Icons.schedule,
                 onClose: () => Navigator.pop(context),
               ),
               Expanded(

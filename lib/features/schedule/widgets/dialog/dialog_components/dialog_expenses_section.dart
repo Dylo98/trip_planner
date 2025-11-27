@@ -4,7 +4,7 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
-import 'package:trip_planner/features/budget/widgets/expense_item_dialog.dart';
+import 'package:trip_planner/features/budget/widgets/dialog/dialog_item_expense.dart';
 
 class DialogExpensesSection extends ConsumerStatefulWidget {
   const DialogExpensesSection({
@@ -40,7 +40,7 @@ class _DayPlanItemExpensesSectionState
   Future<void> _addExpense() async {
     final result = await showDialog<ExpenseItem>(
       context: context,
-      builder: (context) => ExpenseItemDialog(
+      builder: (context) => DialogItemExpense(
         tripId: widget.tripId,
       ),
     );
@@ -56,7 +56,7 @@ class _DayPlanItemExpensesSectionState
   Future<void> _editExpense(int index) async {
     final result = await showDialog<ExpenseItem>(
       context: context,
-      builder: (context) => ExpenseItemDialog(
+      builder: (context) => DialogItemExpense(
         expenseItem: _expenses[index],
         tripId: widget.tripId,
       ),
