@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
 import 'package:trip_planner/features/budget/widgets/expense_item_dialog.dart';
 
-/// Widget sekcji wydatków dla aktywności w planie dnia
-///
-/// Umożliwia:
-/// - Dodawanie wydatków do aktywności
-/// - Edycję istniejących wydatków
-/// - Usuwanie wydatków
-/// - Wyświetlanie sumy wydatków
-class DayPlanItemExpensesSection extends ConsumerStatefulWidget {
-  const DayPlanItemExpensesSection({
+class DialogExpensesSection extends ConsumerStatefulWidget {
+  const DialogExpensesSection({
     super.key,
     required this.item,
     required this.onExpensesChanged,
@@ -25,12 +19,12 @@ class DayPlanItemExpensesSection extends ConsumerStatefulWidget {
   final String? tripId;
 
   @override
-  ConsumerState<DayPlanItemExpensesSection> createState() =>
+  ConsumerState<DialogExpensesSection> createState() =>
       _DayPlanItemExpensesSectionState();
 }
 
 class _DayPlanItemExpensesSectionState
-    extends ConsumerState<DayPlanItemExpensesSection> {
+    extends ConsumerState<DialogExpensesSection> {
   late List<ExpenseItem> _expenses;
 
   @override
@@ -97,73 +91,49 @@ class _DayPlanItemExpensesSectionState
               children: [
                 const Text(
                   'Wydatki',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: AppTextStyles.heading3,
                 ),
                 if (_expenses.isNotEmpty)
                   Text(
                     'Suma: ${_totalExpense.toStringAsFixed(2)} PLN',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.darkGrey,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.bodyTextSecondary,
                   ),
               ],
             ),
             IconButton.filled(
               icon: const Icon(Icons.add),
               onPressed: _addExpense,
-              tooltip: 'Dodaj wydatek',
               style: IconButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.surface,
                 foregroundColor: AppColors.white,
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
-        if (_expenses.isEmpty) _buildEmptyState() else _buildExpensesList(),
+        if (_expenses.isEmpty)
+          Center(child: _buildEmptyState())
+        else
+          _buildExpensesList(),
       ],
     );
   }
 
   Widget _buildEmptyState() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: AppColors.grey.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.grey),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.receipt_long_outlined,
-            size: 48,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Brak wydatków',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Kliknij + aby dodać wydatek',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Icon(
+          Icons.receipt_long_outlined,
+          size: 48,
+          color: AppColors.textSecondary,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Brak wydatków',
+          style: AppTextStyles.bodyTextSecondaryBig,
+        ),
+        const SizedBox(height: 4),
+      ],
     );
   }
 
@@ -176,7 +146,8 @@ class _DayPlanItemExpensesSectionState
         final expense = _expenses[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
-          elevation: 2,
+          elevation: 4,
+          color: AppColors.limeSlice,
           child: InkWell(
             onTap: () => _editExpense(index),
             borderRadius: BorderRadius.circular(12),
@@ -185,25 +156,13 @@ class _DayPlanItemExpensesSectionState
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.green.shade100,
-                    child: const Icon(
-                      Icons.receipt,
-                      color: Colors.green,
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           expense.title,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                          ),
+                          style: AppTextStyles.bodyText,
                         ),
                         const SizedBox(height: 8),
                         Row(
@@ -214,15 +173,12 @@ class _DayPlanItemExpensesSectionState
                                 Icon(
                                   Icons.person_outline,
                                   size: 14,
-                                  color: Colors.grey.shade600,
+                                  color: AppColors.limeSliceDark,
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   expense.displayPayerName,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.grey.shade700,
-                                  ),
+                                  style: AppTextStyles.bodyTextSecondary,
                                 ),
                               ],
                             ),
@@ -231,7 +187,7 @@ class _DayPlanItemExpensesSectionState
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
-                                color: AppColors.primary,
+                                color: AppColors.surface,
                               ),
                             ),
                           ],
@@ -255,7 +211,7 @@ class _DayPlanItemExpensesSectionState
                           children: [
                             Icon(Icons.edit, size: 20),
                             SizedBox(width: 8),
-                            Text('Edytuj'),
+                            Text('Edytuj', style: AppTextStyles.bodySmall),
                           ],
                         ),
                       ),
@@ -267,7 +223,7 @@ class _DayPlanItemExpensesSectionState
                             SizedBox(width: 8),
                             Text(
                               'Usuń',
-                              style: TextStyle(color: AppColors.red),
+                              style: AppTextStyles.bodySmallRed,
                             ),
                           ],
                         ),

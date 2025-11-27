@@ -10,7 +10,7 @@ class AppInputStyle {
   }) {
     return InputDecoration(
       filled: true,
-      fillColor: Colors.white,
+      fillColor: AppColors.limeSliceLight,
       prefixIcon: Container(
         margin: const EdgeInsets.only(left: 12, right: 8),
         decoration: BoxDecoration(

@@ -13,7 +13,9 @@ class DayPlan {
 
   DateTime get dateOnly => DateTime(date.year, date.month, date.day);
 
-  String get dateKey {
+  String get dateKey => formatDateKey(date);
+
+  static String formatDateKey(DateTime date) {
     final year = date.year.toString();
     final month = date.month.toString().padLeft(2, '0');
     final day = date.day.toString().padLeft(2, '0');

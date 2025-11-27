@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
 import 'package:trip_planner/features/home/widgets/home_top.dart';
 import 'package:trip_planner/features/home/widgets/home_content.dart';
@@ -23,6 +24,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('TripPlanner'),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+          ),
+        ),
       ),
       drawer: const AppDrawer(),
       body: userTripsAsync.when(

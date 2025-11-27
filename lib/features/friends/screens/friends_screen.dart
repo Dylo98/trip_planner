@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/friends/widgets/friends_list_tab.dart';
 import 'package:trip_planner/features/friends/widgets/friend_requests_tab.dart';
 import 'package:trip_planner/features/friends/widgets/add_friend_dialog.dart';
@@ -70,6 +71,11 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
               text: 'Zaproszenia',
             ),
           ],
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+          ),
         ),
       ),
       body: TabBarView(

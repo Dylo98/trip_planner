@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
@@ -66,6 +67,11 @@ class _NewTripScreenState extends ConsumerState<NewTripScreen> {
                 onPressed: _saveTrip,
               ),
           ],
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+            ),
+          ),
         ),
         body: IndexedStack(
           index: _selectedIndex,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:uuid/uuid.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
@@ -141,24 +142,20 @@ class _ExpenseItemDialogState extends ConsumerState<ExpenseItemDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 16),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Tytuł wydatku *',
-                hintText: 'np. Zakupy w sklepie, Bilet wstępu',
-                prefixIcon: Icon(Icons.title),
-                border: OutlineInputBorder(),
-              ),
+              decoration: AppInputStyle.inputDecoration(
+                  icon: Icons.title, labelText: 'Tytuł wydatku'),
               textCapitalization: TextCapitalization.sentences,
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _amountController,
-              decoration: const InputDecoration(
+              decoration: AppInputStyle.inputDecoration(
                 labelText: 'Kwota (PLN) *',
                 hintText: '0.00',
-                prefixIcon: Icon(Icons.attach_money),
-                border: OutlineInputBorder(),
+                icon: Icons.attach_money,
               ),
               keyboardType:
                   const TextInputType.numberWithOptions(decimal: true),

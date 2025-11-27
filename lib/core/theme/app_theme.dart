@@ -15,6 +15,14 @@ class AppTheme {
         displayMedium: AppTextStyles.heading2,
         bodyLarge: AppTextStyles.bodyText,
       ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
     );
   }
 }

@@ -106,7 +106,9 @@ class _NotificationSettingsScreenState
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Powiadomienia')),
+        appBar: AppBar(
+          title: const Text('Powiadomienia'),
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }

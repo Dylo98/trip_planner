@@ -4,6 +4,7 @@ import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 enum DayPlanItemType {
   marker,
   custom,
+  checklist,
 }
 
 class DayPlanItem {
@@ -19,6 +20,7 @@ class DayPlanItem {
   final String? color;
   final int order;
   final List<ExpenseItem>? expenses;
+  final bool isCompleted;
 
   DayPlanItem({
     required this.id,
@@ -33,6 +35,7 @@ class DayPlanItem {
     this.color,
     required this.order,
     this.expenses,
+    this.isCompleted = false,
   });
 
   double get totalExpense {
@@ -52,6 +55,8 @@ class DayPlanItem {
   }
 
   bool get isMarkerLinked => type == DayPlanItemType.marker && markerId != null;
+
+  bool get isChecklistItem => type == DayPlanItemType.checklist;
 
   String get timeRange {
     final start = _formatTime(startTime);
@@ -85,6 +90,7 @@ class DayPlanItem {
       'color': color,
       'order': order,
       'expenses': expenses?.map((e) => e.toJson()).toList(),
+      'isCompleted': isCompleted,
     };
   }
 
@@ -123,6 +129,7 @@ class DayPlanItem {
       color: json['color'] as String?,
       order: json['order'] as int? ?? 0,
       expenses: expensesList,
+      isCompleted: json['isCompleted'] as bool? ?? false,
     );
   }
 
@@ -139,6 +146,7 @@ class DayPlanItem {
     String? color,
     int? order,
     List<ExpenseItem>? expenses,
+    bool? isCompleted,
   }) {
     return DayPlanItem(
       id: id ?? this.id,
@@ -153,6 +161,7 @@ class DayPlanItem {
       color: color ?? this.color,
       order: order ?? this.order,
       expenses: expenses ?? this.expenses,
+      isCompleted: isCompleted ?? this.isCompleted,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'dart:io';
 import 'package:trip_planner/features/auth/controller/user_provider.dart';
 import 'package:trip_planner/features/auth/controller/auth_provider.dart';
@@ -171,6 +172,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       appBar: AppBar(
         title: const Text('Profil'),
         elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+          ),
+        ),
       ),
       body: Stack(
         children: [

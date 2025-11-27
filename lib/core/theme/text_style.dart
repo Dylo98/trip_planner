@@ -50,8 +50,25 @@ class AppTextStyles {
     color: AppColors.textPrimary,
   );
 
+  static const bodySmallRed = TextStyle(
+    fontSize: 14,
+    fontFamily: "Oswald",
+    color: AppColors.red,
+  );
+
+  static const bodySmallGreen = TextStyle(
+    fontSize: 14,
+    fontFamily: "Oswald",
+    color: AppColors.primary,
+  );
+
   static const bodyTextSecondary = TextStyle(
-    fontSize: 16,
+    fontSize: 12,
+    fontFamily: "Oswald",
+    color: AppColors.textSecondary,
+  );
+  static const bodyTextSecondaryBig = TextStyle(
+    fontSize: 18,
     fontFamily: "Oswald",
     color: AppColors.textSecondary,
   );
@@ -125,6 +142,13 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     fontFamily: "Oswald",
     color: AppColors.white,
+  );
+
+  static const buttonTextPrimary = TextStyle(
+    fontSize: 16,
+    fontWeight: FontWeight.bold,
+    fontFamily: "Oswald",
+    color: AppColors.primary,
   );
 
   static const buttonTextSmall = TextStyle(

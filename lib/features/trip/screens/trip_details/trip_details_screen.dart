@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_main_screen.dart';
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_map_screen.dart';
 import 'package:trip_planner/features/timeline/screens/timeline_screen.dart';
 import 'package:trip_planner/features/budget/screens/trip_details_budget_screen.dart';
-import 'package:trip_planner/features/schedule/widgets/trip_details_day_plan.dart';
+import 'package:trip_planner/features/schedule/screens/days_schedule_screen.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/friends/widgets/share_trip_dialog.dart';
 import 'package:trip_planner/features/friends/widgets/manage_shared_members_dialog.dart';
@@ -37,7 +38,7 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
       TimelineScreen(
         tripId: widget.trip.id,
       ),
-      TripDetailsDayPlanScreen(
+      DaysScheduleScreen(
         tripId: widget.trip.id,
       ),
       TripDetailsBudgetScreen(
@@ -278,6 +279,11 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
             ],
           ),
         ],
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: AppColors.primaryGradient,
+          ),
+        ),
       ),
       body: IndexedStack(
         index: _selectedIndex,

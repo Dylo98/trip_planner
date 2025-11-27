@@ -33,6 +33,7 @@ class DayPlanService {
     if (ownTripDoc.exists) {
       return currentUid;
     }
+
     final sharedTripDoc = await _firestore
         .collection('users')
         .doc(currentUid)
@@ -68,7 +69,7 @@ class DayPlanService {
   }
 
   Future<DayPlan?> getDayPlan(String tripId, DateTime date) async {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     final collection = await _getDayPlansCollection(tripId);
     final doc = await collection.doc(dateKey).get();
 
@@ -80,7 +81,7 @@ class DayPlanService {
   }
 
   Stream<DayPlan> watchDayPlan(String tripId, DateTime date) {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     return Stream.fromFuture(_getTripOwnerId(tripId)).asyncExpand((ownerId) {
       return _firestore
           .collection('users')
@@ -148,7 +149,7 @@ class DayPlanService {
     DateTime date,
     DayPlanItem item,
   ) async {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     final collection = await _getDayPlansCollection(tripId);
     final docRef = collection.doc(dateKey);
 
@@ -171,7 +172,7 @@ class DayPlanService {
     DateTime date,
     String itemId,
   ) async {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     final collection = await _getDayPlansCollection(tripId);
     final docRef = collection.doc(dateKey);
 
@@ -195,7 +196,7 @@ class DayPlanService {
     DateTime date,
     DayPlanItem updatedItem,
   ) async {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     final collection = await _getDayPlansCollection(tripId);
     final docRef = collection.doc(dateKey);
 
@@ -217,7 +218,7 @@ class DayPlanService {
     String itemId,
     List<ExpenseItem> expenses,
   ) async {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     final collection = await _getDayPlansCollection(tripId);
     final docRef = collection.doc(dateKey);
 
@@ -241,7 +242,7 @@ class DayPlanService {
     DateTime date,
     List<DayPlanItem> reorderedItems,
   ) async {
-    final dateKey = _formatDateKey(date);
+    final dateKey = DayPlan.formatDateKey(date);
     final collection = await _getDayPlansCollection(tripId);
     final docRef = collection.doc(dateKey);
 
@@ -278,12 +279,23 @@ class DayPlanService {
     final end = endDate ?? startDate;
     final days = end.difference(startDate).inDays + 1;
 
+    if (days < 1) {
+      throw Exception('Data końcowa musi być po dacie początkowej');
+    }
+
+    if (days > 365) {
+      throw Exception(
+        'Nie można wygenerować planu na więcej niż 365 dni. '
+        'Podano $days dni.',
+      );
+    }
+
     final collection = await _getDayPlansCollection(tripId);
     final batch = _firestore.batch();
 
     for (int i = 0; i < days; i++) {
       final date = startDate.add(Duration(days: i));
-      final dateKey = _formatDateKey(date);
+      final dateKey = DayPlan.formatDateKey(date);
       final docRef = collection.doc(dateKey);
 
       final existingDoc = await docRef.get();
@@ -294,12 +306,5 @@ class DayPlanService {
     }
 
     await batch.commit();
-  }
-
-  String _formatDateKey(DateTime date) {
-    final year = date.year.toString();
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '$year-$month-$day';
   }
 }
