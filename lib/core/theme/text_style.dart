@@ -147,7 +147,7 @@ class AppTextStyles {
     fontSize: 16,
     fontWeight: FontWeight.bold,
     fontFamily: "Oswald",
-    color: AppColors.white,
+    color: AppColors.lightBlack,
   );
 
   static const buttonTextPrimary = TextStyle(
@@ -201,6 +201,13 @@ class AppTextStyles {
   );
 
   // ========== SPECIAL ==========
+  static const priceTextVerySmall = TextStyle(
+    fontSize: 12,
+    fontWeight: FontWeight.bold,
+    fontFamily: "Oswald",
+    color: AppColors.primary,
+  );
+
   static const priceTextSmall = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.bold,
@@ -213,6 +220,13 @@ class AppTextStyles {
     fontWeight: FontWeight.bold,
     fontFamily: "Oswald",
     color: AppColors.primary,
+  );
+
+  static const priceTextWhite = TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+    fontFamily: "Oswald",
+    color: AppColors.white,
   );
 
   static const priceTextLarge = TextStyle(

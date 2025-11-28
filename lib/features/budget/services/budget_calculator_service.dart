@@ -161,9 +161,16 @@ class BudgetCalculatorService {
       ..sort((a, b) => b.totalAmount.compareTo(a.totalAmount));
 
     final expenses = expensesByLocation.values.toList();
-    final averageExpense = totalExpense / expensesByLocation.length;
-    final highestExpense = expenses.reduce((a, b) => a > b ? a : b);
-    final lowestExpense = expenses.reduce((a, b) => a < b ? a : b);
+
+    double averageExpense = 0;
+    double highestExpense = 0;
+    double lowestExpense = 0;
+
+    if (expenses.isNotEmpty) {
+      averageExpense = totalExpense / expensesByLocation.length;
+      highestExpense = expenses.reduce((a, b) => a > b ? a : b);
+      lowestExpense = expenses.reduce((a, b) => a < b ? a : b);
+    }
 
     return BudgetStatistics(
       totalExpense: totalExpense,

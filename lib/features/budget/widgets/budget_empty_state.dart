@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class BudgetEmptyState extends StatelessWidget {
   const BudgetEmptyState({super.key});
@@ -12,20 +14,17 @@ class BudgetEmptyState extends StatelessWidget {
           Icon(
             Icons.account_balance_wallet_outlined,
             size: 80,
-            color: Colors.grey,
+            color: AppColors.limeSliceDark,
           ),
           SizedBox(height: 16),
           Text(
             'Brak wydatków',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.heading3,
           ),
           SizedBox(height: 8),
           Text(
             'Dodaj wydatki w szczegółach markerów',
-            style: TextStyle(color: Colors.grey),
+            style: AppTextStyles.bodyTextSecondary,
           ),
         ],
       ),

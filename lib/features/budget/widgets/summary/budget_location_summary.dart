@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
+import 'package:trip_planner/core/utils/location_name.dart';
 
-class BudgetExpenseList extends StatelessWidget {
-  const BudgetExpenseList({
+class BudgetLocationSummary extends StatelessWidget {
+  const BudgetLocationSummary({
     super.key,
     required this.expensesByLocation,
     required this.expenseItemsByLocation,
@@ -18,20 +21,34 @@ class BudgetExpenseList extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Wydatki według miejsc',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+        Row(
+          children: [
+            Icon(
+              Icons.location_city,
+              size: 20,
+              color: AppColors.primary,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'Wydatki według miejsc',
+              style: AppTextStyles.heading3,
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Koszty przypisane do konkretnych miejsc',
+          style: AppTextStyles.bodyTextSecondary,
         ),
         const SizedBox(height: 12),
         ...expensesByLocation.entries.map((entry) {
           final percentage = (entry.value / totalExpense) * 100;
           final items = expenseItemsByLocation[entry.key] ?? [];
 
+          final shortLocationName = LocationName.getShortName(entry.key);
+
           return _LocationExpenseCard(
-            locationName: entry.key,
+            locationName: shortLocationName,
             totalAmount: entry.value,
             percentage: percentage,
             expenseItems: items,
@@ -66,6 +83,7 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      color: AppColors.limeSlice,
       child: Column(
         children: [
           InkWell(
@@ -80,11 +98,6 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.blue.shade100,
-                        child: const Icon(Icons.place, color: Colors.blue),
-                      ),
-                      const SizedBox(width: 12),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,14 +109,6 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
                                 fontSize: 15,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${widget.expenseItems.length} ${_getItemWord(widget.expenseItems.length)}',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -112,18 +117,7 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
                         children: [
                           Text(
                             '${widget.totalAmount.toStringAsFixed(2)} PLN',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                            ),
-                          ),
-                          Text(
-                            '${widget.percentage.toStringAsFixed(1)}%',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                            ),
+                            style: AppTextStyles.priceTextSmall,
                           ),
                         ],
                       ),
@@ -132,15 +126,9 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
                         _isExpanded
                             ? Icons.keyboard_arrow_up
                             : Icons.keyboard_arrow_down,
-                        color: Colors.grey.shade600,
+                        color: AppColors.limeSliceDark,
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 8),
-                  LinearProgressIndicator(
-                    value: widget.percentage / 100,
-                    backgroundColor: Colors.grey.shade200,
-                    color: Colors.blue,
                   ),
                 ],
               ),
@@ -155,9 +143,9 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
   Widget _buildExpenseDetails() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: AppColors.limeSliceLight,
         border: Border(
-          top: BorderSide(color: Colors.grey.shade200),
+          top: BorderSide(color: AppColors.limeSliceDark),
         ),
       ),
       child: ListView.separated(
@@ -167,7 +155,7 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
         itemCount: widget.expenseItems.length,
         separatorBuilder: (context, index) => Divider(
           height: 1,
-          color: Colors.grey.shade200,
+          color: AppColors.limeSlice,
         ),
         itemBuilder: (context, index) {
           final item = widget.expenseItems[index];
@@ -175,12 +163,12 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
             dense: true,
             leading: Icon(
               Icons.receipt,
-              color: Colors.grey.shade600,
+              color: AppColors.limeSliceDark,
               size: 20,
             ),
             title: Text(
               item.title,
-              style: const TextStyle(fontSize: 14),
+              style: AppTextStyles.bodyText,
             ),
             subtitle: item.hasAssignedPayer
                 ? Row(
@@ -188,40 +176,23 @@ class _LocationExpenseCardState extends State<_LocationExpenseCard> {
                       Icon(
                         Icons.person_outline,
                         size: 12,
-                        color: Colors.grey.shade600,
+                        color: AppColors.limeSliceDark,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         item.displayPayerName,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey.shade600,
-                        ),
+                        style: AppTextStyles.bodyTextSecondary,
                       ),
                     ],
                   )
                 : null,
             trailing: Text(
               '${item.amount.toStringAsFixed(2)} PLN',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: Colors.blue,
-              ),
+              style: AppTextStyles.priceTextVerySmall,
             ),
           );
         },
       ),
     );
-  }
-
-  String _getItemWord(int count) {
-    if (count == 1) return 'wydatek';
-    if (count % 10 >= 2 &&
-        count % 10 <= 4 &&
-        (count % 100 < 10 || count % 100 >= 20)) {
-      return 'wydatki';
-    }
-    return 'wydatków';
   }
 }

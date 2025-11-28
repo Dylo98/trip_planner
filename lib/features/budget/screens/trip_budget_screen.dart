@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/button_style.dart';
 import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 import 'package:trip_planner/features/schedule/controller/day_plan_provider.dart';
 import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/budget/widgets/budget_empty_state.dart';
-import 'package:trip_planner/features/budget/widgets/expenses/budget_expense_list.dart';
-import 'package:trip_planner/features/budget/widgets/summary/budget_summary_card.dart';
+import 'package:trip_planner/features/budget/widgets/summary/budget_location_summary.dart';
+import 'package:trip_planner/features/budget/widgets/summary/budget_total_summary.dart';
 import 'package:trip_planner/features/budget/widgets/summary/budget_payers_summary.dart';
-import 'package:trip_planner/features/budget/widgets/expenses/budget_trip_expenses_list.dart';
+import 'package:trip_planner/features/budget/widgets/summary/budget_general_summary.dart';
 import 'package:trip_planner/features/budget/widgets/dialog/dialog_trip_expense.dart';
 
-class TripDetailsBudgetScreen extends ConsumerWidget {
+class TripBudgetScreen extends ConsumerWidget {
   final String tripId;
 
-  const TripDetailsBudgetScreen({super.key, required this.tripId});
+  const TripBudgetScreen({super.key, required this.tripId});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -46,12 +47,12 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      BudgetSummaryCard(
+                      BudgetTotalSummary(
                         totalExpense: statistics.totalExpense,
                       ),
                       const SizedBox(height: 24),
                       if (statistics.tripExpenses.isNotEmpty) ...[
-                        BudgetTripExpensesList(
+                        BudgetGeneralSummary(
                           tripExpenses: statistics.tripExpenses,
                           onEdit: (expense) =>
                               _editTripExpense(context, ref, expense),
@@ -67,7 +68,7 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
                         ),
                       const SizedBox(height: 24),
                       if (statistics.expensesByLocation.isNotEmpty)
-                        BudgetExpenseList(
+                        BudgetLocationSummary(
                           expensesByLocation: statistics.expensesByLocation,
                           expenseItemsByLocation:
                               statistics.expenseItemsByLocation,
@@ -90,11 +91,9 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Błąd: $e')),
       ),
       floatingActionButton: tripAsync.maybeWhen(
-        data: (trip) => FloatingActionButton.extended(
+        data: (trip) => GradientFAB(
           onPressed: () => _addTripExpense(context, ref),
           icon: const Icon(Icons.add),
-          label: const Text('Dodaj wydatek'),
-          backgroundColor: Colors.green,
         ),
         orElse: () => null,
       ),
@@ -108,11 +107,9 @@ class TripDetailsBudgetScreen extends ConsumerWidget {
         Positioned(
           right: 16,
           bottom: 16,
-          child: FloatingActionButton.extended(
+          child: GradientFAB(
             onPressed: () => _addTripExpense(context, ref),
             icon: const Icon(Icons.add),
-            label: const Text('Dodaj wydatek'),
-            backgroundColor: Colors.green,
           ),
         ),
       ],

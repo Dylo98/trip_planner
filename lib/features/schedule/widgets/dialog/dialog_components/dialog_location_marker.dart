@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/colors.dart';
-import 'package:trip_planner/features/schedule/utils/location_name.dart';
+import 'package:trip_planner/core/utils/location_name.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 class DialogLocationMarker extends StatelessWidget {

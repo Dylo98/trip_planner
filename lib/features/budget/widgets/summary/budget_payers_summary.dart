@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
+import 'package:trip_planner/features/budget/services/settlement_calculator_service.dart';
+import 'package:trip_planner/features/budget/widgets/dialog/dialog_settlement.dart';
 
 class BudgetPayersSummary extends StatelessWidget {
   const BudgetPayersSummary({
@@ -13,149 +17,122 @@ class BudgetPayersSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      color: Colors.purple.shade50,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.people,
-                  color: Colors.purple.shade700,
-                  size: 24,
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'Kto ile zapłacił',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: const [
+            Icon(
+              Icons.people,
+              size: 20,
+              color: AppColors.primary,
             ),
-            const SizedBox(height: 4),
+            SizedBox(width: 8),
             Text(
-              'Podsumowanie wydatków według osób',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade700,
-              ),
+              'Kto ile zapłacił',
+              style: AppTextStyles.heading3,
             ),
-            const Divider(height: 24),
-            ...payerSummaries.map((payer) {
-              final percentage = (payer.totalAmount / totalExpense) * 100;
-              final isUnknown = payer.payerName == 'Nie określono';
+          ],
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Podsumowanie wydatków według osób',
+          style: AppTextStyles.bodyTextSecondary,
+        ),
+        const SizedBox(height: 12),
+        Card(
+          elevation: 3,
+          color: AppColors.limeSlice,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ...payerSummaries.map((payer) {
+                  final percentage = (payer.totalAmount / totalExpense) * 100;
+                  final isUnknown = payer.payerName == 'Nie określono';
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        CircleAvatar(
-                          radius: 20,
-                          backgroundColor: isUnknown
-                              ? Colors.grey.shade300
-                              : Colors.purple.shade100,
-                          child: Icon(
-                            payer.payerUserId != null
-                                ? Icons.person
-                                : (isUnknown
-                                    ? Icons.help_outline
-                                    : Icons.account_circle),
-                            color: isUnknown
-                                ? Colors.grey.shade600
-                                : Colors.purple.shade700,
-                            size: 20,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                payer.payerName,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                  color: isUnknown
-                                      ? Colors.grey.shade600
-                                      : Colors.black87,
-                                  fontStyle: isUnknown
-                                      ? FontStyle.italic
-                                      : FontStyle.normal,
-                                ),
-                              ),
-                              Text(
-                                '${payer.expenseCount} ${_getExpenseWord(payer.expenseCount)}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                        Row(
                           children: [
-                            Text(
-                              '${payer.totalAmount.toStringAsFixed(2)} PLN',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                                color: isUnknown
-                                    ? Colors.grey.shade700
-                                    : Colors.purple.shade700,
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: AppColors.limeSliceDark
+                                  .withValues(alpha: 0.1),
+                              child: Icon(
+                                payer.payerUserId != null
+                                    ? Icons.person
+                                    : (isUnknown
+                                        ? Icons.help_outline
+                                        : Icons.account_circle),
+                                color: AppColors.limeSliceDark,
+                                size: 20,
                               ),
                             ),
-                            Text(
-                              '${percentage.toStringAsFixed(1)}%',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey.shade600,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    payer.payerName,
+                                    style: AppTextStyles.bodyText,
+                                  ),
+                                  Text(
+                                    '${payer.expenseCount} ${_getExpenseWord(payer.expenseCount)}',
+                                    style: AppTextStyles.bodyTextSecondary,
+                                  ),
+                                ],
                               ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '${payer.totalAmount.toStringAsFixed(2)} PLN',
+                                  style: AppTextStyles.priceTextSmall,
+                                ),
+                                Text(
+                                  '${percentage.toStringAsFixed(1)}%',
+                                  style: AppTextStyles.bodyTextSecondary,
+                                ),
+                              ],
                             ),
                           ],
                         ),
+                        const SizedBox(height: 8),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: LinearProgressIndicator(
+                            value: percentage / 100,
+                            minHeight: 8,
+                            backgroundColor: AppColors.white,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.primary,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 8),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: percentage / 100,
-                        minHeight: 8,
-                        backgroundColor: Colors.grey.shade200,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          isUnknown
-                              ? Colors.grey.shade400
-                              : Colors.purple.shade400,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }),
-            if (payerSummaries.length > 1) ...[
-              const Divider(height: 24),
-              _buildBalanceInfo(),
-            ],
-          ],
+                  );
+                }),
+                if (payerSummaries.length > 1) ...[
+                  const Divider(height: 24),
+                  _buildBalanceInfo(context),
+                ],
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildBalanceInfo() {
+  Widget _buildBalanceInfo(BuildContext context) {
     if (payerSummaries.length < 2) return const SizedBox.shrink();
 
     final averagePerPerson = totalExpense / payerSummaries.length;
@@ -170,20 +147,16 @@ class BudgetPayersSummary extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.green.shade50,
+          color: AppColors.limeSliceLight,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.green.shade200),
         ),
         child: Row(
           children: [
-            Icon(Icons.check_circle, color: Colors.green.shade700, size: 20),
-            const SizedBox(width: 8),
             const Expanded(
-              child: Text(
-                'Wydatki są równo rozłożone!',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
+              child: Center(
+                child: Text(
+                  'Wydatki są równo rozłożone',
+                  style: AppTextStyles.bodyText,
                 ),
               ),
             ),
@@ -195,48 +168,88 @@ class BudgetPayersSummary extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: AppColors.limeSliceLight,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: AppColors.limeSliceDark),
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
-              const SizedBox(width: 8),
-              const Text(
+              Text(
                 'Rozliczenie',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.heading4,
               ),
             ],
           ),
           const SizedBox(height: 8),
           Text(
             'Średnio na osobę: ${averagePerPerson.toStringAsFixed(2)} PLN',
-            style: const TextStyle(fontSize: 13),
+            style: AppTextStyles.bodySmall,
           ),
           if (maxOverpayment > 1)
             Text(
               'Największa nadpłata: +${maxOverpayment.toStringAsFixed(2)} PLN',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.green.shade700,
-              ),
+              style: AppTextStyles.bodySmallGreen,
             ),
           if (maxUnderpayment > 1)
             Text(
-              'Największe niedopłata: -${maxUnderpayment.toStringAsFixed(2)} PLN',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.orange.shade700,
+              'Największa niedopłata: -${maxUnderpayment.toStringAsFixed(2)} PLN',
+              style: AppTextStyles.bodySmallRed,
+            ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => _showSettlementDialog(context),
+              style: ElevatedButton.styleFrom(
+                padding: EdgeInsets.zero,
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(50),
+                ),
+              ),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: AppColors.primaryGradient,
+                  borderRadius: BorderRadius.circular(50),
+                ),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  alignment: Alignment.center,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Zobacz szczegóły rozliczenia',
+                        style: AppTextStyles.buttonText,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
+          )
         ],
+      ),
+    );
+  }
+
+  void _showSettlementDialog(BuildContext context) {
+    final transactions = SettlementCalculatorService.calculateSettlement(
+      payerSummaries,
+      totalExpense,
+    );
+
+    final averagePerPerson = totalExpense / payerSummaries.length;
+
+    showDialog(
+      context: context,
+      builder: (context) => DialogSettlement(
+        transactions: transactions,
+        averagePerPerson: averagePerPerson,
       ),
     );
   }

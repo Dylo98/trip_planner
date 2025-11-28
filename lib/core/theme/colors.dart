@@ -8,6 +8,7 @@ class AppColors {
   static const black = Colors.black;
   static const red = Colors.redAccent;
   static const mistyMint = Color(0xFFe4eedd);
+  static const lightBlack = Color(0xFF4d4d4d);
 
   static const limeSlice = Color(0xFFe4ebcb);
   static const limeSliceDark = Color(0xFF797e76);

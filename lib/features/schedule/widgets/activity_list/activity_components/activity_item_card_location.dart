@@ -4,7 +4,7 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
 import 'package:trip_planner/features/schedule/controller/day_plan_provider.dart';
-import 'package:trip_planner/features/schedule/utils/location_name.dart';
+import 'package:trip_planner/core/utils/location_name.dart';
 
 class ActivityItemCardLocation extends ConsumerWidget {
   final DayPlanItem item;

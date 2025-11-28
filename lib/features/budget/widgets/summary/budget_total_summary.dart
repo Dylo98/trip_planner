@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 
-class BudgetSummaryCard extends StatelessWidget {
-  const BudgetSummaryCard({
+class BudgetTotalSummary extends StatelessWidget {
+  const BudgetTotalSummary({
     super.key,
     required this.totalExpense,
   });

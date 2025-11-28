@@ -3,8 +3,8 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 
-class BudgetTripExpensesList extends StatelessWidget {
-  const BudgetTripExpensesList({
+class BudgetGeneralSummary extends StatelessWidget {
+  const BudgetGeneralSummary({
     super.key,
     required this.tripExpenses,
     required this.onEdit,
