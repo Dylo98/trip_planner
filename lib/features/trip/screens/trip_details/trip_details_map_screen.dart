@@ -7,6 +7,7 @@ import 'package:trip_planner/features/trip/widgets/shared/search_location.dart';
 import 'package:trip_planner/features/trip/services/location/current_location.dart';
 import 'package:trip_planner/core/widgets/loading_indicator.dart';
 import 'package:trip_planner/core/widgets/error_display.dart';
+import 'package:trip_planner/features/trip/widgets/shared/map_location_fab.dart';
 
 class TripDetailsMapScreen extends ConsumerStatefulWidget {
   const TripDetailsMapScreen({super.key, required this.tripId});
@@ -161,24 +162,11 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
             ),
             Positioned(
               bottom: 16,
-              right: 16,
+              left: 16,
               child: SafeArea(
-                child: FloatingActionButton(
-                  heroTag: 'current_location',
-                  onPressed: _isAddingCurrentLocation
-                      ? null
-                      : _addCurrentLocationMarker,
-                  tooltip: 'Dodaj moją lokalizację',
-                  child: _isAddingCurrentLocation
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.my_location),
+                child: MapLocationFab(
+                  onPressed: _addCurrentLocationMarker,
+                  isLoading: _isAddingCurrentLocation,
                 ),
               ),
             ),

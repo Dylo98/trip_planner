@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class StartingLocationBanner extends StatelessWidget {
   const StartingLocationBanner({
@@ -17,11 +19,11 @@ class StartingLocationBanner extends StatelessWidget {
         vertical: 12,
       ),
       decoration: BoxDecoration(
-        color: Colors.blue.shade700,
+        color: AppColors.limeSlice,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: AppColors.black.withValues(alpha: 0.2),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -31,24 +33,21 @@ class StartingLocationBanner extends StatelessWidget {
         children: [
           const Icon(
             Icons.info_outline,
-            color: Colors.white,
+            color: AppColors.limeSliceDark,
             size: 20,
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               'Wyszukaj miejsce rozpoczęcia podróży',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.bodySmall
+                  .copyWith(color: AppColors.limeSliceDark),
             ),
           ),
           IconButton(
             icon: const Icon(
               Icons.close,
-              color: Colors.white,
+              color: AppColors.limeSliceDark,
               size: 20,
             ),
             padding: EdgeInsets.zero,

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/models/place_category.dart';
 
 class CategoryFilterChips extends StatelessWidget {
@@ -63,14 +65,14 @@ class _CategoryChip extends StatelessWidget {
       ),
       selected: isSelected,
       onSelected: (_) => onTap(),
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.limeSlice,
       selectedColor: category.color,
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black87,
+      labelStyle: AppTextStyles.bodySmall.copyWith(
+        color: isSelected ? AppColors.white : AppColors.black,
         fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
       ),
       side: BorderSide(
-        color: isSelected ? category.color : Colors.grey.shade300,
+        color: isSelected ? category.color : AppColors.limeSliceDark,
         width: isSelected ? 2 : 1,
       ),
       elevation: isSelected ? 4 : 0,

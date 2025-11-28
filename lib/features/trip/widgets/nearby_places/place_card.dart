@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_service.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/place_details_bottom_sheet.dart';
@@ -19,6 +21,7 @@ class PlaceCard extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 2,
+      color: AppColors.limeSlice,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -64,7 +67,7 @@ class PlaceCard extends StatelessWidget {
         fit: BoxFit.cover,
         placeholder: (context, url) => Container(
           height: 100,
-          color: Colors.grey.shade200,
+          color: AppColors.grey,
           child: const Center(
             child: CircularProgressIndicator(strokeWidth: 2),
           ),
@@ -107,10 +110,7 @@ class PlaceCard extends StatelessWidget {
       children: [
         Text(
           place.name,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
+          style: AppTextStyles.heading4,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
         ),
@@ -129,24 +129,18 @@ class PlaceCard extends StatelessWidget {
         Icon(
           Icons.star,
           size: 14,
-          color: Colors.amber.shade700,
+          color: Colors.amber,
         ),
         const SizedBox(width: 4),
         Text(
           place.rating!.toStringAsFixed(1),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                fontSize: 12,
-              ),
+          style: AppTextStyles.bodySmall,
         ),
         if (place.userRatingsTotal != null) ...[
           const SizedBox(width: 2),
           Text(
             '(${place.userRatingsTotal})',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade600,
-                  fontSize: 10,
-                ),
+            style: AppTextStyles.bodyTextSecondary,
           ),
         ],
       ],

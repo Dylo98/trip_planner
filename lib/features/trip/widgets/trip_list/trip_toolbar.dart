@@ -55,7 +55,7 @@ class TripToolbar extends StatelessWidget {
               ),
               child: const Icon(
                 Icons.sort,
-                color: Colors.white,
+                color: AppColors.white,
               ),
             ),
             onPressed: onSortPressed,

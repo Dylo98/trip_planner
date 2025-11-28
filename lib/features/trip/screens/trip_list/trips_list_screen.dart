@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/widgets/trip_list/my_trip.dart';
 import 'package:trip_planner/features/friends/widgets/shared_trips_tab.dart';
 
@@ -33,14 +34,16 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
       appBar: AppBar(
         title: const Text('Moje podróże'),
         bottom: TabBar(
+          labelStyle: AppTextStyles.bodyText,
+          indicatorColor: AppColors.limeSliceDark,
           controller: _tabController,
           tabs: const [
             Tab(
-              icon: Icon(Icons.book),
+              icon: Icon(Icons.book, color: AppColors.limeSliceDark),
               text: 'Moje',
             ),
             Tab(
-              icon: Icon(Icons.share),
+              icon: Icon(Icons.share, color: AppColors.limeSliceDark),
               text: 'Współdzielone',
             ),
           ],

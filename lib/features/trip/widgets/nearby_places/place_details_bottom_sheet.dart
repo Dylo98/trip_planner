@@ -41,10 +41,7 @@ class _PlaceDetailsBottomSheetState extends State<PlaceDetailsBottomSheet> {
           _isLoading = false;
         });
       }
-    } catch (e, stackTrace) {
-      debugPrint('❌ Error loading place details: $e');
-      debugPrint('Stack trace: $stackTrace');
-
+    } catch (e) {
       if (mounted) {
         setState(() {
           _isLoading = false;

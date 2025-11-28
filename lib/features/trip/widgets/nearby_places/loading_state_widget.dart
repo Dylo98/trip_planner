@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class LoadingStateWidget extends StatelessWidget {
   const LoadingStateWidget({super.key});
@@ -15,17 +16,13 @@ class LoadingStateWidget extends StatelessWidget {
             const SizedBox(height: 16),
             Text(
               'Szukam ciekawych miejsc...',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Colors.grey.shade700,
-                  ),
+              style: AppTextStyles.heading3,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
               'To może chwilę potrwać',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade500,
-                  ),
+              style: AppTextStyles.bodyTextSecondary,
               textAlign: TextAlign.center,
             ),
           ],

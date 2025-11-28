@@ -13,21 +13,6 @@ class TripPhotoGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrls.isEmpty) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.all(24.0),
-          child: Text(
-            'Brak zdjęć z podróży',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-        ),
-      );
-    }
-
     return GridView.custom(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),

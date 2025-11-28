@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/utils/trip_status_helper.dart';
 
@@ -28,10 +29,8 @@ class TripStatusChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             statusHelper.label,
-            style: TextStyle(
+            style: AppTextStyles.bodySmall.copyWith(
               color: statusHelper.color,
-              fontWeight: FontWeight.w600,
-              fontSize: 13,
             ),
           ),
         ],

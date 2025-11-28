@@ -3,6 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_screen.dart';
@@ -93,20 +95,17 @@ class TripCard extends ConsumerWidget {
       alignment: Alignment.centerRight,
       padding: const EdgeInsets.only(right: 20),
       decoration: BoxDecoration(
-        color: Colors.red,
+        color: AppColors.red,
         borderRadius: BorderRadius.circular(30),
       ),
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.delete, color: Colors.white, size: 32),
+          Icon(Icons.delete, color: AppColors.white, size: 32),
           SizedBox(height: 4),
           Text(
             'Usuń',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.bodySmallWhite,
           ),
         ],
       ),
@@ -184,7 +183,7 @@ class _TripCardImage extends StatelessWidget {
 
   Widget _loading() {
     return Container(
-      color: Colors.grey[300],
+      color: AppColors.grey,
       alignment: Alignment.center,
       child: const SizedBox(
         width: 28,
@@ -198,16 +197,8 @@ class _TripCardImage extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.grey[300],
+      color: AppColors.limeSlice,
       alignment: Alignment.center,
-      child: const Text(
-        'Brak zdjęcia',
-        style: TextStyle(
-          color: Colors.black54,
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
     );
   }
 }

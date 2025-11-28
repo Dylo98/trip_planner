@@ -57,19 +57,6 @@ class MarkerDetailsState {
     });
   }
 
-  @Deprecated('Użyj updateExpenses zamiast updateExpense')
-  Future<void> updateExpense(
-    double expense,
-    Function(void Function()) setState,
-  ) async {
-    final expenseItem = ExpenseItem(
-      id: '${_currentMarker.id}_default',
-      title: 'Wydatek',
-      amount: expense,
-    );
-    await updateExpenses([expenseItem], setState);
-  }
-
   Future<void> updateDescription(
     String description,
     Function(void Function()) setState,

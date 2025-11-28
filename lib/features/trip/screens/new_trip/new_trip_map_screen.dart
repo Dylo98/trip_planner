@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/controllers/map/trip_map_controller.dart';
@@ -154,76 +156,69 @@ class _NewTripMapScreenState extends ConsumerState<NewTripMapScreen> {
     final isSelectingStart = ref.watch(isSelectingStartingLocationProvider);
 
     return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          ref.invalidate(tripFormProvider);
-          ref.invalidate(tripPhotoProvider);
-          ref.read(tripMarkersProvider.notifier).clear();
-          ref.read(hasStartingLocationProvider.notifier).state = false;
-        }
-      },
-      child: Scaffold(
-        body: Stack(
-          children: [
-            GoogleMap(
-              mapType: MapType.normal,
-              markers: markers,
-              polylines: _polylines,
-              initialCameraPosition: _initialPosition,
-              myLocationEnabled: true,
-              myLocationButtonEnabled: false,
-              onMapCreated: _mapController.setMapController,
-            ),
-            Positioned(
-              top: 16,
-              left: 16,
-              right: 16,
-              child: SafeArea(
-                child: Column(
-                  children: [
-                    if (isSelectingStart)
-                      StartingLocationBanner(
-                        onClose: _handleBannerClose,
-                      ),
-                    SearchLocation(
-                      key: ValueKey(_searchLocationKey),
-                      onPlaceSelected: _handlePlaceSelected,
-                    ),
-                  ],
-                ),
+        canPop: true,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) {
+            ref.invalidate(tripFormProvider);
+            ref.invalidate(tripPhotoProvider);
+            ref.read(tripMarkersProvider.notifier).clear();
+            ref.read(hasStartingLocationProvider.notifier).state = false;
+          }
+        },
+        child: Scaffold(
+          body: Stack(
+            children: [
+              GoogleMap(
+                mapType: MapType.normal,
+                markers: markers,
+                polylines: _polylines,
+                initialCameraPosition: _initialPosition,
+                myLocationEnabled: true,
+                myLocationButtonEnabled: false,
+                onMapCreated: _mapController.setMapController,
               ),
-            ),
-            if (_isLoadingLocation)
-              Container(
-                color: Colors.black54,
-                child: const Center(
+              Positioned(
+                top: 16,
+                left: 16,
+                right: 16,
+                child: SafeArea(
                   child: Column(
-                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      CircularProgressIndicator(
-                        color: Colors.white,
-                      ),
-                      SizedBox(height: 16),
-                      Text(
-                        'Pobieranie lokalizacji...',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      if (isSelectingStart)
+                        StartingLocationBanner(onClose: _handleBannerClose),
+                      SearchLocation(
+                        key: ValueKey(_searchLocationKey),
+                        onPlaceSelected: _handlePlaceSelected,
                       ),
                     ],
                   ),
                 ),
               ),
-          ],
-        ),
-        floatingActionButton: MapLocationFab(
-          onPressed: _handleMyLocation,
-          isLoading: _mapController.isMyLocationLocked,
-        ),
-      ),
-    );
+              Positioned(
+                left: 16,
+                bottom: 16 + MediaQuery.of(context).padding.bottom,
+                child: MapLocationFab(
+                  onPressed: _handleMyLocation,
+                  isLoading: _mapController.isMyLocationLocked,
+                ),
+              ),
+              if (_isLoadingLocation)
+                Container(
+                  color: Colors.black54,
+                  child: const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(color: AppColors.white),
+                        SizedBox(height: 16),
+                        Text('Pobieranie lokalizacji...',
+                            style: AppTextStyles.heading3),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ));
   }
 }

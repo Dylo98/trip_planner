@@ -20,7 +20,7 @@ class EmptyImagePicker extends StatelessWidget {
         height: 300,
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: AppColors.limeSlice),
           color: Colors.grey[300],
         ),
         child: selectedImage != null
@@ -41,7 +41,7 @@ class EmptyImagePicker extends StatelessWidget {
                   ),
                   child: const Padding(
                     padding: EdgeInsets.all(12),
-                    child: Icon(Icons.add_a_photo, color: Colors.white),
+                    child: Icon(Icons.add_a_photo, color: AppColors.white),
                   ),
                 ),
               ),

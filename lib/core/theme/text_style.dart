@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'colors.dart';
 
 class AppTextStyles {
@@ -201,6 +202,18 @@ class AppTextStyles {
   );
 
   // ========== SPECIAL ==========
+  static final tripCardTitle = GoogleFonts.bebasNeue(
+    color: AppColors.white,
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  );
+
+  static final tripCardDate = GoogleFonts.bebasNeue(
+    color: const Color(0xFFB9F90B),
+    fontSize: 12,
+    fontWeight: FontWeight.bold,
+  );
+
   static const priceTextVerySmall = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.bold,

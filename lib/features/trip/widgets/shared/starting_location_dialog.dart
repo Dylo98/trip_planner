@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_header.dart';
 
 class StartingLocationDialog extends StatelessWidget {
   const StartingLocationDialog({
@@ -12,58 +15,46 @@ class StartingLocationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
       ),
-      title: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.blue.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              Icons.place,
-              color: Colors.blue.shade700,
-            ),
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              'Miejsce rozpoczęcia',
-              style: TextStyle(fontSize: 20),
-            ),
-          ),
-        ],
-      ),
-      content: Column(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Wybierz punkt startowy swojej podróży',
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              fontSize: 14,
+          DialogHeader(
+            title: 'Lokalizacja startowa',
+            icon: Icons.location_pin,
+            onClose: () => Navigator.of(context).pop(),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Wybierz punkt startowy swojej podróży',
+                  style: AppTextStyles.bodyTextSecondary,
+                ),
+                const SizedBox(height: 24),
+                _OptionCard(
+                  icon: Icons.my_location,
+                  iconColor: AppColors.primary,
+                  title: 'Użyj obecnej lokalizacji',
+                  subtitle: 'Automatycznie ustaw punkt startowy',
+                  onTap: onUseCurrentLocation,
+                ),
+                const SizedBox(height: 12),
+                _OptionCard(
+                  icon: Icons.search,
+                  iconColor: Colors.blue,
+                  title: 'Wyszukaj miejsce',
+                  subtitle: 'Wybierz punkt na mapie',
+                  onTap: onSearchLocation,
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 24),
-          _OptionCard(
-            icon: Icons.my_location,
-            iconColor: Colors.green,
-            title: 'Użyj obecnej lokalizacji',
-            subtitle: 'Automatycznie ustaw punkt startowy',
-            onTap: onUseCurrentLocation,
-          ),
-          const SizedBox(height: 12),
-          _OptionCard(
-            icon: Icons.search,
-            iconColor: Colors.blue,
-            title: 'Wyszukaj miejsce',
-            subtitle: 'Wybierz punkt na mapie',
-            onTap: onSearchLocation,
           ),
         ],
       ),
@@ -93,10 +84,6 @@ class _OptionCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-        ),
         child: Row(
           children: [
             Container(
@@ -118,25 +105,19 @@ class _OptionCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: AppTextStyles.bodyText,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: AppTextStyles.bodyTextSecondary,
                   ),
                 ],
               ),
             ),
             Icon(
               Icons.chevron_right,
-              color: Colors.grey.shade400,
+              color: AppColors.limeSliceDark,
             ),
           ],
         ),

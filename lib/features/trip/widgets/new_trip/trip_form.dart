@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
@@ -90,26 +91,29 @@ class _TripFormState extends ConsumerState<TripForm> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: AppColors.limeSliceDark),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text(
                   'Typ podróży',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.heading3,
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: RadioListTile<TripType>(
-                        title: const Text('Zaplanowana'),
-                        subtitle: const Text('Z datą końcową'),
+                        title: const Text(
+                          'Zaplanowana',
+                          style: AppTextStyles.bodyText,
+                        ),
+                        subtitle: const Text(
+                          'Z datą końcową',
+                          style: AppTextStyles.bodyTextSecondary,
+                        ),
                         value: TripType.planned,
                         groupValue: _selectedTripType,
                         onChanged: (value) {
@@ -130,8 +134,14 @@ class _TripFormState extends ConsumerState<TripForm> {
                     ),
                     Expanded(
                       child: RadioListTile<TripType>(
-                        title: const Text('Trwająca'),
-                        subtitle: const Text('Na bieżąco'),
+                        title: const Text(
+                          'Trwająca',
+                          style: AppTextStyles.bodyText,
+                        ),
+                        subtitle: const Text(
+                          'Na bieżąco',
+                          style: AppTextStyles.bodyTextSecondary,
+                        ),
                         value: TripType.ongoing,
                         groupValue: _selectedTripType,
                         onChanged: (value) {
@@ -160,7 +170,7 @@ class _TripFormState extends ConsumerState<TripForm> {
             padding: const EdgeInsets.all(16),
             width: double.infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey),
+              border: Border.all(color: AppColors.limeSliceDark),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
@@ -168,14 +178,11 @@ class _TripFormState extends ConsumerState<TripForm> {
               children: [
                 const Text(
                   'Data podróży',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: AppTextStyles.heading3,
                 ),
                 const SizedBox(height: 10),
                 const Divider(
-                  color: Colors.grey,
+                  color: AppColors.limeSlice,
                   thickness: 1,
                 ),
                 const SizedBox(height: 8),
@@ -314,9 +321,9 @@ class _TripFormState extends ConsumerState<TripForm> {
                   height: 300,
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
+                    border: Border.all(color: AppColors.limeSliceDark),
                     borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[300],
+                    color: AppColors.limeSlice,
                   ),
                   child: _selectedImage != null
                       ? ClipRRect(

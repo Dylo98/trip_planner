@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class TripDateRange extends StatelessWidget {
   const TripDateRange({
@@ -27,7 +29,7 @@ class TripDateRange extends StatelessWidget {
         ),
         decoration: BoxDecoration(
           border: Border.all(
-            color: isEditable ? Colors.blue.shade200 : Colors.transparent,
+            color: AppColors.limeSliceDark,
             width: 1,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -40,7 +42,7 @@ class TripDateRange extends StatelessWidget {
               const Icon(
                 Icons.edit_calendar,
                 size: 18,
-                color: Colors.blue,
+                color: AppColors.limeSliceDark,
               ),
               const SizedBox(width: 8),
             ],
@@ -48,10 +50,7 @@ class TripDateRange extends StatelessWidget {
               startDate != null
                   ? DateFormat('dd-MM-yyyy').format(startDate!)
                   : 'Brak daty',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.buttonText,
             ),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 8),
@@ -61,17 +60,14 @@ class TripDateRange extends StatelessWidget {
               endDate != null
                   ? DateFormat('dd-MM-yyyy').format(endDate!)
                   : '...',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.buttonText,
             ),
             if (isEditable) ...[
               const SizedBox(width: 8),
               const Icon(
                 Icons.chevron_right,
                 size: 18,
-                color: Colors.blue,
+                color: AppColors.limeSliceDark,
               ),
             ],
           ],

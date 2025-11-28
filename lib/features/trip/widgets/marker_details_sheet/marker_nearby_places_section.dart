@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
 
 class MarkerNearbyPlacesSection extends StatelessWidget {
@@ -32,14 +34,11 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Row(
             children: [
-              const Icon(Icons.explore, size: 20),
+              Icon(Icons.explore, size: 20, color: AppColors.limeSliceDark),
               const SizedBox(width: 8),
               Text(
                 'Ciekawe miejsca w pobliżu (${places.length})',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: AppTextStyles.heading3,
               ),
             ],
           ),
@@ -69,7 +68,7 @@ class MarkerNearbyPlacesSection extends StatelessWidget {
           padding: EdgeInsets.all(8.0),
           child: Text(
             'Ciekawe miejsca w pobliżu',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: AppTextStyles.heading3,
           ),
         ),
         const SizedBox(

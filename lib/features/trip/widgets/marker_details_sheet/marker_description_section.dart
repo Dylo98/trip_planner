@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
 
 class MarkerDescriptionSection extends StatefulWidget {
@@ -41,13 +43,16 @@ class _MarkerDescriptionSectionState extends State<MarkerDescriptionSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 32),
+        const Divider(
+          height: 32,
+          color: AppColors.limeSlice,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
               'Opis miejsca',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: AppTextStyles.heading3,
             ),
             IconButton(
               icon: Icon(_isEditing ? Icons.check : Icons.edit),
@@ -69,20 +74,17 @@ class _MarkerDescriptionSectionState extends State<MarkerDescriptionSection> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: AppColors.limeSlice,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(color: AppColors.limeSliceDark),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.add, color: Colors.grey.shade600),
+                  Icon(Icons.add, color: AppColors.limeSliceDark),
                   const SizedBox(width: 8),
                   Text(
                     'Dodaj opis tego miejsca',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 14,
-                    ),
+                    style: AppTextStyles.bodyText,
                   ),
                 ],
               ),
@@ -94,9 +96,9 @@ class _MarkerDescriptionSectionState extends State<MarkerDescriptionSection> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.blue.shade50,
+                color: AppColors.limeSlice,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.shade200),
+                border: Border.all(color: AppColors.limeSlice),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -106,14 +108,6 @@ class _MarkerDescriptionSectionState extends State<MarkerDescriptionSection> {
                     style: const TextStyle(fontSize: 14),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'Kliknij aby edytować',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                      fontStyle: FontStyle.italic,
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -124,18 +118,13 @@ class _MarkerDescriptionSectionState extends State<MarkerDescriptionSection> {
             maxLines: 5,
             autofocus: true,
             decoration: InputDecoration(
-              hintText: 'Opisz to miejsce...\n\n'
-                  'Możesz dodać:\n'
-                  '• Co tam widziałeś\n'
-                  '• Wrażenia\n'
-                  '• Ciekawostki\n'
-                  '• Rekomendacje',
-              hintStyle: TextStyle(color: Colors.grey.shade500),
+              hintText: 'Opisz to miejsce...',
+              hintStyle: TextStyle(color: AppColors.limeSliceDark),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: AppColors.limeSlice,
             ),
             onChanged: (value) {
               _debouncer.run(() {

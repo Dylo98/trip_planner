@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
@@ -32,7 +33,7 @@ class TripDetailsScreen extends ConsumerWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(Icons.error_outline, size: 48, color: AppColors.red),
               const SizedBox(height: 16),
               Text('Błąd: $e'),
             ],
@@ -112,12 +113,12 @@ class TripDetailsScreen extends ConsumerWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: AppColors.limeSlice,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
                       liveTrip.description!,
-                      style: const TextStyle(fontSize: 14),
+                      style: AppTextStyles.bodyText,
                     ),
                   ),
                 ],
@@ -140,15 +141,12 @@ class TripDetailsScreen extends ConsumerWidget {
                           Icon(
                             Icons.photo_library_outlined,
                             size: 48,
-                            color: Colors.grey.shade400,
+                            color: AppColors.limeSliceDark,
                           ),
                           const SizedBox(height: 8),
                           Text(
                             'Brak zdjęć z podróży',
-                            style: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 14,
-                            ),
+                            style: AppTextStyles.bodyTextSecondary,
                           ),
                         ],
                       ),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class TripHeaderImage extends StatelessWidget {
   const TripHeaderImage({
@@ -65,7 +67,7 @@ class TripHeaderImage extends StatelessWidget {
                     icon: Icons.delete,
                     tooltip: 'Usuń zdjęcie',
                     onPressed: onRemovePressed,
-                    backgroundColor: Colors.red.shade400,
+                    backgroundColor: AppColors.red,
                   ),
                 ],
               ],
@@ -79,7 +81,7 @@ class TripHeaderImage extends StatelessWidget {
     return Container(
       width: double.infinity,
       height: 200,
-      color: Colors.grey[300],
+      color: Colors.grey[200],
       alignment: Alignment.center,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -87,27 +89,14 @@ class TripHeaderImage extends StatelessWidget {
           Icon(
             Icons.landscape,
             size: 48,
-            color: Colors.grey[600],
+            color: AppColors.grey,
           ),
           const SizedBox(height: 8),
           Text(
             'Brak zdjęcia',
-            style: TextStyle(
-              color: Colors.grey[700],
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: AppTextStyles.bodyTextSecondary,
           ),
-          if (isEditable && onEditPressed != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Kliknij + aby dodać',
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 12,
-              ),
-            ),
-          ],
+          if (isEditable && onEditPressed != null) ...[],
         ],
       ),
     );
@@ -139,11 +128,12 @@ class _EditButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: (backgroundColor ?? Colors.black).withValues(alpha: 0.6),
+              color:
+                  (backgroundColor ?? AppColors.black).withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: AppColors.black.withValues(alpha: 0.3),
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),
@@ -151,7 +141,7 @@ class _EditButton extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              color: Colors.white,
+              color: AppColors.white,
               size: 20,
             ),
           ),

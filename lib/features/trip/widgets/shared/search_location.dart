@@ -104,7 +104,7 @@ class _SearchLocationState extends State<SearchLocation> {
       children: [
         Material(
           elevation: 4,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(50),
           child: TextFormField(
             controller: _addressController,
             focusNode: _focusNode,

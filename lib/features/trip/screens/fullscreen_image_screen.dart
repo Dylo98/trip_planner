@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 
 class FullscreenImageScreen extends StatelessWidget {
   const FullscreenImageScreen({super.key, required this.imageUrl});
@@ -53,7 +54,7 @@ class _LoadingIndicator extends StatelessWidget {
         height: 40,
         child: CircularProgressIndicator(
           strokeWidth: 2.5,
-          color: Colors.white70,
+          color: AppColors.white,
         ),
       ),
     );
@@ -69,7 +70,7 @@ class _ErrorPlaceholder extends StatelessWidget {
       child: Icon(
         Icons.broken_image,
         size: 80,
-        color: Colors.white38,
+        color: AppColors.limeSliceDark,
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class TripCardContent extends StatelessWidget {
   const TripCardContent({
@@ -35,22 +36,14 @@ class TripCardContent extends StatelessWidget {
   Widget _buildTripName() {
     return Text(
       tripName,
-      style: GoogleFonts.bebasNeue().copyWith(
-        color: Colors.white,
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-      ),
+      style: AppTextStyles.tripCardTitle,
     );
   }
 
   Widget _buildStartDate() {
     return Text(
       formattedStartDate,
-      style: GoogleFonts.bebasNeue().copyWith(
-        color: const Color(0xFFB9F90B),
-        fontSize: 12,
-        fontWeight: FontWeight.bold,
-      ),
+      style: AppTextStyles.tripCardDate,
     );
   }
 
@@ -61,7 +54,7 @@ class TripCardContent extends StatelessWidget {
         vertical: 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.8),
+        color: AppColors.limeSliceDark,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -69,17 +62,13 @@ class TripCardContent extends StatelessWidget {
         children: [
           const Icon(
             Icons.account_balance_wallet,
-            color: Colors.white,
+            color: AppColors.white,
             size: 14,
           ),
           const SizedBox(width: 4),
           Text(
             '${totalBudget.toStringAsFixed(2)} PLN',
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: AppTextStyles.bodySmallWhite,
           ),
         ],
       ),

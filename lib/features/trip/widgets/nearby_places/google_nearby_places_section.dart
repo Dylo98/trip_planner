@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/providers/nearby_places_provider.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/category_filter_chips.dart';
@@ -26,7 +28,7 @@ class GoogleNearbyPlacesSection extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Divider(height: 32),
+        const Divider(height: 32, color: AppColors.limeSlice),
         _buildHeader(context),
         const SizedBox(height: 12),
         CategoryFilterChips(
@@ -53,13 +55,11 @@ class GoogleNearbyPlacesSection extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
         children: [
-          const Icon(Icons.explore, size: 24),
+          const Icon(Icons.explore, size: 16),
           const SizedBox(width: 8),
           Text(
             'Ciekawe miejsca w pobliżu',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
+            style: AppTextStyles.heading3,
           ),
         ],
       ),

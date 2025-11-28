@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/widgets/trip_card/trip_card_content.dart';
 import 'package:trip_planner/features/trip/widgets/trip_card/trip_status_badge.dart';
@@ -36,9 +37,9 @@ class TripCardOverlay extends StatelessWidget {
 
   BoxDecoration _buildOverlayDecoration() {
     return BoxDecoration(
-      color: Colors.black.withValues(alpha: 0.5),
+      color: AppColors.black.withValues(alpha: 0.5),
       border: Border.all(
-        color: Colors.white,
+        color: AppColors.white,
         width: 5,
       ),
       borderRadius: BorderRadius.circular(30),
