@@ -7,7 +7,7 @@ import 'package:trip_planner/features/auth/controller/user_provider.dart';
 import 'package:trip_planner/features/budget/widgets/dialog/dialog_payer_option_tile.dart';
 import 'package:trip_planner/features/budget/model/budget_payer_selection_model.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
-import 'package:trip_planner/features/friends/service/shared_trip_service.dart';
+import 'package:trip_planner/features/friends/model/shared_trip_member_model.dart';
 
 class DialogPayerSelector extends ConsumerStatefulWidget {
   const DialogPayerSelector({

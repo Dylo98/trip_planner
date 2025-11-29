@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
-import 'package:trip_planner/features/friends/widgets/friends_list_tab.dart';
-import 'package:trip_planner/features/friends/widgets/friend_requests_tab.dart';
-import 'package:trip_planner/features/friends/widgets/add_friend_dialog.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/widgets/dialog/add_friend_dialog.dart';
+import 'package:trip_planner/features/friends/widgets/friend_list/friends_list_tab.dart';
+import 'package:trip_planner/features/friends/widgets/friend_requests/friend_requests_tab.dart';
 
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({super.key});
@@ -51,6 +52,8 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen>
           ),
         ],
         bottom: TabBar(
+          labelStyle: AppTextStyles.bodyText,
+          indicatorColor: AppColors.limeSliceDark,
           controller: _tabController,
           tabs: [
             const Tab(

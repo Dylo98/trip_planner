@@ -29,6 +29,19 @@ class UserRepository {
     return AppUser.fromJson(uid, doc.data()!);
   }
 
+  Stream<AppUser?> watchUser(String uid) {
+    return _firestore.collection('users').doc(uid).snapshots().map((snap) {
+      if (!snap.exists) return null;
+      return AppUser.fromJson(uid, snap.data()!);
+    });
+  }
+
+  Future<AppUser?> getUser(String uid) async {
+    final doc = await _firestore.collection('users').doc(uid).get();
+    if (!doc.exists) return null;
+    return AppUser.fromJson(uid, doc.data()!);
+  }
+
   Future<void> updateProfile({String? name, String? avatar}) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('Brak zalogowanego użytkownika');

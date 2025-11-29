@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/button_style.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/friends/controller/friends_provider.dart';
-import 'package:trip_planner/core/utils/action_lock.dart';
 
 class AddFriendDialog extends ConsumerStatefulWidget {
   const AddFriendDialog({super.key});
@@ -62,58 +65,73 @@ class _AddFriendDialogState extends ConsumerState<AddFriendDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 16),
       title: const Row(
         children: [
-          Icon(Icons.person_add, color: Colors.blue),
+          Icon(
+            Icons.person_add,
+            color: AppColors.limeSliceDark,
+          ),
           SizedBox(width: 8),
-          Text('Dodaj znajomego'),
+          Text(
+            'Dodaj znajomego',
+            style: AppTextStyles.heading3,
+          ),
         ],
       ),
-      content: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Podaj adres e-mail znajomego, którego chcesz dodać.',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _emailController,
-              decoration: AppInputStyle.inputDecoration(
-                icon: Icons.email,
-                labelText: 'E-mail',
+      content: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Podaj adres e-mail znajomego, którego chcesz dodać.',
+                style: AppTextStyles.bodyTextSecondary,
               ),
-              keyboardType: TextInputType.emailAddress,
-              validator: Validators.validateEmail,
-              enabled: !_isLoading,
-              autofocus: true,
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _emailController,
+                decoration: AppInputStyle.inputDecoration(
+                  icon: Icons.email,
+                  labelText: 'E-mail',
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: Validators.validateEmail,
+                enabled: !_isLoading,
+                autofocus: true,
+              ),
+            ],
+          ),
         ),
       ),
       actions: [
         TextButton(
           onPressed: _isLoading ? null : () => Navigator.pop(context),
-          child: const Text('Anuluj'),
+          child: const Text(
+            'Anuluj',
+            style: AppTextStyles.bodySmallRed,
+          ),
         ),
-        ElevatedButton.icon(
+        GradientButton(
           onPressed: _isLoading ? null : _sendRequest,
           icon: _isLoading
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    color: AppColors.darkGrey,
+                    strokeWidth: 2,
+                  ),
                 )
-              : const Icon(Icons.send),
-          label: const Text('Wyślij zaproszenie'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
+              : const Icon(Icons.send, color: AppColors.darkGrey),
+          child: const Text(
+            'Wyślij zaproszenie',
+            style: AppTextStyles.buttonText,
           ),
-        ),
+        )
       ],
     );
   }

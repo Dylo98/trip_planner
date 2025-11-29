@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:trip_planner/features/friends/model/friend_model.dart';
+import 'package:trip_planner/features/friends/model/friend_request_model.dart';
 
 class FriendService {
   FriendService({

@@ -18,7 +18,6 @@ class AppDrawer extends ConsumerWidget {
         children: [
           _buildHeader(),
           Expanded(
-            // ⬅️ PRZEKAZUJESZ context
             child: _buildMenuItems(context, pendingCountAsync),
           ),
           _buildFooter(),
@@ -36,7 +35,6 @@ class AppDrawer extends ConsumerWidget {
     );
   }
 
-  // ⬅️ DODAJEMY BuildContext context
   Widget _buildMenuItems(
     BuildContext context,
     AsyncValue<int> pendingCountAsync,
@@ -71,9 +69,7 @@ class AppDrawer extends ConsumerWidget {
           ),
           title: const Text('Znajomi'),
           onTap: () {
-            // zamknij drawer
             Navigator.pop(context);
-            // i nawiguj do /friends
             context.push('/friends');
           },
         ),

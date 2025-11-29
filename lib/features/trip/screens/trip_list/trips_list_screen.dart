@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/widgets/trip_list/my_trip.dart';
-import 'package:trip_planner/features/friends/widgets/shared_trips_tab.dart';
+import 'package:trip_planner/features/friends/widgets/shared_trips/shared_trips_tab.dart';
 
 class MyTripsScreen extends ConsumerStatefulWidget {
   const MyTripsScreen({super.key});
@@ -39,11 +39,11 @@ class _MyTripsScreenState extends ConsumerState<MyTripsScreen>
           controller: _tabController,
           tabs: const [
             Tab(
-              icon: Icon(Icons.book, color: AppColors.limeSliceDark),
+              icon: Icon(Icons.book),
               text: 'Moje',
             ),
             Tab(
-              icon: Icon(Icons.share, color: AppColors.limeSliceDark),
+              icon: Icon(Icons.share),
               text: 'Współdzielone',
             ),
           ],
