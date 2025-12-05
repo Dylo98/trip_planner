@@ -127,6 +127,16 @@ class CitiesLoaderNotifier extends StateNotifier<CitiesLoaderState> {
     double lat,
     double lng,
   ) async {
+    try {
+      final country =
+          await GeocodingService.getCountryFromCoordinates(lat, lng);
+      if (country != null && country.isNotEmpty) {
+        return country;
+      }
+    } catch (e) {
+//
+    }
+
     if (lat >= 49 && lat <= 54.5 && lng >= 14 && lng <= 24) {
       return 'Polska';
     } else if (lat >= 47 && lat <= 55 && lng >= 5.5 && lng <= 15.5) {
@@ -137,6 +147,10 @@ class CitiesLoaderNotifier extends StateNotifier<CitiesLoaderState> {
       return 'Włochy';
     } else if (lat >= 36 && lat <= 44 && lng >= -9.5 && lng <= 3.5) {
       return 'Hiszpania';
+    } else if (lat >= 25 && lat <= 49 && lng >= -125 && lng <= -66) {
+      return 'USA';
+    } else if (lat >= 41 && lat <= 82 && lng >= 19 && lng <= 180) {
+      return 'Rosja';
     }
 
     return 'Inne';
@@ -144,6 +158,8 @@ class CitiesLoaderNotifier extends StateNotifier<CitiesLoaderState> {
 }
 
 final citiesLoaderProvider =
-    StateNotifierProvider<CitiesLoaderNotifier, CitiesLoaderState>((ref) {
-  return CitiesLoaderNotifier();
-});
+    StateNotifierProvider.autoDispose<CitiesLoaderNotifier, CitiesLoaderState>(
+  (ref) {
+    return CitiesLoaderNotifier();
+  },
+);

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/statistics/model/traveler_statistics.dart';
-import 'package:trip_planner/features/statistics/controller/cities_loader_provider.dart';
-import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 
-class StatisticsOverview extends ConsumerStatefulWidget {
+class StatisticsOverview extends ConsumerWidget {
   final TravelerStatistics statistics;
 
   const StatisticsOverview({
@@ -13,116 +13,61 @@ class StatisticsOverview extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<StatisticsOverview> createState() => _StatisticsOverviewState();
-}
-
-class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
-  final ScrollController _citiesScrollController = ScrollController();
-  bool _citiesExpanded = false;
-
-  @override
-  void dispose() {
-    _citiesScrollController.dispose();
-    super.dispose();
-  }
-
-  void _onCitiesExpanded(bool expanded) {
-    setState(() {
-      _citiesExpanded = expanded;
-    });
-
-    if (expanded) {
-      final trips = ref.read(getTripProvider).value ?? [];
-      final allMarkers = trips.expand((trip) => trip.markerPoints).toList();
-
-      ref.read(citiesLoaderProvider.notifier).loadCities(allMarkers);
-
-      _citiesScrollController.addListener(() {
-        if (_citiesScrollController.position.pixels >=
-            _citiesScrollController.position.maxScrollExtent * 0.8) {
-          ref.read(citiesLoaderProvider.notifier).loadCities(allMarkers);
-        }
-      });
-    }
-  }
-
-  Map<String, int> _getCountriesVisitCount() {
-    final citiesState = ref.watch(citiesLoaderProvider);
-    final countriesVisitCount = <String, int>{};
-
-    for (final entry in citiesState.citiesByCountry.entries) {
-      countriesVisitCount[entry.key] = entry.value.length;
-    }
-
-    if (countriesVisitCount.isEmpty) {
-      for (final country in widget.statistics.placesByCountry.keys) {
-        countriesVisitCount[country] = 0;
-      }
-    }
-
-    return countriesVisitCount;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final citiesState = ref.watch(citiesLoaderProvider);
-    final totalCities = citiesState.citiesByCountry.values
-        .fold<int>(0, (sum, cities) => sum + cities.length);
-    final countriesVisitCount = _getCountriesVisitCount();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final countriesCount = statistics.placesByCountry.length;
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         _buildStatCard(
           'Liczba podróży',
-          widget.statistics.totalTrips.toString(),
+          statistics.totalTrips.toString(),
           Icons.card_travel,
           Colors.blue,
         ),
         _buildExpandableStatCard(
           'Odwiedzone kraje',
-          '${countriesVisitCount.length} / 195',
+          '$countriesCount / 195',
           Icons.flag,
           Colors.green,
-          _buildCountriesList(countriesVisitCount),
+          _buildCountriesList(),
         ),
-        _buildCitiesCard(totalCities, citiesState),
         _buildExpandableStatCard(
           'Wszystkie miejsca',
-          widget.statistics.totalPlaces.toString(),
+          statistics.totalPlaces.toString(),
           Icons.place,
           Colors.red,
           _buildAllPlacesList(),
         ),
         _buildStatCard(
           'Przebyta odległość',
-          '${widget.statistics.totalDistance.toStringAsFixed(0)} km',
+          '${statistics.totalDistance.toStringAsFixed(0)} km',
           Icons.route,
           Colors.purple,
         ),
         _buildStatCard(
           'Dni w podróży',
-          widget.statistics.totalDays.toString(),
+          statistics.totalDays.toString(),
           Icons.calendar_today,
           Colors.teal,
         ),
         _buildStatCard(
           'Łączne wydatki',
-          '${widget.statistics.totalExpenses.toStringAsFixed(2)} PLN',
+          '${statistics.totalExpenses.toStringAsFixed(2)} PLN',
           Icons.attach_money,
           Colors.amber,
         ),
-        if (widget.statistics.mostVisitedCountry.isNotEmpty)
+        if (statistics.mostVisitedCountry.isNotEmpty)
           _buildStatCard(
             'Najczęściej odwiedzany kraj',
-            widget.statistics.mostVisitedCountry,
+            statistics.mostVisitedCountry,
             Icons.star,
             Colors.pink,
           ),
-        if (widget.statistics.favoriteTransportMode.isNotEmpty)
+        if (statistics.favoriteTransportMode.isNotEmpty)
           _buildStatCard(
             'Ulubiony transport',
-            _getTransportName(widget.statistics.favoriteTransportMode),
+            _getTransportName(statistics.favoriteTransportMode),
             Icons.directions,
             Colors.indigo,
           ),
@@ -138,6 +83,7 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
   ) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
+      color: AppColors.limeSlice,
       elevation: 2,
       child: ListTile(
         leading: CircleAvatar(
@@ -146,16 +92,9 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
+          style: AppTextStyles.bodyTextSecondary,
         ),
-        subtitle: Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        subtitle: Text(value, style: AppTextStyles.heading3),
       ),
     );
   }
@@ -170,6 +109,7 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
+      color: AppColors.limeSlice,
       child: ExpansionTile(
         leading: CircleAvatar(
           backgroundColor: color.withValues(alpha: 0.2),
@@ -177,16 +117,9 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
+          style: AppTextStyles.bodyTextSecondary,
         ),
-        subtitle: Text(
-          value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
+        subtitle: Text(value, style: AppTextStyles.heading3),
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
@@ -197,45 +130,24 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
     );
   }
 
-  Widget _buildCitiesCard(int totalCities, CitiesLoaderState citiesState) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      child: ExpansionTile(
-        onExpansionChanged: _onCitiesExpanded,
-        leading: CircleAvatar(
-          backgroundColor: Colors.orange.withValues(alpha: 0.2),
-          child: const Icon(Icons.location_city, color: Colors.orange),
-        ),
-        title: const Text(
-          'Odwiedzone miasta',
-          style: TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-        subtitle: Text(
-          totalCities.toString(),
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: _buildCitiesList(citiesState),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildCountriesList() {
+    final countriesData = <String, int>{};
 
-  Widget _buildCountriesList(Map<String, int> countriesVisitCount) {
-    final countries = countriesVisitCount.entries.toList()
+    for (final entry in statistics.placesByCountry.entries) {
+      final country = entry.key;
+      final places = entry.value;
+      countriesData[country] = places.length;
+    }
+
+    final sortedCountries = countriesData.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: countries.map((entry) {
+      children: sortedCountries.map((entry) {
+        final country = entry.key;
+        final placesCount = entry.value;
+
         return Padding(
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
@@ -243,26 +155,21 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
             children: [
               Expanded(
                 child: Text(
-                  entry.key,
-                  style: const TextStyle(fontSize: 16),
+                  country,
+                  style: AppTextStyles.bodyText,
                 ),
               ),
               Container(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.2),
+                  color: AppColors.limeSliceDark.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  entry.value > 0
-                      ? '${entry.value} ${entry.value == 1 ? 'miasto' : 'miast'}'
-                      : 'Ładowanie...',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.green,
-                  ),
+                  '$placesCount ${placesCount == 1 ? 'miejsce' : 'miejsc'}',
+                  style: AppTextStyles.bodySmall
+                      .copyWith(color: AppColors.limeSliceDark),
                 ),
               ),
             ],
@@ -272,51 +179,9 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
     );
   }
 
-  Widget _buildCitiesList(CitiesLoaderState citiesState) {
-    final allCities = <String>[];
-    for (final entry in citiesState.citiesByCountry.entries) {
-      for (final city in entry.value) {
-        allCities.add('${city.cityName}, ${entry.key}');
-      }
-    }
-    allCities.sort();
-
-    return SizedBox(
-      height: 300,
-      child: ListView.builder(
-        controller: _citiesScrollController,
-        itemCount: allCities.length + (citiesState.isLoading ? 1 : 0),
-        itemBuilder: (context, index) {
-          if (index == allCities.length) {
-            return const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 4),
-            child: Row(
-              children: [
-                const Icon(Icons.location_city, size: 20, color: Colors.orange),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    allCities[index],
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildAllPlacesList() {
     final allPlaces = <String>[];
-    for (final entry in widget.statistics.placesByCountry.entries) {
+    for (final entry in statistics.placesByCountry.entries) {
       for (final place in entry.value) {
         allPlaces.add('${place.placeName}, ${entry.key}');
       }
@@ -329,12 +194,12 @@ class _StatisticsOverviewState extends ConsumerState<StatisticsOverview> {
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Row(
             children: [
-              const Icon(Icons.place, size: 20, color: Colors.red),
+              const Icon(Icons.place, size: 20, color: AppColors.primary),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   place,
-                  style: const TextStyle(fontSize: 16),
+                  style: AppTextStyles.bodySmall,
                 ),
               ),
             ],

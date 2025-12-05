@@ -21,9 +21,13 @@ class TripDetailsMapScreen extends ConsumerStatefulWidget {
 
 class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
   late final TripMapController _mapController;
+  Set<Marker> _markers = {};
   Set<Polyline> _polylines = {};
   bool _hasInitializedPolylines = false;
   bool _isAddingCurrentLocation = false;
+
+  bool _isLoadingMarkers = false;
+  bool _useCustomMarkers = true;
 
   @override
   void initState() {
@@ -39,6 +43,34 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
   void dispose() {
     _mapController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadMarkers(markers) async {
+    if (_isLoadingMarkers) return;
+
+    setState(() => _isLoadingMarkers = true);
+
+    try {
+      final customMarkers = await _mapController.createMapMarkersAsync(
+        markers,
+        useCustomMarkers: _useCustomMarkers,
+      );
+
+      if (mounted) {
+        setState(() {
+          _markers = customMarkers;
+          _isLoadingMarkers = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error loading custom markers: $e');
+      if (mounted) {
+        setState(() {
+          _markers = _mapController.createMapMarkers(markers);
+          _isLoadingMarkers = false;
+        });
+      }
+    }
   }
 
   void _updatePolylines(Set<Polyline> newPolylines) {
@@ -116,6 +148,17 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
     }
   }
 
+  void _toggleCustomMarkers() {
+    setState(() {
+      _useCustomMarkers = !_useCustomMarkers;
+    });
+
+    final tripAsync = ref.read(watchTripProvider(widget.tripId));
+    tripAsync.whenData((trip) {
+      _loadMarkers(trip.markerPoints);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final tripAsync = ref.watch(watchTripProvider(widget.tripId));
@@ -123,6 +166,12 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
     return tripAsync.when(
       data: (trip) {
         final markers = trip.markerPoints;
+
+        if (_markers.isEmpty && markers.isNotEmpty && !_isLoadingMarkers) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _loadMarkers(markers);
+          });
+        }
 
         if (!_hasInitializedPolylines && markers.isNotEmpty) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -135,8 +184,6 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
           });
         }
 
-        final mapMarkers = _mapController.createMapMarkers(markers);
-
         return Stack(
           children: [
             GoogleMap(
@@ -146,7 +193,7 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
                     : const LatLng(52.2297, 21.0122),
                 zoom: 5,
               ),
-              markers: mapMarkers,
+              markers: _markers,
               polylines: _polylines,
               onMapCreated: _mapController.setMapController,
             ),
@@ -157,6 +204,52 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
               child: SafeArea(
                 child: SearchLocation(
                   onPlaceSelected: _handlePlaceSelected,
+                ),
+              ),
+            ),
+            if (_isLoadingMarkers)
+              Positioned(
+                bottom: 80,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                          const SizedBox(width: 12),
+                          Text('Ładowanie zdjęć markerów...'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            Positioned(
+              top: 80,
+              right: 16,
+              child: SafeArea(
+                child: FloatingActionButton.small(
+                  heroTag: 'toggle_custom_markers',
+                  onPressed: _toggleCustomMarkers,
+                  tooltip: _useCustomMarkers
+                      ? 'Wyłącz zdjęcia markerów'
+                      : 'Włącz zdjęcia markerów',
+                  backgroundColor: Colors.white,
+                  child: Icon(
+                    _useCustomMarkers ? Icons.image : Icons.pin_drop,
+                    color: _useCustomMarkers ? Colors.blue : Colors.grey,
+                  ),
                 ),
               ),
             ),

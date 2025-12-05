@@ -4,7 +4,7 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_service.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/place_details_bottom_sheet.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/place_details/place_details_bottom_sheet.dart';
 
 class PlaceCard extends StatelessWidget {
   const PlaceCard({
@@ -129,7 +129,7 @@ class PlaceCard extends StatelessWidget {
         Icon(
           Icons.star,
           size: 14,
-          color: Colors.amber,
+          color: AppColors.star,
         ),
         const SizedBox(width: 4),
         Text(

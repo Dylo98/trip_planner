@@ -5,12 +5,25 @@ import 'package:trip_planner/features/statistics/controller/statistics_provider.
 import 'package:trip_planner/features/statistics/widgets/statistics_overview.dart';
 import 'package:trip_planner/features/statistics/widgets/world_heatmap.dart';
 
-class StatisticsScreen extends ConsumerWidget {
+class StatisticsScreen extends ConsumerStatefulWidget {
   const StatisticsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statisticsAsync = ref.watch(statisticsProvider);
+  ConsumerState<StatisticsScreen> createState() => _StatisticsScreenState();
+}
+
+class _StatisticsScreenState extends ConsumerState<StatisticsScreen> {
+  int _selectedIndex = 0;
+
+  void _onTabSelected(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final statistics = ref.watch(statisticsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -19,42 +32,24 @@ class StatisticsScreen extends ConsumerWidget {
           decoration: BoxDecoration(gradient: AppColors.primaryGradient),
         ),
       ),
-      body: statisticsAsync.when(
-        data: (statistics) => DefaultTabController(
-          length: 2,
-          child: Column(
-            children: [
-              const TabBar(
-                labelColor: AppColors.primary,
-                unselectedLabelColor: Colors.grey,
-                indicatorColor: AppColors.primary,
-                tabs: [
-                  Tab(text: 'Statystyki', icon: Icon(Icons.bar_chart)),
-                  Tab(text: 'Mapa świata', icon: Icon(Icons.map)),
-                ],
-              ),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    StatisticsOverview(statistics: statistics),
-                    WorldHeatmap(statistics: statistics),
-                  ],
-                ),
-              ),
-            ],
+      body: _selectedIndex == 0
+          ? StatisticsOverview(statistics: statistics)
+          : WorldHeatmap(statistics: statistics),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onTabSelected,
+        selectedItemColor: AppColors.primary,
+        unselectedItemColor: Colors.grey,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bar_chart),
+            label: 'Statystyki',
           ),
-        ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Błąd: $error'),
-            ],
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Mapa',
           ),
-        ),
+        ],
       ),
     );
   }

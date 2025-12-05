@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/features/trip/services/nominatim/nominatim.dart';
-import 'place_details_dialog.dart';
+import 'widgets/place_details/place_details_dialog.dart';
 
 class NearbyPlacesList extends StatelessWidget {
   final List<PlaceSuggestion> places;

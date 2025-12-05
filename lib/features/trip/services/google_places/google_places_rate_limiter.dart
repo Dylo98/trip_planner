@@ -5,12 +5,12 @@ import 'package:flutter/foundation.dart';
 import 'google_places_models.dart';
 
 class GooglePlacesRateLimiter {
-  static const int _maxRequestsPerMinute = 20;
-  static const int _maxRequestsPerDay = 300;
+  static const int _maxRequestsPerMinute = 60;
+  static const int _maxRequestsPerDay = 2000;
 
   static const double costNearbySearch = 0.032;
-  static const double costPlaceDetails = 0.017;
-  static const double costPhoto = 0.007;
+  static const double costPlaceDetails = 0.008;
+  static const double costPhoto = 0.0;
 
   static final List<DateTime> _requestTimestamps = [];
   static int _dailyRequestCount = 0;
@@ -21,6 +21,7 @@ class GooglePlacesRateLimiter {
     final now = DateTime.now();
 
     if (_lastResetDate == null || !_isSameDay(_lastResetDate!, now)) {
+      debugPrint('🔄 Nowy dzień - reset liczników');
       _dailyRequestCount = 0;
       _totalCostToday = 0.0;
       _lastResetDate = now;
@@ -30,6 +31,7 @@ class GooglePlacesRateLimiter {
     if (_dailyRequestCount >= _maxRequestsPerDay) {
       debugPrint('🚫 LIMIT DZIENNY: $_dailyRequestCount/$_maxRequestsPerDay');
       debugPrint('   Koszt dzisiaj: \$${_totalCostToday.toStringAsFixed(2)}');
+      debugPrint('⏰ Limit zresetuje się o północy');
       return false;
     }
 
@@ -37,8 +39,6 @@ class GooglePlacesRateLimiter {
     _requestTimestamps.removeWhere((ts) => ts.isBefore(oneMinuteAgo));
 
     if (_requestTimestamps.length >= _maxRequestsPerMinute) {
-      debugPrint(
-          '🚫 RATE LIMIT: ${_requestTimestamps.length}/$_maxRequestsPerMinute zapytań/min');
       return false;
     }
 
@@ -50,9 +50,6 @@ class GooglePlacesRateLimiter {
     _dailyRequestCount++;
     _totalCostToday += cost;
     _saveDailyStats();
-
-    debugPrint('📊 Stats: $_dailyRequestCount/$_maxRequestsPerDay zapytań');
-    debugPrint('   Koszt: \$${_totalCostToday.toStringAsFixed(3)} dzisiaj');
   }
 
   Future<CostStatistics> getStatistics() async {
@@ -82,13 +79,14 @@ class GooglePlacesRateLimiter {
           _dailyRequestCount = stats['count'] as int;
           _totalCostToday = (stats['cost'] as num).toDouble();
           _lastResetDate = savedDate;
-
-          debugPrint(
-              '📊 Wczytano statystyki: $_dailyRequestCount zapytań, \$${_totalCostToday.toStringAsFixed(3)}');
+        } else {
+          _dailyRequestCount = 0;
+          _totalCostToday = 0.0;
+          _lastResetDate = DateTime.now();
         }
       }
     } catch (e) {
-      debugPrint('Błąd wczytywania statystyk: $e');
+//
     }
   }
 
@@ -102,7 +100,7 @@ class GooglePlacesRateLimiter {
       };
       await prefs.setString('google_places_daily_stats', json.encode(stats));
     } catch (e) {
-      debugPrint('Błąd zapisywania statystyk: $e');
+//
     }
   }
 
@@ -118,7 +116,5 @@ class GooglePlacesRateLimiter {
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('google_places_daily_stats');
-
-    debugPrint('✅ Statystyki zresetowane');
   }
 }

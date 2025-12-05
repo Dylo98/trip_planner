@@ -51,6 +51,18 @@ class TripMapController {
     return polylineController.generatePolylines(markers);
   }
 
+  Future<Set<Marker>> createMapMarkersAsync(
+    List<MarkerPoint> markerPoints, {
+    Function(MarkerPoint)? onMarkerTap,
+    bool useCustomMarkers = true,
+  }) async {
+    return await markerDisplayController.createMapMarkersAsync(
+      markerPoints,
+      onMarkerTap: onMarkerTap ?? (marker) => showMarkerDetails(marker),
+      useCustomMarkers: useCustomMarkers,
+    );
+  }
+
   Set<Marker> createMapMarkers(
     List<MarkerPoint> markerPoints, {
     Function(MarkerPoint)? onMarkerTap,

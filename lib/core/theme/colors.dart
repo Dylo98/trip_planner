@@ -7,8 +7,10 @@ class AppColors {
   static const white = Colors.white;
   static const black = Colors.black;
   static const red = Colors.redAccent;
+  static const redLight = Color(0xFFFFACAC);
   static const mistyMint = Color(0xFFe4eedd);
   static const lightBlack = Color(0xFF4d4d4d);
+  static const star = Color(0xFFFFA000);
 
   static const limeSlice = Color(0xFFe4ebcb);
   static const limeSliceDark = Color(0xFF797e76);

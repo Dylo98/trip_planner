@@ -27,7 +27,7 @@ class GooglePlaceAdditionController {
 
     final newMarker = _createMarkerFromPlace(place, transport);
 
-    await _addMarkerToTrip(newMarker);
+    await _addMarkerToTrip(newMarker, transport);
 
     if (context.mounted) {
       _showSuccessMessage(place.name, transport);
@@ -40,20 +40,38 @@ class GooglePlaceAdditionController {
       position: place.location,
       name: place.name,
       description: place.vicinity,
-      transportMode: transport,
+      transportMode: 'other',
       imageUrl: null,
       expenses: null,
     );
   }
 
-  Future<void> _addMarkerToTrip(MarkerPoint marker) async {
+  Future<void> _addMarkerToTrip(MarkerPoint marker, String transport) async {
     if (isNewTrip) {
+      final markers = ref.read(tripMarkersProvider);
+
+      if (markers.isNotEmpty) {
+        ref.read(tripMarkersProvider.notifier).updateMarkerTransport(
+              markers.last.id,
+              transport,
+            );
+      }
+
       ref.read(tripMarkersProvider.notifier).addMarker(marker);
     } else {
-      await ref.read(tripServiceProvider).addMarkerToTrip(
-            tripId!,
-            marker,
-          );
+      final tripService = ref.read(tripServiceProvider);
+
+      final tripSnapshot = await tripService.getTrip(tripId!);
+      if (tripSnapshot != null && tripSnapshot.markerPoints.isNotEmpty) {
+        final lastMarker = tripSnapshot.markerPoints.last;
+        await tripService.updateMarkerTransportMode(
+          tripId: tripId!,
+          markerId: lastMarker.id,
+          transportMode: transport,
+        );
+      }
+
+      await tripService.addMarkerToTrip(tripId!, marker);
 
       if (context.mounted) {
         Navigator.pop(context);

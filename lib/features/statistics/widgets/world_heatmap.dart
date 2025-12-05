@@ -24,16 +24,30 @@ class _WorldHeatmapState extends State<WorldHeatmap> {
     _createMarkers();
   }
 
+  @override
+  void didUpdateWidget(WorldHeatmap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.statistics != widget.statistics) {
+      _createMarkers();
+    }
+  }
+
   void _createMarkers() {
-    for (final entry in widget.statistics.citiesByCountry.entries) {
-      for (final city in entry.value) {
+    _markers.clear();
+
+    for (final entry in widget.statistics.placesByCountry.entries) {
+      final country = entry.key;
+      final places = entry.value;
+
+      for (final place in places) {
         _markers.add(
           Marker(
-            markerId: MarkerId('${city.cityName}_${city.latitude}'),
-            position: LatLng(city.latitude, city.longitude),
+            markerId: MarkerId(
+                '${place.placeName}_${place.latitude}_${place.longitude}'),
+            position: LatLng(place.latitude, place.longitude),
             infoWindow: InfoWindow(
-              title: city.cityName,
-              snippet: entry.key,
+              title: place.placeName,
+              snippet: country,
             ),
             icon: BitmapDescriptor.defaultMarkerWithHue(
               BitmapDescriptor.hueRed,
@@ -41,6 +55,32 @@ class _WorldHeatmapState extends State<WorldHeatmap> {
           ),
         );
       }
+    }
+
+    for (final entry in widget.statistics.citiesByCountry.entries) {
+      final country = entry.key;
+      final cities = entry.value;
+
+      for (final city in cities) {
+        _markers.add(
+          Marker(
+            markerId: MarkerId(
+                'city_${city.cityName}_${city.latitude}_${city.longitude}'),
+            position: LatLng(city.latitude, city.longitude),
+            infoWindow: InfoWindow(
+              title: city.cityName,
+              snippet: '$country (miasto)',
+            ),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueBlue,
+            ),
+          ),
+        );
+      }
+    }
+
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -62,6 +102,8 @@ class _WorldHeatmapState extends State<WorldHeatmap> {
       scrollGesturesEnabled: true,
       tiltGesturesEnabled: true,
       rotateGesturesEnabled: true,
+      compassEnabled: true,
+      mapToolbarEnabled: true,
     );
   }
 

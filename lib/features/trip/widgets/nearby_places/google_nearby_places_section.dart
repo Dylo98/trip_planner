@@ -5,10 +5,10 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/providers/nearby_places_provider.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/category_filter_chips.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/places_grid_view.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/loading_state_widget.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/error_state_widget.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/category_filter_chips.dart/category_filter_chips.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/places_grid/places_grid_view.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/state_widgets/loading_state_widget.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/state_widgets/error_state_widget.dart';
 
 class GoogleNearbyPlacesSection extends ConsumerWidget {
   const GoogleNearbyPlacesSection({

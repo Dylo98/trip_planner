@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:trip_planner/core/theme/colors.dart';
-import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/place_card.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/place_card/place_card.dart';
+import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/places_grid/places_grid_empty_state.dart';
 
 class PlacesGridView extends StatelessWidget {
   const PlacesGridView({
@@ -17,7 +16,7 @@ class PlacesGridView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (places.isEmpty) {
-      return _buildEmptyState(context);
+      return const PlacesGridEmptyState();
     }
 
     return ConstrainedBox(
@@ -41,36 +40,6 @@ class PlacesGridView extends StatelessWidget {
             onPlaceSelected: onPlaceSelected,
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildEmptyState(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.search_off,
-              size: 64,
-              color: AppColors.limeSliceDark,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Nie znaleziono miejsc w tej kategorii',
-              style: AppTextStyles.bodyText,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Spróbuj wybrać inną kategorię lub oddal widok mapy',
-              style: AppTextStyles.bodyTextSecondary,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       ),
     );
   }
