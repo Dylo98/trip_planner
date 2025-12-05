@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class EmptyState extends StatelessWidget {
   const EmptyState({
@@ -27,27 +29,20 @@ class EmptyState extends StatelessWidget {
             Icon(
               icon,
               size: 80,
-              color: Colors.grey[300],
+              color: AppColors.limeSliceDark,
             ),
             const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey[600],
-                fontWeight: FontWeight.w500,
-              ),
+              style: AppTextStyles.heading3,
             ),
             if (subtitle != null) ...[
               const SizedBox(height: 8),
               Text(
                 subtitle!,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
+                style: AppTextStyles.bodyTextSecondary,
               ),
             ],
             if (action != null && actionLabel != null) ...[

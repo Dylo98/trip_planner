@@ -1,54 +1,16 @@
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
-import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_model.dart';
-
-class PayerSummary {
-  final String payerName;
-  final String? payerUserId;
-  final double totalAmount;
-  final int expenseCount;
-
-  const PayerSummary({
-    required this.payerName,
-    this.payerUserId,
-    required this.totalAmount,
-    required this.expenseCount,
-  });
-}
-
-class BudgetStatistics {
-  final double totalExpense;
-  final Map<String, double> expensesByLocation;
-  final Map<String, List<ExpenseItem>> expenseItemsByLocation;
-  final List<TripExpenseItem> tripExpenses;
-  final List<PayerSummary> payerSummaries;
-  final double averageExpense;
-  final double highestExpense;
-  final double lowestExpense;
-
-  const BudgetStatistics({
-    required this.totalExpense,
-    required this.expensesByLocation,
-    required this.expenseItemsByLocation,
-    required this.tripExpenses,
-    required this.payerSummaries,
-    required this.averageExpense,
-    required this.highestExpense,
-    required this.lowestExpense,
-  });
-
-  bool get hasExpenses => totalExpense > 0;
-  int get locationCount => expensesByLocation.length;
-  int get totalExpenseItems =>
-      expenseItemsByLocation.values.fold(0, (sum, list) => sum + list.length);
-}
+import 'package:trip_planner/features/friends/model/shared_trip_member_model.dart';
+import 'package:trip_planner/features/budget/model/payer_summary_model.dart';
+import 'package:trip_planner/features/budget/model/budget_statistics_model.dart';
 
 class BudgetCalculatorService {
   static BudgetStatistics calculateStatistics(
     List<MarkerPoint> markers, {
-    List<TripExpenseItem>? tripExpenses,
+    List<ExpenseItem>? tripExpenses,
     List<DayPlan>? dayPlans,
+    List<SharedTripMember>? sharedMembers,
   }) {
     double totalExpense = 0;
     final expensesByLocation = <String, double>{};
@@ -56,6 +18,14 @@ class BudgetCalculatorService {
     final payerTotals = <String, double>{};
     final payerUserIds = <String, String?>{};
     final payerExpenseCounts = <String, int>{};
+
+    if (sharedMembers != null && sharedMembers.isNotEmpty) {
+      for (final member in sharedMembers) {
+        payerTotals[member.displayName] = 0.0;
+        payerUserIds[member.displayName] = member.uid;
+        payerExpenseCounts[member.displayName] = 0;
+      }
+    }
 
     for (final marker in markers) {
       final locationName = marker.name ?? 'Nieznane miejsce';
@@ -123,7 +93,7 @@ class BudgetCalculatorService {
       }
     }
 
-    final processedTripExpenses = <TripExpenseItem>[];
+    final processedTripExpenses = <ExpenseItem>[];
     if (tripExpenses != null && tripExpenses.isNotEmpty) {
       for (final expense in tripExpenses) {
         totalExpense += expense.amount;
@@ -137,7 +107,7 @@ class BudgetCalculatorService {
       }
     }
 
-    if (totalExpense == 0) {
+    if (totalExpense == 0 && payerTotals.isEmpty) {
       return const BudgetStatistics(
         totalExpense: 0,
         expensesByLocation: {},

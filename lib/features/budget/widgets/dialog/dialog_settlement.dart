@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/widgets/dialog/dialog_header.dart';
 import 'package:trip_planner/features/budget/model/settlement_transaction_model.dart';
 
@@ -310,11 +311,9 @@ class DialogSettlement extends StatelessWidget {
 
     Clipboard.setData(ClipboardData(text: text.toString()));
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Skopiowano rozliczenie do schowka'),
-        duration: Duration(seconds: 2),
-      ),
+    AppNotifications.showSuccess(
+      context: context,
+      message: 'Skopiowano rozliczenie do schowka',
     );
   }
 }

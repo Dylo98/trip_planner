@@ -182,4 +182,26 @@ class Validators {
   static String _formatDate(DateTime date) {
     return '${date.day.toString().padLeft(2, '0')}.${date.month.toString().padLeft(2, '0')}.${date.year}';
   }
+
+  static String? validateExpenseTitle(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Wpisz tytuł wydatku';
+    }
+    return null;
+  }
+
+  static String? validateAmount(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Wpisz kwotę';
+    }
+
+    final amountStr = value.replaceAll(',', '.');
+    final amount = double.tryParse(amountStr);
+
+    if (amount == null || amount <= 0) {
+      return 'Wpisz poprawną kwotę';
+    }
+
+    return null;
+  }
 }

@@ -267,7 +267,9 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
         );
       },
       loading: () => const LoadingIndicator(),
-      error: (err, _) => ErrorDisplay(error: err),
+      error: (err, _) => ErrorDisplay(
+        message: 'Błąd',
+      ),
     );
   }
 }

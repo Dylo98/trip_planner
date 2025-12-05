@@ -1,5 +1,5 @@
 import 'package:trip_planner/features/budget/model/settlement_transaction_model.dart';
-import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
+import 'package:trip_planner/features/budget/model/payer_summary_model.dart';
 
 class SettlementCalculatorService {
   static List<SettlementTransaction> calculateSettlement(

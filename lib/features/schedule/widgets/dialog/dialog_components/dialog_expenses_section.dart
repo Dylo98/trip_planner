@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
+
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/schedule/model/day_plan_item_model.dart';
-import 'package:trip_planner/features/budget/widgets/dialog/dialog_item_expense.dart';
+import 'package:trip_planner/features/budget/model/budget_payer_selection_model.dart';
+import 'package:trip_planner/features/budget/widgets/dialog/dialog_expense.dart';
 
 class DialogExpensesSection extends ConsumerStatefulWidget {
   const DialogExpensesSection({
@@ -38,33 +41,60 @@ class _DayPlanItemExpensesSectionState
   }
 
   Future<void> _addExpense() async {
-    final result = await showDialog<ExpenseItem>(
+    final formResult = await showDialog<ExpenseFormResult>(
       context: context,
-      builder: (context) => DialogItemExpense(
+      builder: (context) => DialogExpense(
         tripId: widget.tripId,
+        isEditMode: false,
       ),
     );
 
-    if (result != null) {
+    if (formResult != null) {
+      final newExpense = ExpenseItem(
+        id: const Uuid().v4(),
+        title: formResult.title,
+        amount: formResult.amount,
+        payerName: formResult.payer.payerName,
+        payerUserId: formResult.payer.payerUserId,
+        createdAt: DateTime.now(),
+      );
+
       setState(() {
-        _expenses.add(result);
+        _expenses.add(newExpense);
       });
       widget.onExpensesChanged(_expenses);
     }
   }
 
   Future<void> _editExpense(int index) async {
-    final result = await showDialog<ExpenseItem>(
+    final current = _expenses[index];
+
+    final formResult = await showDialog<ExpenseFormResult>(
       context: context,
-      builder: (context) => DialogItemExpense(
-        expenseItem: _expenses[index],
+      builder: (context) => DialogExpense(
         tripId: widget.tripId,
+        isEditMode: true,
+        initialTitle: current.title,
+        initialAmount: current.amount,
+        initialPayer: BudgetPayerSelection(
+          payerName: current.payerName,
+          payerUserId: current.payerUserId,
+        ),
       ),
     );
 
-    if (result != null) {
+    if (formResult != null) {
+      final updated = ExpenseItem(
+        id: current.id,
+        title: formResult.title,
+        amount: formResult.amount,
+        payerName: formResult.payer.payerName,
+        payerUserId: formResult.payer.payerUserId,
+        createdAt: current.createdAt,
+      );
+
       setState(() {
-        _expenses[index] = result;
+        _expenses[index] = updated;
       });
       widget.onExpensesChanged(_expenses);
     }
@@ -204,8 +234,8 @@ class _DayPlanItemExpensesSectionState
                         _showDeleteConfirmation(index);
                       }
                     },
-                    itemBuilder: (context) => [
-                      const PopupMenuItem(
+                    itemBuilder: (context) => const [
+                      PopupMenuItem(
                         value: 'edit',
                         child: Row(
                           children: [
@@ -215,7 +245,7 @@ class _DayPlanItemExpensesSectionState
                           ],
                         ),
                       ),
-                      const PopupMenuItem(
+                      PopupMenuItem(
                         value: 'delete',
                         child: Row(
                           children: [

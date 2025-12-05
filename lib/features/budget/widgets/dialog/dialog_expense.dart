@@ -1,51 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/widgets/dialog/dialog_actions_bar.dart';
 import 'package:trip_planner/core/widgets/dialog/dialog_header.dart';
 import 'package:trip_planner/features/budget/widgets/dialog/dialog_expense_inputs.dart';
 import 'package:trip_planner/features/budget/model/budget_payer_selection_model.dart';
 import 'package:trip_planner/features/budget/widgets/dialog/dialog_payer_selector.dart';
-import 'package:trip_planner/features/budget/model/expense_item_model.dart';
-import 'package:uuid/uuid.dart';
 
-class DialogItemExpense extends StatefulWidget {
-  const DialogItemExpense({
-    super.key,
-    this.expenseItem,
-    this.tripId,
+class ExpenseFormResult {
+  final String title;
+  final double amount;
+  final BudgetPayerSelection payer;
+
+  const ExpenseFormResult({
+    required this.title,
+    required this.amount,
+    required this.payer,
   });
-
-  final ExpenseItem? expenseItem;
-  final String? tripId;
-
-  @override
-  State<DialogItemExpense> createState() => _DialogItemExpenseState();
 }
 
-class _DialogItemExpenseState extends State<DialogItemExpense> {
+class DialogExpense extends StatefulWidget {
+  const DialogExpense({
+    super.key,
+    this.initialTitle = '',
+    this.initialAmount,
+    this.initialPayer,
+    this.tripId,
+    this.isEditMode = false,
+  });
+
+  final String initialTitle;
+  final double? initialAmount;
+  final BudgetPayerSelection? initialPayer;
+  final String? tripId;
+  final bool isEditMode;
+
+  @override
+  State<DialogExpense> createState() => _ExpenseFormDialogState();
+}
+
+class _ExpenseFormDialogState extends State<DialogExpense> {
   late final TextEditingController _titleController;
   late final TextEditingController _amountController;
   late BudgetPayerSelection _payerSelection;
 
   String? _titleError;
   String? _amountError;
-  bool _isEditMode = false;
 
   @override
   void initState() {
     super.initState();
-    _isEditMode = widget.expenseItem != null;
 
-    _titleController = TextEditingController(
-      text: widget.expenseItem?.title ?? '',
-    );
+    _titleController = TextEditingController(text: widget.initialTitle);
     _amountController = TextEditingController(
-      text: widget.expenseItem?.amount.toStringAsFixed(2) ?? '',
+      text: widget.initialAmount != null
+          ? widget.initialAmount!.toStringAsFixed(2)
+          : '',
     );
 
-    _payerSelection = BudgetPayerSelection(
-      payerName: widget.expenseItem?.payerName,
-      payerUserId: widget.expenseItem?.payerUserId,
-    );
+    _payerSelection = widget.initialPayer ??
+        const BudgetPayerSelection(
+          payerName: null,
+          payerUserId: null,
+        );
   }
 
   @override
@@ -55,39 +71,27 @@ class _DialogItemExpenseState extends State<DialogItemExpense> {
     super.dispose();
   }
 
-  void _saveExpense() {
+  void _save() {
+    final titleError = Validators.validateExpenseTitle(_titleController.text);
+    final amountError = Validators.validateAmount(_amountController.text);
+
     setState(() {
-      _titleError = null;
-      _amountError = null;
+      _titleError = titleError;
+      _amountError = amountError;
     });
 
-    final title = _titleController.text.trim();
-    if (title.isEmpty) {
-      _titleError = 'Wpisz tytuł wydatku';
-    }
+    if (titleError != null || amountError != null) return;
 
     final amountStr = _amountController.text.replaceAll(',', '.');
-    final amount = double.tryParse(amountStr);
+    final amount = double.parse(amountStr);
 
-    if (amount == null || amount <= 0) {
-      _amountError = 'Wpisz poprawną kwotę';
-    }
-
-    if (_titleError != null || _amountError != null) {
-      setState(() {});
-      return;
-    }
-
-    final expense = ExpenseItem(
-      id: widget.expenseItem?.id ?? const Uuid().v4(),
-      title: title,
-      amount: amount!,
-      payerName: _payerSelection.payerName,
-      payerUserId: _payerSelection.payerUserId,
-      createdAt: widget.expenseItem?.createdAt ?? DateTime.now(),
+    final result = ExpenseFormResult(
+      title: _titleController.text.trim(),
+      amount: amount,
+      payer: _payerSelection,
     );
 
-    Navigator.pop(context, expense);
+    Navigator.pop(context, result);
   }
 
   @override
@@ -110,7 +114,7 @@ class _DialogItemExpenseState extends State<DialogItemExpense> {
             mainAxisSize: MainAxisSize.min,
             children: [
               DialogHeader(
-                title: _isEditMode ? 'Edytuj wydatek' : 'Dodaj wydatek',
+                title: widget.isEditMode ? 'Edytuj wydatek' : 'Dodaj wydatek',
                 icon: Icons.attach_money,
                 onClose: () => Navigator.pop(context),
               ),
@@ -144,8 +148,8 @@ class _DialogItemExpenseState extends State<DialogItemExpense> {
               ),
               DialogActionsBar(
                 onCancel: () => Navigator.pop(context),
-                onConfirm: _saveExpense,
-                isEditing: _isEditMode,
+                onConfirm: _save,
+                isEditing: widget.isEditMode,
                 addLabel: 'Dodaj',
                 saveLabel: 'Zapisz',
               ),

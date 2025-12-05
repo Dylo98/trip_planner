@@ -1,5 +1,5 @@
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
 
 class TripExpenseService extends BaseTripService {
@@ -11,7 +11,7 @@ class TripExpenseService extends BaseTripService {
 
   Future<void> addTripExpense({
     required String tripId,
-    required TripExpenseItem expense,
+    required ExpenseItem expense,
   }) async {
     requireUserId();
 
@@ -63,7 +63,7 @@ class TripExpenseService extends BaseTripService {
 
   Future<void> updateTripExpense({
     required String tripId,
-    required TripExpenseItem expense,
+    required ExpenseItem expense,
   }) async {
     requireUserId();
 
@@ -93,7 +93,7 @@ class TripExpenseService extends BaseTripService {
     });
   }
 
-  Future<List<TripExpenseItem>> getTripExpenses(String tripId) async {
+  Future<List<ExpenseItem>> getTripExpenses(String tripId) async {
     requireUserId();
 
     final ownerId = await getTripOwnerId(tripId);

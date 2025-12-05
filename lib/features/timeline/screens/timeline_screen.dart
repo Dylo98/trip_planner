@@ -34,7 +34,9 @@ class TimelineScreen extends ConsumerWidget {
           );
         },
         loading: () => const LoadingIndicator(),
-        error: (e, _) => ErrorDisplay(error: e),
+        error: (e, _) => ErrorDisplay(
+          message: 'Błąd',
+        ),
       ),
     );
   }

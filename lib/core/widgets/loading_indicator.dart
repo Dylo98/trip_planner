@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class LoadingIndicator extends StatelessWidget {
   const LoadingIndicator({
@@ -23,10 +24,7 @@ class LoadingIndicator extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 message!,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
+                style: AppTextStyles.heading3,
               ),
             ],
           ],

@@ -5,6 +5,7 @@ class ExpenseItem {
   final String? payerName;
   final String? payerUserId;
   final DateTime createdAt;
+  final String? category;
 
   ExpenseItem({
     required this.id,
@@ -13,6 +14,7 @@ class ExpenseItem {
     this.payerName,
     this.payerUserId,
     DateTime? createdAt,
+    this.category,
   }) : createdAt = createdAt ?? DateTime.now();
 
   String get displayPayerName {
@@ -32,6 +34,7 @@ class ExpenseItem {
       'payerName': payerName,
       'payerUserId': payerUserId,
       'createdAt': createdAt.toIso8601String(),
+      'category': category,
     };
   }
 
@@ -45,6 +48,7 @@ class ExpenseItem {
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'])
           : DateTime.now(),
+      category: json['category'] as String?,
     );
   }
 
@@ -55,6 +59,7 @@ class ExpenseItem {
     String? payerName,
     String? payerUserId,
     DateTime? createdAt,
+    String? category,
   }) {
     return ExpenseItem(
       id: id ?? this.id,
@@ -63,6 +68,7 @@ class ExpenseItem {
       payerName: payerName ?? this.payerName,
       payerUserId: payerUserId ?? this.payerUserId,
       createdAt: createdAt ?? this.createdAt,
+      category: category ?? this.category,
     );
   }
 }

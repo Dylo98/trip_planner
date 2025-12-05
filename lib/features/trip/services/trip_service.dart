@@ -13,7 +13,6 @@ import 'package:trip_planner/features/trip/services/marker/marker_crud_service.d
 import 'package:trip_planner/features/trip/services/marker/marker_update_service.dart';
 import 'package:trip_planner/features/trip/services/marker/marker_image_service.dart';
 import 'package:trip_planner/features/budget/services/trip_expense_service.dart';
-import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
 
 /// Główny serwis TripService - Facade Pattern
 ///
@@ -216,7 +215,7 @@ class TripService {
   /// Dodaje nowy wydatek ogólny do podróży
   Future<void> addTripExpense({
     required String tripId,
-    required TripExpenseItem expense,
+    required ExpenseItem expense,
   }) =>
       _tripExpenseService.addTripExpense(
         tripId: tripId,
@@ -236,7 +235,7 @@ class TripService {
   /// Aktualizuje wydatek ogólny w podróży
   Future<void> updateTripExpense({
     required String tripId,
-    required TripExpenseItem expense,
+    required ExpenseItem expense,
   }) =>
       _tripExpenseService.updateTripExpense(
         tripId: tripId,
@@ -244,7 +243,7 @@ class TripService {
       );
 
   /// Pobiera wszystkie wydatki ogólne z podróży
-  Future<List<TripExpenseItem>> getTripExpenses(String tripId) =>
+  Future<List<ExpenseItem>> getTripExpenses(String tripId) =>
       _tripExpenseService.getTripExpenses(tripId);
 
   /// Aktualizuje zdjęcie główne podróży

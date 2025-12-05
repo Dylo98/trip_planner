@@ -1,5 +1,5 @@
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
-import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum TripType {
@@ -22,7 +22,7 @@ class Trip {
   final List<String>? imageUrl;
   final String? tripPhotoUrl;
   final List<MarkerPoint> markerPoints;
-  final List<TripExpenseItem>? tripExpenses;
+  final List<ExpenseItem>? tripExpenses;
   final TripType tripType;
 
   Trip({
@@ -109,7 +109,7 @@ class Trip {
           : [],
       tripExpenses: data['tripExpenses'] != null
           ? (data['tripExpenses'] as List)
-              .map((e) => TripExpenseItem.fromJson(e))
+              .map((e) => ExpenseItem.fromJson(e))
               .toList()
           : null,
       tripType: parsedType,
@@ -144,7 +144,7 @@ class Trip {
           : [],
       tripExpenses: json['tripExpenses'] != null
           ? (json['tripExpenses'] as List)
-              .map((e) => TripExpenseItem.fromJson(e))
+              .map((e) => ExpenseItem.fromJson(e))
               .toList()
           : null,
       tripType: parsedType,
@@ -160,7 +160,7 @@ class Trip {
     List<String>? imageUrl,
     String? tripPhotoUrl,
     List<MarkerPoint>? markerPoints,
-    List<TripExpenseItem>? tripExpenses,
+    List<ExpenseItem>? tripExpenses,
     TripType? tripType,
   }) {
     return Trip(

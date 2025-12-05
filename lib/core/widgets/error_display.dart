@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class ErrorDisplay extends StatelessWidget {
   const ErrorDisplay({
     super.key,
-    required this.error,
+    required this.message,
     this.onRetry,
     this.padding = const EdgeInsets.all(24.0),
   });
 
-  final Object error;
+  final String message;
   final VoidCallback? onRetry;
   final EdgeInsetsGeometry padding;
 
@@ -23,23 +25,29 @@ class ErrorDisplay extends StatelessWidget {
             const Icon(
               Icons.error_outline,
               size: 60,
-              color: Colors.red,
+              color: AppColors.red,
             ),
             const SizedBox(height: 16),
             Text(
-              'Błąd: $error',
+              'Wystąpił błąd',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey[700],
-                fontSize: 14,
-              ),
+              style: AppTextStyles.heading3,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.bodyTextSecondary,
             ),
             if (onRetry != null) ...[
               const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Spróbuj ponownie'),
+                label: const Text(
+                  'Spróbuj ponownie',
+                  style: AppTextStyles.bodyTextSecondary,
+                ),
               ),
             ],
           ],

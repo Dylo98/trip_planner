@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
-import 'package:trip_planner/features/budget/model/trip_expense_item_model.dart';
+import 'package:trip_planner/core/utils/text_utils.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
+import 'package:trip_planner/features/budget/model/expense_item_model.dart';
 
 class BudgetGeneralSummary extends StatelessWidget {
   const BudgetGeneralSummary({
@@ -11,9 +13,9 @@ class BudgetGeneralSummary extends StatelessWidget {
     required this.onDelete,
   });
 
-  final List<TripExpenseItem> tripExpenses;
-  final Function(TripExpenseItem) onEdit;
-  final Function(TripExpenseItem) onDelete;
+  final List<ExpenseItem> tripExpenses;
+  final Function(ExpenseItem) onEdit;
+  final Function(ExpenseItem) onDelete;
 
   double get _totalAmount {
     return tripExpenses.fold(0.0, (sum, expense) => sum + expense.amount);
@@ -83,7 +85,12 @@ class BudgetGeneralSummary extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        '${tripExpenses.length} ${_getExpenseWord(tripExpenses.length)}',
+                        '${tripExpenses.length} ${TextUtils.getPolishPlural(
+                          tripExpenses.length,
+                          'wydatek',
+                          'wydatki',
+                          'wydatków',
+                        )}',
                         style: AppTextStyles.bodySmallWhite,
                       ),
                     ),
@@ -109,7 +116,7 @@ class BudgetGeneralSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildExpenseItem(BuildContext context, TripExpenseItem expense) {
+  Widget _buildExpenseItem(BuildContext context, ExpenseItem expense) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
       leading: CircleAvatar(
@@ -191,41 +198,15 @@ class BudgetGeneralSummary extends StatelessWidget {
 
   Future<void> _showDeleteConfirmation(
     BuildContext context,
-    TripExpenseItem expense,
+    ExpenseItem expense,
   ) async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmationDialogs.deleteExpense(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Usuń wydatek'),
-        content: Text(
-          'Czy na pewno chcesz usunąć wydatek "${expense.title}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Anuluj'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Usuń'),
-          ),
-        ],
-      ),
+      expenseName: expense.title,
     );
 
-    if (confirmed == true) {
+    if (confirmed) {
       onDelete(expense);
     }
-  }
-
-  String _getExpenseWord(int count) {
-    if (count == 1) return 'wydatek';
-    if (count % 10 >= 2 &&
-        count % 10 <= 4 &&
-        (count % 100 < 10 || count % 100 >= 20)) {
-      return 'wydatki';
-    }
-    return 'wydatków';
   }
 }

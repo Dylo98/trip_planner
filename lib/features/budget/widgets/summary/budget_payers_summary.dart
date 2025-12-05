@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
-import 'package:trip_planner/features/budget/services/budget_calculator_service.dart';
+import 'package:trip_planner/core/utils/text_utils.dart';
+import 'package:trip_planner/features/budget/model/payer_summary_model.dart';
 import 'package:trip_planner/features/budget/services/settlement_calculator_service.dart';
 import 'package:trip_planner/features/budget/widgets/dialog/dialog_settlement.dart';
 
@@ -83,7 +84,12 @@ class BudgetPayersSummary extends StatelessWidget {
                                     style: AppTextStyles.bodyText,
                                   ),
                                   Text(
-                                    '${payer.expenseCount} ${_getExpenseWord(payer.expenseCount)}',
+                                    '${payer.expenseCount} ${TextUtils.getPolishPlural(
+                                      payer.expenseCount,
+                                      'wydatek',
+                                      'wydatki',
+                                      'wydatków',
+                                    )}',
                                     style: AppTextStyles.bodyTextSecondary,
                                   ),
                                 ],
@@ -252,15 +258,5 @@ class BudgetPayersSummary extends StatelessWidget {
         averagePerPerson: averagePerPerson,
       ),
     );
-  }
-
-  String _getExpenseWord(int count) {
-    if (count == 1) return 'wydatek';
-    if (count % 10 >= 2 &&
-        count % 10 <= 4 &&
-        (count % 100 < 10 || count % 100 >= 20)) {
-      return 'wydatki';
-    }
-    return 'wydatków';
   }
 }
