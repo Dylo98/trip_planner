@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
 
 import 'google_places_models.dart';
 
@@ -26,7 +25,7 @@ class GooglePlacesCacheManager {
           .map((json) => GooglePlace.fromJson(json))
           .toList();
     } catch (e) {
-      debugPrint('Cache read error: $e');
+      // Błąd podczas odczytu cache - zwróć null
       return null;
     }
   }
@@ -40,7 +39,7 @@ class GooglePlacesCacheManager {
       };
       await prefs.setString(key, json.encode(data));
     } catch (e) {
-      debugPrint('Cache save error: $e');
+      // Błąd podczas zapisu cache - ignoruj, nie krytyczne
     }
   }
 
@@ -61,7 +60,7 @@ class GooglePlacesCacheManager {
 
       return GooglePlaceDetails.fromJson(data['details']);
     } catch (e) {
-      debugPrint('Details cache read error: $e');
+      // Błąd podczas odczytu cache - zwróć null
       return null;
     }
   }
@@ -79,7 +78,7 @@ class GooglePlacesCacheManager {
       };
       await prefs.setString(key, json.encode(data));
     } catch (e) {
-      debugPrint('Details cache save error: $e');
+      // Błąd podczas zapisu cache - ignoruj, nie krytyczne
     }
   }
 
@@ -93,10 +92,8 @@ class GooglePlacesCacheManager {
           await prefs.remove(key);
         }
       }
-
-      debugPrint('✅ Cache wyczyszczona');
     } catch (e) {
-      debugPrint('Cache clear error: $e');
+      // Błąd podczas czyszczenia cache - ignoruj
     }
   }
 }

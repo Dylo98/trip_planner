@@ -21,7 +21,6 @@ class GooglePlacesRateLimiter {
     final now = DateTime.now();
 
     if (_lastResetDate == null || !_isSameDay(_lastResetDate!, now)) {
-      debugPrint('🔄 Nowy dzień - reset liczników');
       _dailyRequestCount = 0;
       _totalCostToday = 0.0;
       _lastResetDate = now;
@@ -29,9 +28,6 @@ class GooglePlacesRateLimiter {
     }
 
     if (_dailyRequestCount >= _maxRequestsPerDay) {
-      debugPrint('🚫 LIMIT DZIENNY: $_dailyRequestCount/$_maxRequestsPerDay');
-      debugPrint('   Koszt dzisiaj: \$${_totalCostToday.toStringAsFixed(2)}');
-      debugPrint('⏰ Limit zresetuje się o północy');
       return false;
     }
 
@@ -86,7 +82,10 @@ class GooglePlacesRateLimiter {
         }
       }
     } catch (e) {
-//
+      // Błąd podczas ładowania statystyk - użyj domyślnych wartości
+      _dailyRequestCount = 0;
+      _totalCostToday = 0.0;
+      _lastResetDate = DateTime.now();
     }
   }
 
@@ -100,7 +99,7 @@ class GooglePlacesRateLimiter {
       };
       await prefs.setString('google_places_daily_stats', json.encode(stats));
     } catch (e) {
-//
+      // Błąd podczas zapisywania statystyk - ignoruj, nie krytyczne
     }
   }
 
