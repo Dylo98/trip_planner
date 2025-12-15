@@ -21,11 +21,6 @@ class ProfileMenu extends StatelessWidget {
           onTap: () => context.push('/profile/edit'),
         ),
         ProfileMenuItem(
-          icon: Icons.notifications_outlined,
-          title: 'Powiadomienia',
-          onTap: () => context.push('/profile/notifications'),
-        ),
-        ProfileMenuItem(
           icon: Icons.security_outlined,
           title: 'Prywatność i bezpieczeństwo',
           onTap: () => context.push('/profile/change-password'),
