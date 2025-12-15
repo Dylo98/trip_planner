@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter/foundation.dart';
-
 import 'google_places_models.dart';
 
 class GooglePlacesRateLimiter {
@@ -21,7 +19,6 @@ class GooglePlacesRateLimiter {
     final now = DateTime.now();
 
     if (_lastResetDate == null || !_isSameDay(_lastResetDate!, now)) {
-      debugPrint('🔄 Nowy dzień - reset liczników');
       _dailyRequestCount = 0;
       _totalCostToday = 0.0;
       _lastResetDate = now;
@@ -29,10 +26,7 @@ class GooglePlacesRateLimiter {
     }
 
     if (_dailyRequestCount >= _maxRequestsPerDay) {
-      debugPrint('🚫 LIMIT DZIENNY: $_dailyRequestCount/$_maxRequestsPerDay');
-      debugPrint('   Koszt dzisiaj: \$${_totalCostToday.toStringAsFixed(2)}');
-      debugPrint('⏰ Limit zresetuje się o północy');
-      return false;
+      return true;
     }
 
     final oneMinuteAgo = now.subtract(const Duration(minutes: 1));
@@ -86,7 +80,9 @@ class GooglePlacesRateLimiter {
         }
       }
     } catch (e) {
-//
+      _dailyRequestCount = 0;
+      _totalCostToday = 0.0;
+      _lastResetDate = DateTime.now();
     }
   }
 

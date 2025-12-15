@@ -74,8 +74,6 @@ class _SearchLocationState extends State<SearchLocation> {
           setState(() => _suggestions = results);
         }
       } catch (e) {
-        debugPrint('Error fetching suggestions: $e');
-
         if (mounted && currentRequestId == _requestId) {
           setState(() => _suggestions = []);
         }

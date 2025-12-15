@@ -63,7 +63,6 @@ class _TripDetailsMapScreenState extends ConsumerState<TripDetailsMapScreen> {
         });
       }
     } catch (e) {
-      debugPrint('Error loading custom markers: $e');
       if (mounted) {
         setState(() {
           _markers = _mapController.createMapMarkers(markers);

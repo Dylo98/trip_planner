@@ -76,7 +76,6 @@ class CustomMarkerService {
 
       return bitmapDescriptor;
     } catch (e) {
-      debugPrint('Error creating custom marker: $e');
       return BitmapDescriptor.defaultMarker;
     }
   }
@@ -166,7 +165,6 @@ class CustomMarkerService {
 
       return BitmapDescriptor.fromBytes(markerBytes);
     } catch (e) {
-      debugPrint('Error creating custom marker with transport: $e');
       return BitmapDescriptor.defaultMarker;
     }
   }
