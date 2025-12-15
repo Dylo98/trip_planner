@@ -2,27 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
-
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-
 import 'package:trip_planner/features/trip/model/trip_model.dart';
-
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_main_screen.dart';
-
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_map_screen.dart';
-
 import 'package:trip_planner/features/timeline/screens/timeline_screen.dart';
-
 import 'package:trip_planner/features/budget/screens/trip_budget_screen.dart';
-
 import 'package:trip_planner/features/schedule/screens/days_schedule_screen.dart';
-
 import 'package:trip_planner/features/trip/services/trip_service.dart';
-
 import 'package:trip_planner/features/friends/widgets/dialog/share_trip_dialog.dart';
-
 import 'package:trip_planner/features/friends/widgets/dialog/dialog_manage_shared_members.dart';
-
+import 'package:trip_planner/features/trip/widgets/shared/trip_name_edit_dialog.dart';
 import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 
@@ -115,53 +105,9 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
   }
 
   Future<void> _editTripName(String currentName) async {
-    final TextEditingController nameController = TextEditingController(
-      text: currentName,
-    );
-
-    final result = await showDialog<String>(
+    final result = await TripNameEditDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Zmień nazwę podróży'),
-        content: TextField(
-          controller: nameController,
-          decoration: const InputDecoration(
-            labelText: 'Nazwa podróży',
-            hintText: 'Wpisz nową nazwę',
-          ),
-          maxLength: 40,
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Anuluj'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final newName = nameController.text.trim();
-              if (newName.isEmpty) {
-                AppNotifications.showError(
-                  context: context,
-                  message: 'Nazwa nie może być pusta',
-                );
-
-                return;
-              }
-
-              if (newName.length < 3) {
-                AppNotifications.showError(
-                  context: context,
-                  message: 'Nazwa musi mieć min. 3 znaki',
-                );
-                return;
-              }
-              Navigator.pop(context, newName);
-            },
-            child: const Text('Zapisz'),
-          ),
-        ],
-      ),
+      currentName: currentName,
     );
 
     if (result == null || !mounted) return;
