@@ -6,7 +6,6 @@ import 'package:trip_planner/features/home/screens/home.dart';
 import 'package:trip_planner/features/auth/screens/auth.dart';
 import 'package:trip_planner/features/profile/screens/change_password.dart';
 import 'package:trip_planner/features/profile/screens/edit_profile.dart';
-import 'package:trip_planner/features/profile/screens/notification_settings.dart';
 import 'package:trip_planner/features/profile/screens/profile.dart';
 import 'package:trip_planner/features/trip/screens/new_trip/new_trip_screen.dart';
 import 'package:trip_planner/features/trip/screens/trip_list/trips_list_screen.dart';
@@ -85,10 +84,6 @@ final appRouter = GoRouter(
         GoRoute(
           path: 'change-password',
           builder: (context, state) => const ChangePasswordScreen(),
-        ),
-        GoRoute(
-          path: 'notifications',
-          builder: (context, state) => const NotificationSettingsScreen(),
         ),
       ],
     ),
