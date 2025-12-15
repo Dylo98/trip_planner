@@ -3,6 +3,7 @@ import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/features/friends/model/shared_trip_member_model.dart';
 import 'package:trip_planner/features/friends/widgets/dialog/dialog_components/dialog_role_badge.dart';
+import 'package:trip_planner/core/widgets/user_avatar.dart';
 
 class DialogSharedMemberItem extends StatelessWidget {
   const DialogSharedMemberItem({
@@ -22,18 +23,9 @@ class DialogSharedMemberItem extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       color: AppColors.limeSlice,
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.limeSliceDark.withValues(alpha: 0.1),
-          backgroundImage: member.avatar != null && member.avatar!.isNotEmpty
-              ? NetworkImage(member.avatar!)
-              : null,
-          child: member.avatar == null || member.avatar!.isEmpty
-              ? Text(
-                  member.displayName[0].toUpperCase(),
-                  style: AppTextStyles.bodySmall
-                      .copyWith(color: AppColors.limeSliceDark),
-                )
-              : null,
+        leading: UserAvatar(
+          displayName: member.displayName,
+          avatarUrl: member.avatar,
         ),
         title: Text(
           member.displayName,

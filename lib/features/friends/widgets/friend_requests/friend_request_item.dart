@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/core/widgets/user_avatar.dart';
 import 'package:trip_planner/features/friends/model/friend_request_model.dart';
 
 class FriendRequestItem extends StatelessWidget {
@@ -21,20 +22,9 @@ class FriendRequestItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 4),
       color: AppColors.limeSlice,
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: AppColors.limeSliceDark.withValues(alpha: 0.1),
-          backgroundImage:
-              request.fromAvatar != null && request.fromAvatar!.isNotEmpty
-                  ? NetworkImage(request.fromAvatar!)
-                  : null,
-          child: request.fromAvatar == null || request.fromAvatar!.isEmpty
-              ? Text(
-                  request.displayName[0].toUpperCase(),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.limeSliceDark,
-                  ),
-                )
-              : null,
+        leading: UserAvatar(
+          displayName: request.displayName,
+          avatarUrl: request.fromAvatar,
         ),
         title: Text(
           request.displayName,

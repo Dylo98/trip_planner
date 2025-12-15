@@ -1,5 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class BuildCarouselImage extends StatelessWidget {
   const BuildCarouselImage({
@@ -66,10 +68,10 @@ class BuildCarouselImage extends StatelessWidget {
       height: double.infinity,
       color: Colors.grey[300],
       alignment: Alignment.center,
-      child: const Icon(
+      child: Icon(
         Icons.image_not_supported,
         size: 48,
-        color: Colors.black54,
+        color: AppColors.black.withValues(alpha: 0.6),
       ),
     );
   }
@@ -81,16 +83,12 @@ class BuildCarouselImage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: Colors.black54,
+          color: AppColors.black.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTextStyles.heading3.copyWith(color: AppColors.white),
           overflow: TextOverflow.ellipsis,
         ),
       ),

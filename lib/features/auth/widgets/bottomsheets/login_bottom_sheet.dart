@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/auth/constants/auth_messages.dart';
-import 'package:trip_planner/features/auth/controller/auth_provider.dart';
+import 'package:trip_planner/features/auth/providers/auth_provider.dart';
 import 'package:trip_planner/features/auth/services/auth_service.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/theme/input_style.dart';

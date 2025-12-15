@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/features/auth/controller/user_provider.dart';
+import 'package:trip_planner/features/auth/providers/user_provider.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/theme/colors.dart';

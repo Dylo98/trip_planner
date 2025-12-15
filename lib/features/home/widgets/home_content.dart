@@ -2,7 +2,8 @@ import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:trip_planner/features/auth/controller/user_provider.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/features/auth/providers/user_provider.dart';
 import 'package:trip_planner/core/utils/user_utils.dart';
 
 class HomeContent extends ConsumerWidget {
@@ -59,7 +60,7 @@ class HomeContent extends ConsumerWidget {
         const SizedBox(height: 20),
         const Text(
           'Zaplanuj swoją podróż i podziel się nią z innymi!',
-          style: TextStyle(fontSize: 16),
+          style: AppTextStyles.bodyTextSecondaryBig,
         ),
       ],
     );

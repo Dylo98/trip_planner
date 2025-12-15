@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/widgets/drawer/app_drawer.dart';
+import 'package:trip_planner/core/widgets/empty_state.dart';
+import 'package:trip_planner/core/widgets/loading_indicator.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/home/widgets/home_top.dart';
 import 'package:trip_planner/features/home/widgets/home_content.dart';
 import 'package:trip_planner/features/home/widgets/add_trip_box.dart';
@@ -10,17 +13,13 @@ import 'package:trip_planner/features/home/widgets/home_carousel.dart';
 import 'package:trip_planner/features/home/widgets/home_empty_carousel.dart';
 import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 
-class HomeScreen extends ConsumerStatefulWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  ConsumerState<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final userTripsAsync = ref.watch(getTripProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('TripPlanner'),
@@ -48,25 +47,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 : const HomeEmptyCarousel(),
           ],
         ),
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              const Text(
-                'Nie udało się załadować podróży',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: () => ref.refresh(getTripProvider),
-                child: const Text('Spróbuj ponownie'),
-              ),
-            ],
-          ),
+        loading: () => const LoadingIndicator(
+          message: 'Ładowanie podróży...',
         ),
-        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => EmptyState(
+          icon: Icons.error_outline,
+          title: 'Nie udało się załadować podróży',
+          subtitle: 'Sprawdź połączenie i spróbuj ponownie.',
+          actionLabel: 'Spróbuj ponownie',
+          action: () {
+            AppNotifications.showError(
+              context: context,
+              message: 'Błąd ładowania. Odświeżam...',
+            );
+            ref.refresh(getTripProvider);
+          },
+        ),
       ),
     );
   }

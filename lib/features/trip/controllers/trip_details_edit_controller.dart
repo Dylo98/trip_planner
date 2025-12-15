@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trip_planner/core/utils/validators.dart';
-import 'package:trip_planner/features/auth/controller/user_provider.dart';
+import 'package:trip_planner/features/auth/providers/user_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 

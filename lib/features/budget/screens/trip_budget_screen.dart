@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/widgets/error_display.dart';
 import 'package:trip_planner/core/widgets/loading_indicator.dart';
-import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:trip_planner/core/theme/button_style.dart';

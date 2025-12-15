@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
-import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/core/widgets/error_display.dart';
+import 'package:trip_planner/core/widgets/loading_indicator.dart';
+import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 import 'package:trip_planner/features/friends/model/friend_model.dart';
 import 'package:trip_planner/features/friends/widgets/friend_list/friend_list_item.dart';
 import 'package:trip_planner/features/friends/widgets/friend_list/friends_empty_state.dart';
@@ -32,21 +34,12 @@ class FriendsListTab extends ConsumerWidget {
           },
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            const Text('Błąd podczas ładowania znajomych'),
-            const SizedBox(height: 8),
-            TextButton(
-              onPressed: () => ref.invalidate(friendsProvider),
-              child: const Text('Spróbuj ponownie'),
-            ),
-          ],
-        ),
+      loading: () => const LoadingIndicator(
+        message: 'Ładowanie znajomych...',
+      ),
+      error: (error, stack) => ErrorDisplay(
+        message: 'Błąd podczas ładowania znajomych.',
+        onRetry: () => ref.invalidate(friendsProvider),
       ),
     );
   }
@@ -69,14 +62,15 @@ class FriendsListTab extends ConsumerWidget {
       if (context.mounted) {
         AppNotifications.showSuccess(
           context: context,
-          message: 'Usunięto znajomego: ${friend.displayName}',
+          message: 'Usunięto znajomego ${friend.displayName}',
         );
       }
     } catch (e) {
       if (context.mounted) {
         AppNotifications.showError(
           context: context,
-          message: 'Błąd: $e',
+          message:
+              'Wystąpił błąd podczas usuwania znajomego ${friend.displayName}',
         );
       }
     }

@@ -7,7 +7,7 @@ import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 
 class AddFriendDialog extends ConsumerStatefulWidget {
   const AddFriendDialog({super.key});

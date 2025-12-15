@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/widgets/drawer/drawer_logout_item.dart';
 import 'package:trip_planner/core/widgets/drawer/drawer_menu_item.dart';
-import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 
 class AppDrawer extends ConsumerWidget {
   const AppDrawer({super.key});

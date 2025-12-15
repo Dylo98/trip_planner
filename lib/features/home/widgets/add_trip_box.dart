@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 
 class AddTripBox extends StatefulWidget {
   const AddTripBox({super.key});
@@ -44,7 +45,7 @@ class _AddTripBoxState extends State<AddTripBox>
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: AppColors.black.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -53,11 +54,7 @@ class _AddTripBoxState extends State<AddTripBox>
         child: const Center(
           child: Text(
             'DODAJ NOWĄ PODRÓŻ',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppColors.black,
-            ),
+            style: AppTextStyles.heading3,
           ),
         ),
       ),

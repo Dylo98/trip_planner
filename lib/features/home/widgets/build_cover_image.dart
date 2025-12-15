@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/home/constants/layout_constants.dart';
-import 'package:trip_planner/features/auth/controller/user_provider.dart';
+import 'package:trip_planner/features/auth/providers/user_provider.dart';
 
 class BuildCoverImage extends ConsumerWidget {
   const BuildCoverImage({super.key});
+
+  static const String _fallbackAsset = 'assets/images/image_home.jpg';
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -13,66 +16,55 @@ class BuildCoverImage extends ConsumerWidget {
     return meAsync.when(
       data: (me) {
         final coverImageUrl = me?.coverImage;
-        final hasCoverImage = coverImageUrl?.isNotEmpty == true;
+        final hasCoverImage =
+            coverImageUrl != null && coverImageUrl.trim().isNotEmpty;
+
+        if (!hasCoverImage) return _fallbackImage();
 
         return Container(
-          color: Colors.black,
-          child: hasCoverImage
-              ? Image.network(
-                  coverImageUrl!,
-                  height: LayoutConstants.coverHeight,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      'assets/images/image_home.jpg',
-                      height: LayoutConstants.coverHeight,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return Container(
-                      height: LayoutConstants.coverHeight,
-                      width: double.infinity,
-                      color: Colors.grey.shade300,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      ),
-                    );
-                  },
-                )
-              : Image.asset(
-                  'assets/images/image_home.jpg',
-                  height: LayoutConstants.coverHeight,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+          color: AppColors.black,
+          child: Image.network(
+            coverImageUrl.trim(),
+            height: LayoutConstants.coverHeight,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _fallbackImage(),
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+
+              final expected = loadingProgress.expectedTotalBytes;
+              final loaded = loadingProgress.cumulativeBytesLoaded;
+              final value = expected != null ? loaded / expected : null;
+
+              return _loadingPlaceholder(progress: value);
+            },
+          ),
         );
       },
-      loading: () => Container(
-        color: Colors.grey.shade300,
+      loading: () => _loadingPlaceholder(),
+      error: (_, __) => _fallbackImage(),
+    );
+  }
+
+  Widget _fallbackImage() {
+    return Container(
+      color: AppColors.black,
+      child: Image.asset(
+        _fallbackAsset,
         height: LayoutConstants.coverHeight,
         width: double.infinity,
-        child: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        fit: BoxFit.cover,
       ),
-      error: (_, __) => Container(
-        color: Colors.black,
-        child: Image.asset(
-          'assets/images/image_home.jpg',
-          height: LayoutConstants.coverHeight,
-          width: double.infinity,
-          fit: BoxFit.cover,
-        ),
-      ),
+    );
+  }
+
+  Widget _loadingPlaceholder({double? progress}) {
+    return Container(
+      height: LayoutConstants.coverHeight,
+      width: double.infinity,
+      color: Colors.grey.shade300,
+      alignment: Alignment.center,
+      child: CircularProgressIndicator(value: progress),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/widgets/buttons/gradient_button.dart';
 
 class HomeEmptyCarousel extends StatelessWidget {
@@ -21,7 +22,7 @@ class HomeEmptyCarousel extends StatelessWidget {
         const SizedBox(height: 16),
         const Text(
           'Nie masz jeszcze żadnych podróży',
-          style: TextStyle(fontSize: 16),
+          style: AppTextStyles.bodyTextSecondary,
         ),
         const SizedBox(height: 8),
         Container(

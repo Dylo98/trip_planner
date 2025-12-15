@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
-import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 import 'package:trip_planner/features/friends/model/friend_model.dart';
+import 'package:trip_planner/core/widgets/user_avatar.dart';
 
 class DialogFriendSelector extends ConsumerWidget {
   const DialogFriendSelector({
@@ -125,37 +126,17 @@ class FriendDropdownItem extends ConsumerWidget {
 
         return Row(
           children: [
-            CircleAvatar(
+            UserAvatar(
+              displayName: displayName,
+              avatarUrl: avatarUrl,
               radius: 16,
-              backgroundColor: AppColors.limeSliceDark.withValues(alpha: 0.1),
-              backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
-                  ? NetworkImage(avatarUrl)
-                  : null,
-              onBackgroundImageError: avatarUrl != null && avatarUrl.isNotEmpty
-                  ? (exception, stackTrace) {
-                      debugPrint('Error loading avatar: $exception');
-                    }
-                  : null,
-              child: avatarUrl == null || avatarUrl.isEmpty
-                  ? Text(
-                      displayName[0].toUpperCase(),
-                      style: AppTextStyles.bodySmall
-                          .copyWith(color: AppColors.limeSliceDark),
-                    )
-                  : null,
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    displayName,
-                    style: AppTextStyles.bodyText,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              child: Text(
+                displayName,
+                style: AppTextStyles.bodyText,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -163,14 +144,9 @@ class FriendDropdownItem extends ConsumerWidget {
       },
       loading: () => Row(
         children: [
-          CircleAvatar(
+          UserAvatar(
+            displayName: friend.displayName,
             radius: 16,
-            backgroundColor: AppColors.limeSliceDark.withValues(alpha: 0.1),
-            child: Text(
-              friend.displayName[0].toUpperCase(),
-              style: AppTextStyles.bodySmall
-                  .copyWith(color: AppColors.limeSliceDark),
-            ),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -184,14 +160,9 @@ class FriendDropdownItem extends ConsumerWidget {
       ),
       error: (_, __) => Row(
         children: [
-          CircleAvatar(
+          UserAvatar(
+            displayName: friend.displayName,
             radius: 16,
-            backgroundColor: AppColors.limeSliceDark.withValues(alpha: 0.1),
-            child: Text(
-              friend.displayName[0].toUpperCase(),
-              style: AppTextStyles.bodySmall
-                  .copyWith(color: AppColors.limeSliceDark),
-            ),
           ),
           const SizedBox(width: 12),
           Expanded(

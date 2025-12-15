@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
-import 'package:trip_planner/features/auth/controller/user_provider.dart';
+import 'package:trip_planner/features/auth/providers/user_provider.dart';
 import 'package:trip_planner/features/budget/widgets/dialog/dialog_payer_option_tile.dart';
 import 'package:trip_planner/features/budget/model/budget_payer_selection_model.dart';
-import 'package:trip_planner/features/friends/controller/friends_provider.dart';
+import 'package:trip_planner/features/friends/providers/friends_provider.dart';
 import 'package:trip_planner/features/friends/model/shared_trip_member_model.dart';
 
 class DialogPayerSelector extends ConsumerStatefulWidget {
