@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_service.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/place_details/components/place_details_header.dart';
@@ -75,8 +76,9 @@ class _PlaceDetailsBottomSheetState extends State<PlaceDetailsBottomSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _isAdding = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Błąd: $e')),
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie udało się dodać miejsca do podróży',
         );
       }
     }
@@ -296,8 +298,9 @@ class _PlaceDetailsBottomSheetState extends State<PlaceDetailsBottomSheet> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Nie można otworzyć linku: $e')),
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie można otworzyć linku',
         );
       }
     }

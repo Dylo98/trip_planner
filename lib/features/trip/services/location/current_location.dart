@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 
 class CurrentLocation {
   static Future<Position?> getCurrentPosition({
@@ -47,8 +48,8 @@ class CurrentLocation {
       );
     } catch (e) {
       if (context != null && context.mounted) {
-        _showError(
-            context, 'Nie udało się pobrać lokalizacji: ${e.toString()}');
+        _showError(context,
+            'Nie udało się pobrać lokalizacji. Sprawdź połączenie z GPS.');
       }
       return null;
     }
@@ -81,14 +82,9 @@ class CurrentLocation {
 
   static void _showError(BuildContext context, String message) {
     if (!context.mounted) return;
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 4),
-        behavior: SnackBarBehavior.floating,
-      ),
+    AppNotifications.showError(
+      context: context,
+      message: message,
     );
   }
 }

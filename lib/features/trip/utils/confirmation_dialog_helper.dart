@@ -1,57 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
 
 class ConfirmationDialogHelper {
   static Future<bool> showDeleteMarkerDialog(
     BuildContext context,
   ) async {
-    final confirmed = await showDialog<bool>(
+    return ConfirmationDialogs.delete(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Usuń punkt podróży'),
-        content: const Text('Czy na pewno chcesz usunąć ten punkt podróży?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Anuluj'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Usuń'),
-          ),
-        ],
-      ),
+      title: 'Usuń punkt podróży',
+      content: 'Czy na pewno chcesz usunąć ten punkt podróży?',
     );
-
-    return confirmed ?? false;
   }
 
   static Future<bool> showDeleteTripDialog(
     BuildContext context,
     String tripName,
   ) async {
-    final confirmed = await showDialog<bool>(
+    return ConfirmationDialogs.deleteTrip(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Usuń podróż'),
-        content: Text(
-          'Czy na pewno chcesz usunąć podróż "$tripName"?\n\n'
-          'Ta akcja jest nieodwracalna i usunie wszystkie zdjęcia, markery i dane podróży.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Anuluj'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Usuń'),
-          ),
-        ],
-      ),
+      tripName: tripName,
     );
-
-    return confirmed ?? false;
   }
 }

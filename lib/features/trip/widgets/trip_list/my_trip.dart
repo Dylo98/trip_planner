@@ -6,6 +6,7 @@ import 'package:trip_planner/core/utils/debouncer.dart';
 import 'package:trip_planner/features/trip/utils/trip_sorting_helper.dart';
 import 'package:trip_planner/features/trip/widgets/trip_list/trip_toolbar.dart';
 import 'package:trip_planner/features/trip/widgets/trip_card/trip_card.dart';
+import 'package:trip_planner/core/widgets/empty_state.dart';
 
 class MyTrip extends ConsumerStatefulWidget {
   const MyTrip({super.key});
@@ -96,32 +97,18 @@ class _MyTripState extends ConsumerState<MyTrip> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _searchQuery.isEmpty ? 'Brak podróży' : 'Nie znaleziono podróży',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (_searchQuery.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Spróbuj wyszukać czegoś innego',
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ],
-        ],
-      ),
+    if (_searchQuery.isEmpty) {
+      return const EmptyState(
+        icon: Icons.luggage,
+        title: 'Brak podróży',
+        subtitle: 'Dodaj swoją pierwszą podróż, aby rozpocząć planowanie',
+      );
+    }
+
+    return const EmptyState(
+      icon: Icons.search_off,
+      title: 'Nie znaleziono podróży',
+      subtitle: 'Spróbuj wyszukać czegoś innego',
     );
   }
 }
