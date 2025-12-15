@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-
 import 'package:trip_planner/features/home/constants/layout_constants.dart';
 
 class ProfileCoverImage extends StatelessWidget {

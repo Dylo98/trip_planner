@@ -1,31 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:trip_planner/core/theme/colors.dart';
-
 import 'dart:io';
-
 import 'package:trip_planner/features/auth/providers/user_provider.dart';
-
 import 'package:trip_planner/features/auth/providers/auth_provider.dart';
-
 import 'package:trip_planner/features/profile/services/profile_image_service.dart';
-
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-
 import 'package:trip_planner/core/utils/action_lock.dart';
-
 import 'package:trip_planner/core/widgets/error_display.dart';
-
 import 'package:trip_planner/core/widgets/loading_indicator.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_header/profile_header.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_menu/profile_info.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_menu/profile_menu.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_menu/logout_dialog.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -116,9 +103,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final message = _profileImageService.getErrorMessage(e);
+
           AppNotifications.showError(
             context: context,
-            message: 'Nie udało się zapisać zdjęcia',
+            message: message,
           );
         }
       } finally {
@@ -148,9 +137,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final message = _profileImageService.getErrorMessage(e);
+
           AppNotifications.showError(
             context: context,
-            message: 'Nie udało się zapisać zdjęcia',
+            message: message,
           );
         }
       } finally {

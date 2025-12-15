@@ -1,11 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_header/profile_cover_image.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_header/profile_avatar.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_header/profile_edit_button.dart';
 
 class ProfileHeader extends StatelessWidget {

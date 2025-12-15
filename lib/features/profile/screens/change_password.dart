@@ -1,19 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:firebase_auth/firebase_auth.dart';
-
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-
 import 'package:trip_planner/core/theme/colors.dart';
-
 import 'package:trip_planner/core/utils/validators.dart';
-
 import 'package:trip_planner/core/utils/action_lock.dart';
-
 import 'package:trip_planner/features/profile/providers/password_service_provider.dart';
-
 import 'package:trip_planner/features/profile/widgets/change_password/password_text_field.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
@@ -76,24 +67,11 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
           Navigator.of(context).pop();
         }
-      } on FirebaseAuthException catch (e) {
-        if (mounted) {
-          final passwordService = ref.read(passwordServiceProvider);
-
-          final message = passwordService.getFirebaseErrorMessage(e) ??
-              'Błąd podczas zmiany hasła';
-
-          AppNotifications.showError(context: context, message: message);
-        }
       } catch (e) {
         if (mounted) {
-          AppNotifications.showError(
-            context: context,
-            message: 'Błąd: $e',
-          );
-        }
-      } finally {
-        if (mounted) {
+          final passwordService = ref.read(passwordServiceProvider);
+          final message = passwordService.getErrorMessage(e);
+          AppNotifications.showError(context: context, message: message);
           setState(() => _isLoading = false);
         }
       }

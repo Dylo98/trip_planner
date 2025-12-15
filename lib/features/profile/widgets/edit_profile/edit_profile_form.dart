@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'package:trip_planner/core/theme/input_style.dart';
-
 import 'package:trip_planner/core/theme/colors.dart';
-
 import 'package:trip_planner/core/utils/validators.dart';
 
 class EditProfileForm extends StatelessWidget {

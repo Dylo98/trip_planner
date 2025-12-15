@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:trip_planner/features/auth/providers/user_provider.dart';
-
 import 'package:trip_planner/core/widgets/app_notifications.dart';
-
 import 'package:trip_planner/core/utils/action_lock.dart';
-
 import 'package:trip_planner/core/widgets/loading_indicator.dart';
-
 import 'package:trip_planner/core/widgets/error_display.dart';
-
 import 'package:trip_planner/features/profile/widgets/edit_profile/edit_profile_form.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {

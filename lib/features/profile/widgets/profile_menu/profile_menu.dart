@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-
 import 'package:go_router/go_router.dart';
-
 import 'package:trip_planner/features/profile/widgets/profile_menu/profile_menu_item.dart';
 
 class ProfileMenu extends StatelessWidget {
