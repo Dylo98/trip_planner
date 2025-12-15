@@ -103,9 +103,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final message = _profileImageService.getErrorMessage(e);
           AppNotifications.showError(
             context: context,
-            message: 'Nie udało się zapisać zdjęcia',
+            message: message,
           );
         }
       } finally {
@@ -135,9 +136,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         }
       } catch (e) {
         if (mounted) {
+          final message = _profileImageService.getErrorMessage(e);
           AppNotifications.showError(
             context: context,
-            message: 'Nie udało się zapisać zdjęcia',
+            message: message,
           );
         }
       } finally {

@@ -8,93 +8,107 @@ class ProfileImageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  Future<String> uploadAvatar(File imageFile) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('Użytkownik nie jest zalogowany');
+  /// Parsuje błędy Firebase na przyjazne komunikaty po polsku
+  String getErrorMessage(dynamic error) {
+    if (error is FirebaseException) {
+      switch (error.code) {
+        case 'storage/unauthorized':
+          return 'Brak uprawnień do uploadu zdjęcia';
+        case 'storage/canceled':
+          return 'Upload został anulowany';
+        case 'storage/unknown':
+          return 'Wystąpił nieznany błąd podczas uploadu';
+        case 'storage/quota-exceeded':
+          return 'Przekroczono limit miejsca na zdjęcia';
+        case 'storage/unauthenticated':
+          return 'Musisz być zalogowany aby dodać zdjęcie';
+        case 'permission-denied':
+          return 'Brak uprawnień do zapisu';
+        case 'unavailable':
+          return 'Serwer jest niedostępny, spróbuj ponownie';
+        default:
+          return 'Błąd podczas zapisu zdjęcia';
       }
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-
-      final storageRef =
-          _storage.ref().child('users/$userId/profile/avatar_$timestamp.jpg');
-
-      await storageRef.putFile(imageFile);
-
-      final downloadUrl = await storageRef.getDownloadURL();
-
-      await _firestore.collection('users').doc(userId).update({
-        'avatar': downloadUrl,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      await _auth.currentUser?.updatePhotoURL(downloadUrl);
-
-      return downloadUrl;
-    } catch (e) {
-      throw Exception('Błąd podczas uploadu zdjęcia profilowego: $e');
     }
+
+    if (error.toString().contains('Użytkownik nie jest zalogowany')) {
+      return 'Musisz być zalogowany';
+    }
+
+    return 'Nie udało się zapisać zdjęcia';
+  }
+
+  Future<String> uploadAvatar(File imageFile) async {
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Użytkownik nie jest zalogowany');
+    }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    final storageRef =
+        _storage.ref().child('users/$userId/profile/avatar_$timestamp.jpg');
+
+    await storageRef.putFile(imageFile);
+
+    final downloadUrl = await storageRef.getDownloadURL();
+
+    await _firestore.collection('users').doc(userId).update({
+      'avatar': downloadUrl,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await _auth.currentUser?.updatePhotoURL(downloadUrl);
+
+    return downloadUrl;
   }
 
   Future<String> uploadCoverImage(File imageFile) async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('Użytkownik nie jest zalogowany');
-      }
-
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-
-      final storageRef =
-          _storage.ref().child('users/$userId/profile/cover_$timestamp.jpg');
-
-      await storageRef.putFile(imageFile);
-
-      final downloadUrl = await storageRef.getDownloadURL();
-
-      await _firestore.collection('users').doc(userId).update({
-        'coverImage': downloadUrl,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      return downloadUrl;
-    } catch (e) {
-      throw Exception('Błąd podczas uploadu zdjęcia w tle: $e');
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Użytkownik nie jest zalogowany');
     }
+
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+
+    final storageRef =
+        _storage.ref().child('users/$userId/profile/cover_$timestamp.jpg');
+
+    await storageRef.putFile(imageFile);
+
+    final downloadUrl = await storageRef.getDownloadURL();
+
+    await _firestore.collection('users').doc(userId).update({
+      'coverImage': downloadUrl,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    return downloadUrl;
   }
 
   Future<void> deleteAvatar() async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('Użytkownik nie jest zalogowany');
-      }
-
-      await _firestore.collection('users').doc(userId).update({
-        'avatar': FieldValue.delete(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      await _auth.currentUser?.updatePhotoURL(null);
-    } catch (e) {
-      throw Exception('Błąd podczas usuwania zdjęcia profilowego: $e');
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Użytkownik nie jest zalogowany');
     }
+
+    await _firestore.collection('users').doc(userId).update({
+      'avatar': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+
+    await _auth.currentUser?.updatePhotoURL(null);
   }
 
   Future<void> deleteCoverImage() async {
-    try {
-      final userId = _auth.currentUser?.uid;
-      if (userId == null) {
-        throw Exception('Użytkownik nie jest zalogowany');
-      }
-
-      await _firestore.collection('users').doc(userId).update({
-        'coverImage': FieldValue.delete(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      throw Exception('Błąd podczas usuwania zdjęcia w tle: $e');
+    final userId = _auth.currentUser?.uid;
+    if (userId == null) {
+      throw Exception('Użytkownik nie jest zalogowany');
     }
+
+    await _firestore.collection('users').doc(userId).update({
+      'coverImage': FieldValue.delete(),
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
   }
 }
