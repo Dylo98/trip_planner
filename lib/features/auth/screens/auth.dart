@@ -7,14 +7,9 @@ import 'package:trip_planner/features/auth/widgets/bottomsheets/auth_bottom_shee
 import 'package:trip_planner/features/auth/widgets/bottomsheets/login_bottom_sheet.dart';
 import 'package:trip_planner/features/auth/widgets/bottomsheets/signup_bottom_sheet.dart';
 
-class AuthScreen extends StatefulWidget {
+class AuthScreen extends StatelessWidget {
   const AuthScreen({super.key});
 
-  @override
-  State<AuthScreen> createState() => _AuthScreenState();
-}
-
-class _AuthScreenState extends State<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

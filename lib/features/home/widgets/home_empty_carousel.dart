@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
-import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/theme/button_style.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
-import 'package:trip_planner/core/widgets/buttons/gradient_button.dart';
 
 class HomeEmptyCarousel extends StatelessWidget {
   const HomeEmptyCarousel({super.key});
@@ -25,14 +24,11 @@ class HomeEmptyCarousel extends StatelessWidget {
           style: AppTextStyles.bodyTextSecondary,
         ),
         const SizedBox(height: 8),
-        Container(
-          decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
-            borderRadius: BorderRadius.circular(25),
-          ),
-          child: GradientButton(
-            text: 'Dodaj pierwszą podróż',
-            onPressed: () => context.push('/add-trip'),
+        GradientButton(
+          onPressed: () => context.push('/add-trip'),
+          child: const Text(
+            'Dodaj pierwszą podróż',
+            style: AppTextStyles.buttonText,
           ),
         ),
       ],

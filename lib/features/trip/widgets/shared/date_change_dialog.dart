@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
+import 'package:trip_planner/features/trip/utils/trip_validators.dart';
 
 class DateChangeResult {
   final DateTime startDate;
@@ -43,7 +43,7 @@ class _DateChangeDialogState extends State<DateChangeDialog> {
   bool get _isOngoingTrip => widget.trip.tripType == TripType.ongoing;
 
   void _validateAndSubmit() {
-    final validationError = Validators.validateTripDatesWithConflicts(
+    final validationError = TripValidators.validateTripDatesWithConflicts(
       startDate: _startDate,
       endDate: _endDate,
       existingTrips: widget.existingTrips,

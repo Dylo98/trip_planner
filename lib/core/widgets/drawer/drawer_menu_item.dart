@@ -20,7 +20,10 @@ class DrawerMenuItem extends StatelessWidget {
     return ListTile(
       leading: Icon(icon, color: iconColor),
       title: Text(title),
-      onTap: () => context.push(route),
+      onTap: () {
+        Navigator.pop(context);
+        context.push(route);
+      },
     );
   }
 }

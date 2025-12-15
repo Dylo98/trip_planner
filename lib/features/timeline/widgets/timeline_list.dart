@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:trip_planner/features/timeline/widgets/timeline_tile_widget.dart';
+import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 
 class TimelineList extends StatelessWidget {
-  final List markers;
+  final List<MarkerPoint> markers;
   final String? tripId;
 
   const TimelineList({

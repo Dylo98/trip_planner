@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:trip_planner/core/utils/validators.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/trip/providers/trip_form_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/providers/trip_photo_provider.dart';
 import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
+import 'package:trip_planner/features/trip/utils/trip_validators.dart';
 
 class TripFormService {
   final WidgetRef ref;
@@ -20,7 +20,7 @@ class TripFormService {
 
     final existingTrips = ref.read(getTripProvider).value ?? [];
 
-    final dateError = Validators.validateTripDatesWithConflicts(
+    final dateError = TripValidators.validateTripDatesWithConflicts(
       startDate: tripState.startDate,
       endDate: tripState.endDate,
       existingTrips: existingTrips,
