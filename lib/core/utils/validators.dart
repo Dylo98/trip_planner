@@ -1,4 +1,5 @@
 import 'package:trip_planner/features/trip/model/trip_model.dart';
+import 'package:trip_planner/core/constants/validation_constants.dart';
 
 class Validators {
   static String? validateEmail(String? value) {
@@ -8,9 +9,7 @@ class Validators {
 
     final email = value.trim();
 
-    final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
-    );
+    final emailRegex = RegExp(ValidationConstants.emailRegexPattern);
 
     if (!emailRegex.hasMatch(email)) {
       return 'Nieprawidłowy format e-mail';
@@ -24,8 +23,8 @@ class Validators {
       return 'Hasło jest wymagane';
     }
 
-    if (value.length < 6) {
-      return 'Hasło musi zawierać minimum 6 znaków';
+    if (value.length < ValidationConstants.minPasswordLength) {
+      return 'Hasło musi zawierać minimum ${ValidationConstants.minPasswordLength} znaków';
     }
 
     return null;
@@ -36,12 +35,12 @@ class Validators {
       return 'Imię jest wymagane';
     }
 
-    if (value.trim().length < 2) {
-      return 'Imię musi mieć co najmniej 2 znaki';
+    if (value.trim().length < ValidationConstants.minNameLength) {
+      return 'Imię musi mieć co najmniej ${ValidationConstants.minNameLength} znaki';
     }
 
-    if (value.trim().length > 50) {
-      return 'Imię nie może być dłuższe niż 50 znaków';
+    if (value.trim().length > ValidationConstants.maxNameLength) {
+      return 'Imię nie może być dłuższe niż ${ValidationConstants.maxNameLength} znaków';
     }
 
     return null;
@@ -52,12 +51,12 @@ class Validators {
       return 'Musisz podać nazwę podróży';
     }
 
-    if (value.trim().length < 3) {
-      return 'Nazwa podróży musi mieć min. 3 znaki';
+    if (value.trim().length < ValidationConstants.minTripNameLength) {
+      return 'Nazwa podróży musi mieć min. ${ValidationConstants.minTripNameLength} znaki';
     }
 
-    if (value.trim().length > 100) {
-      return 'Nazwa podróży jest za długa (max. 100 znaków)';
+    if (value.trim().length > ValidationConstants.maxTripNameLength) {
+      return 'Nazwa podróży jest za długa (max. ${ValidationConstants.maxTripNameLength} znaków)';
     }
 
     return null;
@@ -76,10 +75,14 @@ class Validators {
     }
 
     final now = DateTime.now();
-    final maxPastDate = DateTime(now.year - 10, now.month, now.day);
+    final maxPastDate = DateTime(
+      now.year - ValidationConstants.maxPastYears,
+      now.month,
+      now.day,
+    );
 
     if (startDate.isBefore(maxPastDate)) {
-      return 'Data podróży nie może być starsza niż 10 lat';
+      return 'Data podróży nie może być starsza niż ${ValidationConstants.maxPastYears} lat';
     }
 
     return null;

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
+import 'package:trip_planner/core/utils/error_logger.dart';
 
 /// Serwis odpowiedzialny za zarządzanie zdjęciami głównej podróży
 ///
@@ -54,8 +55,18 @@ class TripImageService extends BaseTripService {
     try {
       final imageRef = storage.refFromURL(imageUrl);
       await imageRef.delete();
-    } catch (e) {
-      //
+    } catch (e, stackTrace) {
+      // Błąd podczas usuwania zdjęcia jest akceptowalny (np. zdjęcie już usunięte)
+      ErrorLogger.warn(
+        'Nie udało się usunąć zdjęcia: $imageUrl',
+        context: 'TripImageService._deleteImageFromStorage',
+      );
+      ErrorLogger.log(
+        'Szczegóły błędu podczas usuwania zdjęcia',
+        error: e,
+        stackTrace: stackTrace,
+        context: 'TripImageService',
+      );
     }
   }
 }

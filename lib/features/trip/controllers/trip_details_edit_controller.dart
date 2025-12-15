@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:trip_planner/core/utils/dialog_utils.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
 import 'package:trip_planner/features/auth/providers/user_provider.dart';
@@ -37,37 +38,28 @@ class TripDetailsEditController {
 
       if (!context.mounted) return false;
 
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
       try {
         final File imageFile = File(image.path);
-        final String photoUrl = await _tripService.uploadTripImage(
-          imageFile,
-          trip.id,
-        );
 
-        await _tripService.updateTripPhoto(trip.id, photoUrl);
+        await DialogUtils.executeWithLoading(context, () async {
+          final String photoUrl = await _tripService.uploadTripImage(
+            imageFile,
+            trip.id,
+          );
+          await _tripService.updateTripPhoto(trip.id, photoUrl);
+        });
 
         if (context.mounted) {
-          Navigator.pop(context);
           AppNotifications.showSuccess(
             context: context,
             message: 'Zdjęcie zostało dodane',
           );
-
           return true;
         }
 
         return false;
       } catch (e) {
         if (context.mounted) {
-          Navigator.pop(context);
           AppNotifications.showError(
             context: context,
             message: 'Nie udało się dodać zdjęcia. Spróbuj ponownie.',
@@ -96,28 +88,21 @@ class TripDetailsEditController {
     if (!confirmed || !context.mounted) return false;
 
     try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
-      await _tripService.updateTripPhoto(trip.id, null);
+      await DialogUtils.executeWithLoading(context, () async {
+        await _tripService.updateTripPhoto(trip.id, null);
+      });
 
       if (context.mounted) {
-        Navigator.pop(context);
         AppNotifications.showSuccess(
           context: context,
           message: 'Zdjęcie zostało usunięte',
         );
+        return true;
       }
 
-      return true;
+      return false;
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context);
         AppNotifications.showError(
           context: context,
           message: 'Nie udało się usunąć zdjęcia. Spróbuj ponownie.',
@@ -158,34 +143,25 @@ class TripDetailsEditController {
       if (result == null || !context.mounted) return false;
 
       try {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-
-        await _tripService.updateTripDates(
-          trip.id,
-          result.startDate,
-          result.endDate,
-        );
+        await DialogUtils.executeWithLoading(context, () async {
+          await _tripService.updateTripDates(
+            trip.id,
+            result.startDate,
+            result.endDate,
+          );
+        });
 
         if (context.mounted) {
-          Navigator.pop(context);
           AppNotifications.showSuccess(
             context: context,
             message: 'Daty zostały zaktualizowane',
           );
-
           return true;
         }
 
         return false;
       } catch (e) {
         if (context.mounted) {
-          Navigator.pop(context);
           AppNotifications.showError(
             context: context,
             message: 'Nie udało się zaktualizować dat. Spróbuj ponownie.',
@@ -215,30 +191,21 @@ class TripDetailsEditController {
     if (result == null || !context.mounted) return false;
 
     try {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => const Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-
-      await _tripService.updateTripName(trip.id, result);
+      await DialogUtils.executeWithLoading(context, () async {
+        await _tripService.updateTripName(trip.id, result);
+      });
 
       if (context.mounted) {
-        Navigator.pop(context);
         AppNotifications.showSuccess(
           context: context,
           message: 'Nazwa została zmieniona',
         );
-
         return true;
       }
 
       return false;
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context);
         AppNotifications.showError(
           context: context,
           message: 'Nie udało się zmienić nazwy. Spróbuj ponownie.',

@@ -1,5 +1,6 @@
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/base_trip_service.dart';
+import 'package:trip_planner/core/utils/error_logger.dart';
 
 /// Serwis odpowiedzialny za podstawowe operacje CRUD na podróżach
 ///
@@ -96,8 +97,14 @@ class TripCrudService extends BaseTripService {
             final trip = Trip.fromFirestore(tripData);
             trips.add(trip);
           }
-        } catch (e) {
-          //
+        } catch (e, stackTrace) {
+          // Kontynuuj parsowanie pozostałych podróży, pomijając błędne dokumenty
+          ErrorLogger.log(
+            'Nie udało się sparsować podróży o ID: ${doc.id}',
+            error: e,
+            stackTrace: stackTrace,
+            context: 'TripCrudService.getTrips',
+          );
         }
       }
       return trips;

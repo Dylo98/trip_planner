@@ -59,6 +59,23 @@ class Trip {
     return endDate!.difference(startDate!).inDays + 1;
   }
 
+  // Private helper methods for parsing
+  static TripType? _parseTripType(dynamic value) {
+    if (value == null) return null;
+    try {
+      return TripType.values.firstWhere((e) => e.name == value);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static DateTime? _parseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is Timestamp) return value.toDate();
+    if (value is String) return DateTime.parse(value);
+    return null;
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -75,29 +92,11 @@ class Trip {
   }
 
   factory Trip.fromFirestore(Map<String, dynamic> data) {
-    TripType? parsedType;
-    if (data['tripType'] != null) {
-      try {
-        parsedType = TripType.values.firstWhere(
-          (e) => e.name == data['tripType'],
-        );
-      } catch (e) {
-        parsedType = null;
-      }
-    }
-
-    DateTime? parseDate(dynamic value) {
-      if (value == null) return null;
-      if (value is Timestamp) return value.toDate();
-      if (value is String) return DateTime.parse(value);
-      return null;
-    }
-
     return Trip(
       id: data['id'],
       name: data['name'],
-      startDate: parseDate(data['startDate']),
-      endDate: parseDate(data['endDate']),
+      startDate: _parseDate(data['startDate']),
+      endDate: _parseDate(data['endDate']),
       description: data['description'] as String?,
       imageUrl:
           data['imageUrl'] != null ? List<String>.from(data['imageUrl']) : [],
@@ -112,27 +111,16 @@ class Trip {
               .map((e) => ExpenseItem.fromJson(e))
               .toList()
           : null,
-      tripType: parsedType,
+      tripType: _parseTripType(data['tripType']),
     );
   }
 
   factory Trip.fromJson(Map<String, dynamic> json) {
-    TripType? parsedType;
-    if (json['tripType'] != null) {
-      try {
-        parsedType = TripType.values.firstWhere(
-          (e) => e.name == json['tripType'],
-        );
-      } catch (e) {
-        parsedType = null;
-      }
-    }
     return Trip(
       id: json['id'],
       name: json['name'],
-      startDate:
-          json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
-      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+      startDate: _parseDate(json['startDate']),
+      endDate: _parseDate(json['endDate']),
       description: json['description'] as String?,
       imageUrl:
           json['imageUrl'] != null ? List<String>.from(json['imageUrl']) : [],
@@ -147,7 +135,7 @@ class Trip {
               .map((e) => ExpenseItem.fromJson(e))
               .toList()
           : null,
-      tripType: parsedType,
+      tripType: _parseTripType(json['tripType']),
     );
   }
 
