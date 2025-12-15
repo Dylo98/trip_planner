@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trip_planner/core/utils/validators.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
 import 'package:trip_planner/features/auth/providers/user_provider.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
@@ -53,7 +55,10 @@ class TripDetailsEditController {
 
         if (context.mounted) {
           Navigator.pop(context);
-          _showSuccessMessage('Zdjęcie zostało dodane!');
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Zdjęcie zostało dodane',
+          );
           return true;
         }
 
@@ -61,30 +66,20 @@ class TripDetailsEditController {
       } catch (e) {
         if (context.mounted) {
           Navigator.pop(context);
-        }
-        String errorMessage;
-
-        if (e.toString().contains('not-found')) {
-          errorMessage =
-              'Nie znaleziono podróży w bazie.\nID: ${trip.id}\n\nSprawdź czy podróż istnieje w Firestore.';
-        } else if (e.toString().contains('permission-denied')) {
-          errorMessage =
-              'Brak uprawnień do edycji.\nSprawdź Firebase Security Rules.';
-        } else if (e.toString().contains('network')) {
-          errorMessage = 'Brak połączenia z internetem';
-        } else {
-          errorMessage = 'Błąd: ${e.toString()}';
-        }
-
-        if (context.mounted) {
-          _showErrorMessage(errorMessage);
+          AppNotifications.showError(
+            context: context,
+            message: 'Nie udało się dodać zdjęcia. Spróbuj ponownie.',
+          );
         }
 
         return false;
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage('Nieoczekiwany błąd: ${e.toString()}');
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie udało się wybrać zdjęcia',
+        );
       }
 
       return false;
@@ -92,34 +87,38 @@ class TripDetailsEditController {
   }
 
   Future<bool> handlePhotoRemoval() async {
-    final confirmed = await _showConfirmationDialog(
-      title: 'Usuń zdjęcie',
-      content: 'Czy na pewno chcesz usunąć zdjęcie główne podróży?',
+    final confirmed = await ConfirmationDialogs.deletePhoto(
+      context: context,
     );
 
-    if (!confirmed) return false;
+    if (!confirmed || !context.mounted) return false;
 
     try {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => const Center(
-            child: CircularProgressIndicator(),
-          ),
-        );
-      }
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
       await _tripService.updateTripPhoto(trip.id, null);
 
       if (context.mounted) {
         Navigator.pop(context);
-        _showSuccessMessage('Zdjęcie zostało usunięte');
+        AppNotifications.showSuccess(
+          context: context,
+          message: 'Zdjęcie zostało usunięte',
+        );
       }
       return true;
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context);
-        _showErrorMessage('Błąd podczas usuwania zdjęcia');
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie udało się usunąć zdjęcia. Spróbuj ponownie.',
+        );
       }
       return false;
     }
@@ -131,7 +130,10 @@ class TripDetailsEditController {
       final user = userAsync.value;
 
       if (user == null) {
-        _showErrorMessage('Nie jesteś zalogowany');
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie jesteś zalogowany',
+        );
         return false;
       }
 
@@ -166,7 +168,10 @@ class TripDetailsEditController {
 
         if (context.mounted) {
           Navigator.pop(context);
-          _showSuccessMessage('Daty zostały zaktualizowane');
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Daty zostały zaktualizowane',
+          );
           return true;
         }
 
@@ -174,13 +179,19 @@ class TripDetailsEditController {
       } catch (e) {
         if (context.mounted) {
           Navigator.pop(context);
-          _showErrorMessage('Błąd podczas aktualizacji dat');
+          AppNotifications.showError(
+            context: context,
+            message: 'Nie udało się zaktualizować dat. Spróbuj ponownie.',
+          );
         }
         return false;
       }
     } catch (e) {
       if (context.mounted) {
-        _showErrorMessage('Błąd: ${e.toString()}');
+        AppNotifications.showError(
+          context: context,
+          message: 'Wystąpił nieoczekiwany błąd',
+        );
       }
       return false;
     }
@@ -213,20 +224,16 @@ class TripDetailsEditController {
             onPressed: () {
               final newName = nameController.text.trim();
               if (newName.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Nazwa nie może być pusta'),
-                    backgroundColor: Colors.red,
-                  ),
+                AppNotifications.showError(
+                  context: context,
+                  message: 'Nazwa nie może być pusta',
                 );
                 return;
               }
               if (newName.length < 3) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Nazwa musi mieć min. 3 znaki'),
-                    backgroundColor: Colors.red,
-                  ),
+                AppNotifications.showError(
+                  context: context,
+                  message: 'Nazwa musi mieć min. 3 znaki',
                 );
                 return;
               }
@@ -253,7 +260,10 @@ class TripDetailsEditController {
 
       if (context.mounted) {
         Navigator.pop(context);
-        _showSuccessMessage('Nazwa została zmieniona');
+        AppNotifications.showSuccess(
+          context: context,
+          message: 'Nazwa została zmieniona',
+        );
         return true;
       }
 
@@ -261,78 +271,13 @@ class TripDetailsEditController {
     } catch (e) {
       if (context.mounted) {
         Navigator.pop(context);
-        _showErrorMessage('Błąd podczas zmiany nazwy');
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie udało się zmienić nazwy. Spróbuj ponownie.',
+        );
       }
       return false;
     }
-  }
-
-  Future<bool> _showConfirmationDialog({
-    required String title,
-    required String content,
-  }) async {
-    final result = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Anuluj'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Potwierdź'),
-          ),
-        ],
-      ),
-    );
-
-    return result ?? false;
-  }
-
-  void _showSuccessMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showErrorMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                message,
-                maxLines: 5,
-                overflow: TextOverflow.visible,
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.red,
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
   }
 }
 

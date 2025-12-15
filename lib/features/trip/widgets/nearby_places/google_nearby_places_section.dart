@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
+import 'package:trip_planner/core/widgets/loading_indicator.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/providers/nearby_places_provider.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/category_filter_chips.dart/category_filter_chips.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/places_grid/places_grid_view.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/state_widgets/loading_state_widget.dart';
 import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/state_widgets/error_state_widget.dart';
 
 class GoogleNearbyPlacesSection extends ConsumerWidget {
@@ -39,7 +39,9 @@ class GoogleNearbyPlacesSection extends ConsumerWidget {
         ),
         const SizedBox(height: 16),
         placesState.when(
-          loading: () => const LoadingStateWidget(),
+          loading: () => const LoadingIndicator(
+            message: 'Szukam ciekawych miejsc...',
+          ),
           error: (error, stack) => ErrorStateWidget(
             error: error,
             onRetry: () => ref.refresh(nearbyPlacesProvider(markerPosition)),

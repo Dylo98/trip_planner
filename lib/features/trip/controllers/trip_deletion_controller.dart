@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/trip/utils/confirmation_dialog_helper.dart';
@@ -40,24 +41,18 @@ class TripDeletionController {
   void showSuccessMessage(String tripName) {
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Usunięto podróż "$tripName"'),
-        backgroundColor: Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
+    AppNotifications.showSuccess(
+      context: context,
+      message: 'Usunięto podróż "$tripName"',
     );
   }
 
   void showErrorMessage(Object error) {
     if (!context.mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Błąd usuwania: $error'),
-        backgroundColor: Colors.red,
-        behavior: SnackBarBehavior.floating,
-      ),
+    AppNotifications.showError(
+      context: context,
+      message: 'Nie udało się usunąć podróży. Spróbuj ponownie.',
     );
   }
 }

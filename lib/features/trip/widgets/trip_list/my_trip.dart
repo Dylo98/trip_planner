@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/widgets/empty_state.dart';
 import 'package:trip_planner/features/trip/providers/get_trip_provider.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
 import 'package:trip_planner/core/utils/debouncer.dart';
@@ -96,32 +97,18 @@ class _MyTripState extends ConsumerState<MyTrip> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.search_off,
-            size: 64,
-            color: Colors.grey.shade400,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            _searchQuery.isEmpty ? 'Brak podróży' : 'Nie znaleziono podróży',
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          if (_searchQuery.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Spróbuj wyszukać czegoś innego',
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ],
-        ],
-      ),
+    if (_searchQuery.isEmpty) {
+      return const EmptyState(
+        icon: Icons.luggage,
+        title: 'Brak podróży',
+        subtitle: 'Dodaj swoją pierwszą podróż, aby rozpocząć planowanie',
+      );
+    }
+
+    return const EmptyState(
+      icon: Icons.search_off,
+      title: 'Nie znaleziono podróży',
+      subtitle: 'Spróbuj wyszukać czegoś innego',
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:trip_planner/core/theme/colors.dart';
+import 'package:trip_planner/core/widgets/dialog/dialog_confirmation.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/trip/model/trip_model.dart';
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_main_screen.dart';
 import 'package:trip_planner/features/trip/screens/trip_details/trip_details_map_screen.dart';
@@ -11,7 +13,6 @@ import 'package:trip_planner/features/trip/services/trip_service.dart';
 import 'package:trip_planner/features/friends/widgets/dialog/share_trip_dialog.dart';
 import 'package:trip_planner/features/friends/widgets/dialog/dialog_manage_shared_members.dart';
 import 'package:trip_planner/features/friends/providers/friends_provider.dart';
-import 'package:trip_planner/features/trip/widgets/shared/delete_trip_dialog.dart';
 import 'package:trip_planner/features/trip/providers/watch_trip_provider.dart';
 
 class MainTripDetailsScreen extends ConsumerStatefulWidget {
@@ -54,37 +55,28 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
   }
 
   Future<void> _deleteTrip() async {
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmationDialogs.deleteTrip(
       context: context,
-      builder: (context) => DeleteTripDialog(
-        tripName: widget.trip.name,
-      ),
+      tripName: widget.trip.name,
     );
 
-    if (confirmed != true) return;
+    if (!confirmed || !mounted) return;
 
     try {
       await ref.read(tripServiceProvider).deleteTrip(widget.trip.id);
 
       if (mounted) {
         Navigator.pop(context);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Usunięto podróż "${widget.trip.name}"'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
+        AppNotifications.showSuccess(
+          context: context,
+          message: 'Usunięto podróż "${widget.trip.name}"',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Błąd usuwania: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie udało się usunąć podróży. Spróbuj ponownie.',
         );
       }
     }
@@ -137,20 +129,16 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
             onPressed: () {
               final newName = nameController.text.trim();
               if (newName.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Nazwa nie może być pusta'),
-                    backgroundColor: Colors.red,
-                  ),
+                AppNotifications.showError(
+                  context: context,
+                  message: 'Nazwa nie może być pusta',
                 );
                 return;
               }
               if (newName.length < 3) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Nazwa musi mieć min. 3 znaki'),
-                    backgroundColor: Colors.red,
-                  ),
+                AppNotifications.showError(
+                  context: context,
+                  message: 'Nazwa musi mieć min. 3 znaki',
                 );
                 return;
               }
@@ -170,22 +158,16 @@ class _MainTripDetailsScreenState extends ConsumerState<MainTripDetailsScreen> {
           .updateTripName(widget.trip.id, result);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Nazwa została zmieniona'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
+        AppNotifications.showSuccess(
+          context: context,
+          message: 'Nazwa została zmieniona',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Błąd: $e'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
+        AppNotifications.showError(
+          context: context,
+          message: 'Nie udało się zmienić nazwy. Spróbuj ponownie.',
         );
       }
     }

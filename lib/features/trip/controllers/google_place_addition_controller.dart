@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/features/trip/model/marker_point_model.dart';
 import 'package:trip_planner/features/trip/providers/trip_markers_provider.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
@@ -80,23 +81,9 @@ class GooglePlaceAdditionController {
   }
 
   void _showSuccessMessage(String placeName, String transport) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.check_circle, color: Colors.white),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                'Dodano: $placeName (${TransportHelper.getName(transport)})',
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.green,
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
+    AppNotifications.showSuccess(
+      context: context,
+      message: 'Dodano: $placeName (${TransportHelper.getName(transport)})',
     );
   }
 }

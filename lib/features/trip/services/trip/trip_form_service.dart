@@ -50,7 +50,7 @@ class TripFormService {
       if (context.mounted) {
         AppNotifications.showError(
           context: context,
-          message: e.toString(),
+          message: 'Nie udało się zapisać podróży. Spróbuj ponownie.',
         );
       }
     }
