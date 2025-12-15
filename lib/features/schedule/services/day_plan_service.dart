@@ -292,17 +292,9 @@ class DayPlanService {
 
     final collection = await _getDayPlansCollection(tripId);
 
-    // Zbierz wszystkie date keys które trzeba sprawdzić
-    final dateKeys = <String>[];
-    for (int i = 0; i < days; i++) {
-      final date = startDate.add(Duration(days: i));
-      dateKeys.add(DayPlan.formatDateKey(date));
-    }
-
-    // Pobierz wszystkie istniejące dokumenty jednym zapytaniem
+    // Pobierz wszystkie istniejące dokumenty jednym zapytaniem (optymalizacja)
     final existingDocs = await collection.get();
-    final existingKeys =
-        existingDocs.docs.map((doc) => doc.id).toSet();
+    final existingKeys = existingDocs.docs.map((doc) => doc.id).toSet();
 
     // Stwórz batch tylko dla nieistniejących dokumentów
     final batch = _firestore.batch();
@@ -310,6 +302,7 @@ class DayPlanService {
       final date = startDate.add(Duration(days: i));
       final dateKey = DayPlan.formatDateKey(date);
 
+      // Sprawdź czy dokument już istnieje używając Set (O(1) lookup)
       if (!existingKeys.contains(dateKey)) {
         final docRef = collection.doc(dateKey);
         final emptyPlan = DayPlan.empty(date);
