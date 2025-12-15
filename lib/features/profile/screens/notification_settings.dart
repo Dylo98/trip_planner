@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-// NOTIFICATIONS (SNACKBARS)
 import 'package:trip_planner/core/widgets/app_notifications.dart';
+import 'package:trip_planner/core/widgets/loading_indicator.dart';
+import 'package:trip_planner/core/widgets/error_display.dart';
+import 'package:trip_planner/features/profile/providers/notification_settings_provider.dart';
+import 'package:trip_planner/features/profile/model/notification_settings_model.dart';
+import 'package:trip_planner/features/profile/widgets/notification_settings/notification_section_header.dart';
+import 'package:trip_planner/features/profile/widgets/notification_settings/notification_switch_tile.dart';
 
 class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
@@ -16,73 +18,21 @@ class NotificationSettingsScreen extends ConsumerStatefulWidget {
 
 class _NotificationSettingsScreenState
     extends ConsumerState<NotificationSettingsScreen> {
-  bool _tripReminders = true;
-  bool _weeklyDigest = false;
-  bool _pushNotifications = true;
-
-  bool _isLoading = true;
+  NotificationSettings? _settings;
   bool _isSaving = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadSettings();
-  }
-
-  Future<void> _loadSettings() async {
-    try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) return;
-
-      final doc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('settings')
-          .doc('notifications')
-          .get();
-
-      if (doc.exists && mounted) {
-        final data = doc.data()!;
-        setState(() {
-          _tripReminders = data['tripReminders'] ?? true;
-          _weeklyDigest = data['weeklyDigest'] ?? false;
-          _pushNotifications = data['pushNotifications'] ?? true;
-          _isLoading = false;
-        });
-      } else {
-        setState(() => _isLoading = false);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-        AppNotifications.showError(
-          context: context,
-          message: 'Nie udało się wczytać ustawień powiadomień',
-        );
-      }
-    }
-  }
-
-  Future<void> _saveSettings() async {
-    setState(() => _isSaving = true);
+  Future<void> _updateSetting(NotificationSettings newSettings) async {
+    setState(() {
+      _settings = newSettings;
+      _isSaving = true;
+    });
 
     try {
-      final userId = FirebaseAuth.instance.currentUser?.uid;
-      if (userId == null) throw Exception('Użytkownik niezalogowany');
-
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('settings')
-          .doc('notifications')
-          .set({
-        'tripReminders': _tripReminders,
-        'weeklyDigest': _weeklyDigest,
-        'pushNotifications': _pushNotifications,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final service = ref.read(notificationSettingsServiceProvider);
+      await service.updateNotificationSettings(newSettings);
 
       if (mounted) {
+        ref.invalidate(notificationSettingsProvider);
         AppNotifications.showSuccess(
           context: context,
           message: 'Ustawienia powiadomień zostały zapisane',
@@ -104,14 +54,7 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text('Powiadomienia'),
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
+    final settingsAsync = ref.watch(notificationSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -129,88 +72,69 @@ class _NotificationSettingsScreenState
             ),
         ],
       ),
-      body: ListView(
-        children: [
-          _buildSectionHeader('Ogólne'),
-          _buildSwitchTile(
-            title: 'Wszystkie powiadomienia push',
-            subtitle: 'Włącz/wyłącz wszystkie powiadomienia w aplikacji',
-            value: _pushNotifications,
-            icon: Icons.notifications_active,
-            onChanged: (value) {
-              setState(() => _pushNotifications = value);
-              _saveSettings();
-            },
-          ),
-          const Divider(height: 32),
-          _buildSectionHeader('Podróże'),
-          _buildSwitchTile(
-            title: 'Przypomnienia o podróżach',
-            subtitle: 'Powiadom mnie przed rozpoczęciem podróży',
-            value: _tripReminders,
-            icon: Icons.calendar_today,
-            onChanged: (value) {
-              setState(() => _tripReminders = value);
-              _saveSettings();
-            },
-          ),
-          _buildSwitchTile(
-            title: 'Tygodniowe podsumowanie',
-            subtitle: 'Otrzymuj cotygodniowe podsumowanie swoich podróży',
-            value: _weeklyDigest,
-            icon: Icons.summarize,
-            onChanged: (value) {
-              setState(() => _weeklyDigest = value);
-              _saveSettings();
-            },
-          ),
-          const SizedBox(height: 20),
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Text(
-              'Zmiany są zapisywane automatycznie',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+      body: settingsAsync.when(
+        data: (settings) {
+          final currentSettings = _settings ?? settings;
 
-  Widget _buildSectionHeader(String title) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey[700],
+          return ListView(
+            children: [
+              const NotificationSectionHeader(title: 'Ogólne'),
+              NotificationSwitchTile(
+                title: 'Wszystkie powiadomienia push',
+                subtitle: 'Włącz/wyłącz wszystkie powiadomienia w aplikacji',
+                value: currentSettings.pushNotifications,
+                icon: Icons.notifications_active,
+                onChanged: (value) {
+                  _updateSetting(
+                    currentSettings.copyWith(pushNotifications: value),
+                  );
+                },
+              ),
+              const Divider(height: 32),
+              const NotificationSectionHeader(title: 'Podróże'),
+              NotificationSwitchTile(
+                title: 'Przypomnienia o podróżach',
+                subtitle: 'Powiadom mnie przed rozpoczęciem podróży',
+                value: currentSettings.tripReminders,
+                icon: Icons.calendar_today,
+                onChanged: (value) {
+                  _updateSetting(
+                    currentSettings.copyWith(tripReminders: value),
+                  );
+                },
+              ),
+              NotificationSwitchTile(
+                title: 'Tygodniowe podsumowanie',
+                subtitle: 'Otrzymuj cotygodniowe podsumowanie swoich podróży',
+                value: currentSettings.weeklyDigest,
+                icon: Icons.summarize,
+                onChanged: (value) {
+                  _updateSetting(
+                    currentSettings.copyWith(weeklyDigest: value),
+                  );
+                },
+              ),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  'Zmiany są zapisywane automatycznie',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          );
+        },
+        loading: () => const LoadingIndicator(),
+        error: (err, stack) => ErrorDisplay(
+          message: 'Nie udało się wczytać ustawień powiadomień',
+          onRetry: () => ref.invalidate(notificationSettingsProvider),
         ),
       ),
-    );
-  }
-
-  Widget _buildSwitchTile({
-    required String title,
-    required String subtitle,
-    required bool value,
-    required IconData icon,
-    required ValueChanged<bool> onChanged,
-  }) {
-    return SwitchListTile(
-      value: value,
-      onChanged: onChanged,
-      title: Text(title),
-      subtitle: Text(
-        subtitle,
-        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-      ),
-      secondary: Icon(icon, color: Colors.grey[700]),
     );
   }
 }

@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'dart:io';
 import 'package:trip_planner/features/auth/providers/user_provider.dart';
 import 'package:trip_planner/features/auth/providers/auth_provider.dart';
 import 'package:trip_planner/features/profile/services/profile_image_service.dart';
-import 'package:trip_planner/features/home/constants/layout_constants.dart';
 import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/utils/action_lock.dart';
+import 'package:trip_planner/core/widgets/error_display.dart';
+import 'package:trip_planner/core/widgets/loading_indicator.dart';
+import 'package:trip_planner/features/profile/widgets/profile_header/profile_header.dart';
+import 'package:trip_planner/features/profile/widgets/profile_menu/profile_info.dart';
+import 'package:trip_planner/features/profile/widgets/profile_menu/profile_menu.dart';
+import 'package:trip_planner/features/profile/widgets/profile_menu/logout_dialog.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -184,115 +188,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             data: (me) => SingleChildScrollView(
               child: Column(
                 children: [
-                  Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      _buildCoverImage(me?.coverImage),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: _isUpdating ? null : _pickCoverImage,
-                            borderRadius: BorderRadius.circular(25),
-                            child: _buildEditButton(icon: Icons.camera_alt),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: -50,
-                        left: 20,
-                        child: Stack(
-                          children: [
-                            _buildProfileImage(me?.avatar),
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: _isUpdating ? null : _pickProfileImage,
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: _buildEditButton(
-                                    icon: Icons.camera_alt,
-                                    size: 40,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  ProfileHeader(
+                    coverImageUrl: me?.coverImage,
+                    avatarUrl: me?.avatar,
+                    selectedCoverImage: _selectedCoverImage,
+                    selectedProfileImage: _selectedProfileImage,
+                    onCoverImageTap: _pickCoverImage,
+                    onProfileImageTap: _pickProfileImage,
+                    isUpdating: _isUpdating,
                   ),
                   const SizedBox(height: 60),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          me?.name ?? 'Brak nazwy',
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Text(
-                          me?.email ?? '',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
-                    ),
+                  ProfileInfo(
+                    name: me?.name ?? '',
+                    email: me?.email ?? '',
                   ),
                   const SizedBox(height: 30),
-                  const Divider(),
-                  _buildProfileOption(
-                    icon: Icons.person_outline,
-                    title: 'Edytuj profil',
-                    onTap: () => context.push('/profile/edit'),
+                  ProfileMenu(
+                    onLogoutTap: _showLogoutDialog,
                   ),
-                  _buildProfileOption(
-                    icon: Icons.notifications_outlined,
-                    title: 'Powiadomienia',
-                    onTap: () => context.push('/profile/notifications'),
-                  ),
-                  _buildProfileOption(
-                    icon: Icons.security_outlined,
-                    title: 'Prywatność i bezpieczeństwo',
-                    onTap: () => context.push('/profile/change-password'),
-                  ),
-                  const Divider(height: 30),
-                  _buildProfileOption(
-                    icon: Icons.logout,
-                    title: 'Wyloguj się',
-                    textColor: Colors.red,
-                    onTap: _showLogoutDialog,
-                  ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
-            loading: () => const Center(child: CircularProgressIndicator()),
-            error: (err, stack) => Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
-                  const Text('Nie udało się załadować profilu'),
-                  const SizedBox(height: 8),
-                  TextButton(
-                    onPressed: () => ref.invalidate(meProvider),
-                    child: const Text('Spróbuj ponownie'),
-                  ),
-                ],
-              ),
+            loading: () => const LoadingIndicator(),
+            error: (err, stack) => ErrorDisplay(
+              message: 'Nie udało się załadować profilu',
+              onRetry: () => ref.invalidate(meProvider),
             ),
           ),
           if (_isUpdating)
@@ -307,118 +227,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
   }
 
-  Widget _buildCoverImage(String? coverImageUrl) {
-    return GestureDetector(
-      onTap: _isUpdating ? null : _pickCoverImage,
-      child: Container(
-        height: LayoutConstants.coverHeight,
-        width: double.infinity,
-        color: Colors.black,
-        child: _selectedCoverImage != null
-            ? Image.file(_selectedCoverImage!, fit: BoxFit.cover)
-            : (coverImageUrl?.isNotEmpty == true
-                ? Image.network(
-                    coverImageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Image.asset(
-                      'assets/images/image_home.jpg',
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Image.asset(
-                    'assets/images/image_home.jpg',
-                    fit: BoxFit.cover,
-                  )),
-      ),
-    );
-  }
-
-  Widget _buildProfileImage(String? avatarUrl) {
-    final hasAvatar =
-        avatarUrl?.isNotEmpty == true || _selectedProfileImage != null;
-
-    return GestureDetector(
-      onTap: _isUpdating ? null : _pickProfileImage,
-      child: CircleAvatar(
-        radius: LayoutConstants.profileHeight / 2,
-        backgroundColor: Colors.white,
-        child: CircleAvatar(
-          radius: LayoutConstants.profileHeight / 2 - 5,
-          backgroundColor: Colors.grey.shade300,
-          backgroundImage: _selectedProfileImage != null
-              ? FileImage(_selectedProfileImage!)
-              : (hasAvatar ? NetworkImage(avatarUrl!) : null) as ImageProvider?,
-          child: !hasAvatar
-              ? const Icon(Icons.person, size: 50, color: Colors.white70)
-              : null,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEditButton({
-    required IconData icon,
-    double size = 45,
-  }) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Icon(
-        icon,
-        size: size * 0.5,
-        color: Colors.grey[700],
-      ),
-    );
-  }
-
-  Widget _buildProfileOption({
-    required IconData icon,
-    required String title,
-    required VoidCallback onTap,
-    Color? textColor,
-  }) {
-    return ListTile(
-      leading: Icon(icon, color: textColor),
-      title: Text(
-        title,
-        style: TextStyle(fontSize: 16, color: textColor),
-      ),
-      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-      onTap: onTap,
-    );
-  }
-
   void _showLogoutDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Wyloguj się'),
-        content: const Text('Czy na pewno chcesz się wylogować?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Anuluj'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _logout();
-            },
-            child: const Text('Wyloguj', style: TextStyle(color: Colors.red)),
-          ),
-        ],
-      ),
-    );
+    LogoutDialog.show(context, _logout);
   }
 }
