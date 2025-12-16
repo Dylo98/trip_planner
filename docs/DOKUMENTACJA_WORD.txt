@@ -92,16 +92,7 @@ Możliwości:
 • Odwrotne geokodowanie (współrzędne → adres)
 • Pobieranie aktualnej lokalizacji użytkownika
 
-1.7. SZTUCZNA INTELIGENCJA
-
-google_generative_ai 0.4.7 - Google Gemini API
-
-Zastosowanie AI:
-• Sugestie miejsc do odwiedzenia
-• Generowanie opisów
-• Asystent planowania podróży
-
-1.8. KOMPONENTY UI/UX
+1.7. KOMPONENTY UI/UX
 
 google_fonts 6.2.1 - Fonty Google (Oswald)
 cupertino_icons 1.0.8 - Ikony iOS
@@ -115,7 +106,7 @@ modal_bottom_sheet 3.0.0 - Zaawansowane bottom sheets
 another_flushbar 1.10.24 - Powiadomienia snackbar
 cached_network_image 3.4.1 - Cache'owanie obrazów z sieci
 
-1.9. NARZĘDZIA POMOCNICZE
+1.8. NARZĘDZIA POMOCNICZE
 
 flutter_dotenv 5.1.0 - Zmienne środowiskowe z .env
 http 1.4.0 - Requesty HTTP
@@ -125,7 +116,7 @@ image_picker 1.1.2 - Wybieranie zdjęć z galerii/kamery
 url_launcher 6.3.2 - Otwieranie URL-i zewnętrznych
 shared_preferences 2.5.3 - Lokalne przechowywanie preferencji
 
-1.10. CZCIONKI
+1.9. CZCIONKI
 
 Aplikacja używa rodziny fontów Oswald:
 • ExtraLight - waga 200
@@ -135,7 +126,7 @@ Aplikacja używa rodziny fontów Oswald:
 • SemiBold - waga 600
 • Bold - waga 700
 
-1.11. WSPIERANE PLATFORMY
+1.10. WSPIERANE PLATFORMY
 
 • Android - Wspierana (główna platforma)
 • iOS - Wspierana (wymaga Mac do budowania)
@@ -285,7 +276,6 @@ GMSServices.provideAPIKey("YOUR_API_KEY")
 Utwórz plik .env w głównym katalogu projektu:
 
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-GOOGLE_AI_API_KEY=your_google_ai_api_key
 
 WAŻNE: Dodaj .env do .gitignore - nigdy nie commituj kluczy API!
 
@@ -363,7 +353,7 @@ Globalne repozytorium zależności dostępne z dowolnego miejsca w aplikacji.
 2. State Management - Riverpod Providers
 3. Business Logic Layer - Services, Repositories, Utils
 4. Data Layer - Models, DTOs, Mappers
-5. External Services - Firebase, Google Maps, Google AI
+5. External Services - Firebase, Google Maps
 
 4.4. ZASADY SOLID
 

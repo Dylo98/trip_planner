@@ -198,21 +198,6 @@ import GoogleMaps
 </head>
 ```
 
-## Konfiguracja Google AI API
-
-### Krok 1: Utwórz klucz API
-
-1. Przejdź do [Google AI Studio](https://makersuite.google.com/app/apikey)
-2. Kliknij **Create API key**
-3. Wybierz projekt Google Cloud
-4. Skopiuj wygenerowany klucz
-
-### Krok 2: Dodaj do .env
-
-```env
-GOOGLE_AI_API_KEY=your_gemini_api_key
-```
-
 ## Plik .env
 
 Utwórz plik `.env` w głównym katalogu projektu:
@@ -220,9 +205,6 @@ Utwórz plik `.env` w głównym katalogu projektu:
 ```env
 # Google Maps API Key
 GOOGLE_MAPS_API_KEY=AIza...your_key_here
-
-# Google AI (Gemini) API Key
-GOOGLE_AI_API_KEY=AIza...your_key_here
 
 # Opcjonalne - dodatkowe konfiguracje
 # DEBUG_MODE=true
@@ -338,7 +320,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() async {
   await dotenv.load();
   print('Maps API: ${dotenv.env['GOOGLE_MAPS_API_KEY']}');
-  print('AI API: ${dotenv.env['GOOGLE_AI_API_KEY']}');
 }
 ```
 

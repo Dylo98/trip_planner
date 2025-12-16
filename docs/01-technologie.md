@@ -87,18 +87,6 @@ Obsługiwane metody logowania:
 - Odwrotne geokodowanie (współrzędne → adres)
 - Pobieranie aktualnej lokalizacji użytkownika
 
-## Sztuczna inteligencja
-
-| Pakiet | Wersja | Opis |
-|--------|--------|------|
-| **google_generative_ai** | 0.4.7 | Google Gemini API |
-
-### Zastosowanie AI
-
-- Sugestie miejsc do odwiedzenia
-- Generowanie opisów
-- Asystent planowania podróży
-
 ## UI/UX
 
 | Pakiet | Wersja | Opis |
@@ -187,7 +175,6 @@ Aplikacja używa rodziny fontów **Oswald**:
 ├─────────────────────────────────────────────────────────┤
 │  External APIs                                          │
 │  ├── Firebase (Auth, Firestore, Storage)               │
-│  ├── Google Maps API                                    │
-│  └── Google Generative AI                              │
+│  └── Google Maps API                                    │
 └─────────────────────────────────────────────────────────┘
 ```

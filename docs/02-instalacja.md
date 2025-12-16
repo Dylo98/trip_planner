@@ -130,7 +130,6 @@ Dodaj wymagane klucze:
 
 ```env
 GOOGLE_MAPS_API_KEY=your_api_key_here
-GOOGLE_AI_API_KEY=your_api_key_here
 ```
 
 ## Krok 6: Uruchomienie aplikacji

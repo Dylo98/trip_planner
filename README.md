@@ -49,7 +49,6 @@ Szczegółowa dokumentacja techniczna znajduje się w folderze **[docs/](docs/RE
 | Riverpod | 2.6.1 | State management |
 | GoRouter | 17.0.0 | Nawigacja |
 | Google Maps Flutter | 2.12.1 | Mapy i geolokalizacja |
-| Google Generative AI | 0.4.7 | Integracja z AI |
 
 ## Wymagania
 
@@ -60,7 +59,6 @@ Szczegółowa dokumentacja techniczna znajduje się w folderze **[docs/](docs/RE
   - Cloud Firestore
   - Storage
 - Klucz API Google Maps
-- Klucz API Google Generative AI (opcjonalnie)
 
 ## Instalacja
 
@@ -84,7 +82,6 @@ Utwórz plik `.env` w głównym katalogu projektu:
 
 ```env
 GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-GOOGLE_AI_API_KEY=your_google_ai_api_key
 ```
 
 ### Firebase
