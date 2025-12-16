@@ -2,6 +2,27 @@
 
 Aplikacja mobilna do planowania i zarządzania podróżami, napisana w Flutter z wykorzystaniem Firebase jako backendu.
 
+## Pełna dokumentacja
+
+Szczegółowa dokumentacja techniczna znajduje się w folderze **[docs/](docs/README.md)**:
+
+| Dokument | Opis |
+|----------|------|
+| [Technologie](docs/01-technologie.md) | Stos technologiczny, biblioteki |
+| [Instalacja](docs/02-instalacja.md) | Wymagania, instalacja |
+| [Konfiguracja](docs/03-konfiguracja.md) | Firebase, API keys |
+| [Architektura](docs/04-architektura.md) | Wzorce projektowe |
+| [Struktura projektu](docs/05-struktura-projektu.md) | Organizacja kodu |
+| [Funkcjonalności](docs/06-funkcjonalnosci.md) | Features aplikacji |
+| [Modele danych](docs/07-modele-danych.md) | Trip, MarkerPoint, etc. |
+| [Serwisy](docs/08-serwisy.md) | Logika biznesowa |
+| [State Management](docs/09-state-management.md) | Riverpod |
+| [Nawigacja](docs/10-nawigacja.md) | GoRouter |
+| [Baza danych](docs/11-baza-danych.md) | Firestore |
+| [Budowanie](docs/12-budowanie.md) | Build & Deploy |
+
+---
+
 ## Spis treści
 
 - [Technologie](#technologie)
