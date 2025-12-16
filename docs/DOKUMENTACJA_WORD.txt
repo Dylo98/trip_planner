@@ -1,0 +1,1471 @@
+DOKUMENTACJA TECHNICZNA
+TRIPPLANNER
+Aplikacja mobilna do planowania podróży
+
+================================================================================
+SPIS TREŚCI
+================================================================================
+
+1. TECHNOLOGIE
+2. INSTALACJA I URUCHOMIENIE
+3. KONFIGURACJA
+4. ARCHITEKTURA
+5. STRUKTURA PROJEKTU
+6. FUNKCJONALNOŚCI
+7. MODELE DANYCH
+8. SERWISY
+9. STATE MANAGEMENT
+10. NAWIGACJA
+11. BAZA DANYCH
+12. BUDOWANIE APLIKACJI
+
+================================================================================
+1. TECHNOLOGIE
+================================================================================
+
+1.1. PRZEGLĄD STOSU TECHNOLOGICZNEGO
+
+TripPlanner to aplikacja mobilna zbudowana w oparciu o nowoczesny stos technologiczny, łączący Flutter jako framework UI z Firebase jako kompleksowym rozwiązaniem backendowym.
+
+1.2. FRAMEWORK I JĘZYK
+
+• Flutter SDK >= 3.6.0 - Cross-platformowy framework UI od Google
+• Dart >= 3.6.0 < 4.0.0 - Język programowania zoptymalizowany pod UI
+
+Dlaczego Flutter?
+• Jeden codebase - aplikacja działa na Android, iOS, Web, Windows, macOS, Linux
+• Hot Reload - natychmiastowe odświeżanie zmian podczas developmentu
+• Wydajność - kompilacja do natywnego kodu maszynowego
+• Bogaty ekosystem - tysiące gotowych pakietów na pub.dev
+
+1.3. BACKEND - FIREBASE
+
+Firebase Core 3.13.0 - Inicjalizacja Firebase
+Firebase Auth 5.5.2 - Autoryzacja użytkowników
+Cloud Firestore 5.6.7 - Baza danych NoSQL w czasie rzeczywistym
+Firebase Storage 12.4.6 - Przechowywanie plików (zdjęcia)
+
+Firebase Authentication - obsługiwane metody logowania:
+• Email + hasło
+• Reset hasła przez email
+
+Cloud Firestore:
+• Baza danych dokumentowa NoSQL
+• Synchronizacja w czasie rzeczywistym
+• Offline persistence
+• Skalowalna bez konfiguracji serwera
+
+Firebase Storage:
+• Przechowywanie zdjęć podróży
+• Zdjęcia profilowe użytkowników
+• Zdjęcia markerów na mapie
+
+1.4. STATE MANAGEMENT
+
+flutter_riverpod 2.6.1 - Reaktywne zarządzanie stanem
+
+Dlaczego Riverpod?
+• Compile-time safety - błędy wykrywane podczas kompilacji
+• Testability - łatwe mockowanie providerów
+• Brak BuildContext - providery dostępne wszędzie
+• Automatyczne dispose - zarządzanie cyklem życia
+
+1.5. NAWIGACJA
+
+go_router 17.0.0 - Deklaratywny routing
+
+Funkcje GoRouter:
+• URL-based routing
+• Deep linking
+• Nested routes
+• Redirecty na podstawie stanu auth
+
+1.6. MAPY I LOKALIZACJA
+
+google_maps_flutter 2.12.1 - Widżet Google Maps
+geocoding 3.0.0 - Konwersja adres ↔ współrzędne
+geolocator 14.0.0 - Lokalizacja urządzenia
+
+Możliwości:
+• Interaktywne mapy z markerami
+• Geokodowanie adresów
+• Odwrotne geokodowanie (współrzędne → adres)
+• Pobieranie aktualnej lokalizacji użytkownika
+
+1.7. SZTUCZNA INTELIGENCJA
+
+google_generative_ai 0.4.7 - Google Gemini API
+
+Zastosowanie AI:
+• Sugestie miejsc do odwiedzenia
+• Generowanie opisów
+• Asystent planowania podróży
+
+1.8. KOMPONENTY UI/UX
+
+google_fonts 6.2.1 - Fonty Google (Oswald)
+cupertino_icons 1.0.8 - Ikony iOS
+lottie 3.0.0 - Animacje Lottie
+animated_text_kit 4.2.3 - Animowane teksty
+animations 2.0.11 - Animacje Material
+carousel_slider 5.0.0 - Karuzele zdjęć
+flutter_staggered_grid_view 0.7.0 - Siatki o zmiennej wielkości
+timeline_tile 2.0.0 - Komponenty osi czasu
+modal_bottom_sheet 3.0.0 - Zaawansowane bottom sheets
+another_flushbar 1.10.24 - Powiadomienia snackbar
+cached_network_image 3.4.1 - Cache'owanie obrazów z sieci
+
+1.9. NARZĘDZIA POMOCNICZE
+
+flutter_dotenv 5.1.0 - Zmienne środowiskowe z .env
+http 1.4.0 - Requesty HTTP
+uuid 4.5.1 - Generowanie unikalnych ID
+intl 0.20.2 - Internacjonalizacja, formatowanie dat
+image_picker 1.1.2 - Wybieranie zdjęć z galerii/kamery
+url_launcher 6.3.2 - Otwieranie URL-i zewnętrznych
+shared_preferences 2.5.3 - Lokalne przechowywanie preferencji
+
+1.10. CZCIONKI
+
+Aplikacja używa rodziny fontów Oswald:
+• ExtraLight - waga 200
+• Light - waga 300
+• Regular - waga 400
+• Medium - waga 500
+• SemiBold - waga 600
+• Bold - waga 700
+
+1.11. WSPIERANE PLATFORMY
+
+• Android - Wspierana (główna platforma)
+• iOS - Wspierana (wymaga Mac do budowania)
+• Web - Wspierana (ograniczona funkcjonalność map)
+• Windows - Eksperymentalna
+• macOS - Eksperymentalna
+• Linux - Eksperymentalna
+
+================================================================================
+2. INSTALACJA I URUCHOMIENIE
+================================================================================
+
+2.1. WYMAGANIA SYSTEMOWE
+
+Minimalne wymagania:
+• System operacyjny: Windows 10+, macOS 10.14+, Linux
+• RAM: 8 GB (zalecane 16 GB)
+• Miejsce na dysku: 5 GB wolnego miejsca
+• Flutter SDK: >= 3.6.0
+• Dart SDK: >= 3.6.0 < 4.0.0
+
+Dla rozwoju na Android:
+• Android Studio Arctic Fox (2020.3.1) lub nowszy
+• Android SDK API Level 21+ (Android 5.0)
+• Java JDK 11 lub nowszy
+
+Dla rozwoju na iOS (tylko macOS):
+• Xcode 14.0 lub nowszy
+• CocoaPods - najnowsza wersja
+• iOS Deployment Target 12.0+
+
+2.2. INSTALACJA FLUTTER
+
+Windows:
+1. Pobierz Flutter SDK z https://flutter.dev/docs/get-started/install/windows
+2. Rozpakuj do C:\flutter
+3. Dodaj C:\flutter\bin do zmiennej PATH
+
+macOS (przez Homebrew):
+brew install flutter
+
+Linux (przez snap):
+sudo snap install flutter --classic
+
+Weryfikacja instalacji:
+flutter doctor
+
+2.3. KLONOWANIE REPOZYTORIUM
+
+git clone https://github.com/Dylo98/trip_planner.git
+cd trip_planner
+
+2.4. INSTALACJA ZALEŻNOŚCI
+
+flutter pub get
+
+Rozwiązywanie problemów:
+flutter clean
+flutter pub cache repair
+flutter pub get
+
+2.5. URUCHOMIENIE APLIKACJI
+
+Tryb debug:
+flutter run
+
+Uruchomienie na konkretnym urządzeniu:
+flutter devices                    (lista urządzeń)
+flutter run -d <device_id>        (uruchom na wybranym)
+
+Tryb release:
+flutter run --release
+
+2.6. HOT RELOAD
+
+Podczas działania aplikacji:
+• r - Hot Reload (odświeża UI zachowując stan)
+• R - Hot Restart (restartuje aplikację)
+• q - Zamyka aplikację
+
+================================================================================
+3. KONFIGURACJA
+================================================================================
+
+3.1. KONFIGURACJA FIREBASE
+
+Krok 1: Utwórz projekt Firebase
+1. Przejdź do https://console.firebase.google.com/
+2. Kliknij "Add project"
+3. Podaj nazwę projektu (np. "trip-planner")
+4. Opcjonalnie włącz Google Analytics
+5. Kliknij "Create project"
+
+Krok 2: Włącz wymagane usługi
+
+Authentication:
+1. Build > Authentication
+2. Get started
+3. Sign-in method > włącz Email/Password
+
+Cloud Firestore:
+1. Build > Firestore Database
+2. Create database
+3. Wybierz tryb (Production/Test)
+4. Wybierz lokalizację (np. europe-west1)
+
+Firebase Storage:
+1. Build > Storage
+2. Get started
+3. Wybierz tryb i lokalizację
+
+Krok 3: Zainstaluj FlutterFire CLI
+dart pub global activate flutterfire_cli
+
+Krok 4: Skonfiguruj Firebase
+firebase login
+flutterfire configure
+
+3.2. KONFIGURACJA GOOGLE MAPS API
+
+Krok 1: Włącz API w Google Cloud Console
+1. Przejdź do https://console.cloud.google.com/
+2. APIs & Services > Library
+3. Włącz:
+   • Maps SDK for Android
+   • Maps SDK for iOS
+   • Maps JavaScript API
+   • Places API
+   • Geocoding API
+
+Krok 2: Utwórz klucz API
+1. APIs & Services > Credentials
+2. Create Credentials > API key
+
+Krok 3: Skonfiguruj w projekcie
+
+Android (android/app/src/main/AndroidManifest.xml):
+<meta-data
+    android:name="com.google.android.geo.API_KEY"
+    android:value="YOUR_API_KEY"/>
+
+iOS (ios/Runner/AppDelegate.swift):
+GMSServices.provideAPIKey("YOUR_API_KEY")
+
+3.3. PLIK .ENV
+
+Utwórz plik .env w głównym katalogu projektu:
+
+GOOGLE_MAPS_API_KEY=your_google_maps_api_key
+GOOGLE_AI_API_KEY=your_google_ai_api_key
+
+WAŻNE: Dodaj .env do .gitignore - nigdy nie commituj kluczy API!
+
+3.4. REGUŁY BEZPIECZEŃSTWA FIRESTORE
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      match /trips/{tripId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      match /shared_trips/{tripId} {
+        allow read: if request.auth != null && request.auth.uid == userId;
+        allow write: if request.auth != null;
+      }
+    }
+  }
+}
+
+================================================================================
+4. ARCHITEKTURA
+================================================================================
+
+4.1. ARCHITEKTURA FEATURE-FIRST
+
+Projekt wykorzystuje architekturę Feature-First (Modular Architecture) z podziałem na moduły funkcjonalne.
+
+Zamiast tradycyjnego podziału według typu (wszystkie modele w jednym folderze), kod jest organizowany według funkcjonalności biznesowych.
+
+Struktura:
+lib/
+├── core/                    (Współdzielone zasoby)
+│   ├── navigation/
+│   ├── theme/
+│   ├── utils/
+│   └── widgets/
+│
+└── features/               (Moduły funkcjonalne)
+    ├── auth/
+    ├── trip/
+    ├── budget/
+    └── ...
+
+Zalety:
+• Modularność - każdy feature jest samodzielną jednostką
+• Skalowalność - łatwe dodawanie nowych funkcjonalności
+• Czytelność - kod powiązany logicznie jest w jednym miejscu
+• Niezależność - zespoły mogą pracować równolegle
+• Testowalność - każdy moduł można testować izolowanie
+
+4.2. WZORCE PROJEKTOWE
+
+Facade Pattern:
+TripService jako główna fasada delegująca operacje do wyspecjalizowanych serwisów:
+• TripCrudService - podstawowe operacje CRUD
+• TripImageService - zarządzanie zdjęciami
+• TripDeletionService - usuwanie podróży
+• MarkerCrudService - operacje na markerach
+• MarkerUpdateService - aktualizacja markerów
+• MarkerImageService - zdjęcia markerów
+
+Repository Pattern:
+Warstwa abstrakcji między logiką biznesową a źródłem danych. Umożliwia łatwą zamianę źródła danych (Firebase → REST API → lokalna baza).
+
+Provider Pattern (Riverpod):
+Globalne repozytorium zależności dostępne z dowolnego miejsca w aplikacji.
+
+4.3. WARSTWY APLIKACJI
+
+1. Presentation Layer - Screens, Widgets, Dialogs
+2. State Management - Riverpod Providers
+3. Business Logic Layer - Services, Repositories, Utils
+4. Data Layer - Models, DTOs, Mappers
+5. External Services - Firebase, Google Maps, Google AI
+
+4.4. ZASADY SOLID
+
+Single Responsibility - każdy serwis ma jedną odpowiedzialność
+Open/Closed - nowe features bez modyfikacji istniejących
+Liskov Substitution - modele używają copyWith
+Interface Segregation - Facade eksponuje tylko potrzebne metody
+Dependency Inversion - serwisy przyjmują zależności przez konstruktor
+
+================================================================================
+5. STRUKTURA PROJEKTU
+================================================================================
+
+5.1. GŁÓWNA STRUKTURA
+
+trip_planner/
+├── android/                (Konfiguracja Android)
+├── ios/                    (Konfiguracja iOS)
+├── web/                    (Konfiguracja Web)
+├── linux/                  (Konfiguracja Linux)
+├── macos/                  (Konfiguracja macOS)
+├── windows/                (Konfiguracja Windows)
+├── assets/                 (Zasoby statyczne)
+│   ├── images/
+│   ├── fonts/
+│   └── lottie/
+├── lib/                    (KOD ŹRÓDŁOWY)
+├── test/                   (Testy)
+├── docs/                   (Dokumentacja)
+├── .env                    (Zmienne środowiskowe)
+├── pubspec.yaml            (Manifest projektu)
+└── README.md
+
+5.2. STRUKTURA LIB/
+
+lib/
+├── main.dart                     (Punkt wejścia)
+├── firebase_options.dart         (Konfiguracja Firebase)
+│
+├── core/                         (Moduł współdzielony)
+│   ├── navigation/
+│   │   └── app_router.dart       (Konfiguracja GoRouter)
+│   ├── theme/
+│   │   ├── app_theme.dart        (Główny ThemeData)
+│   │   ├── colors.dart           (Paleta kolorów)
+│   │   ├── text_style.dart       (Style tekstów)
+│   │   ├── button_style.dart     (Style przycisków)
+│   │   └── input_style.dart      (Style input fields)
+│   ├── utils/
+│   │   ├── validators.dart       (Walidacja formularzy)
+│   │   ├── debouncer.dart        (Debouncing)
+│   │   └── ...
+│   └── widgets/
+│       ├── buttons/
+│       ├── dialog/
+│       ├── drawer/
+│       └── ...
+│
+└── features/                     (Moduły funkcjonalne)
+    ├── auth/                     (Autoryzacja)
+    ├── home/                     (Ekran główny)
+    ├── trip/                     (Podróże - główny moduł)
+    ├── budget/                   (Budżet)
+    ├── schedule/                 (Harmonogram)
+    ├── friends/                  (Znajomi)
+    ├── profile/                  (Profil)
+    ├── statistics/               (Statystyki)
+    ├── timeline/                 (Oś czasu)
+    └── splash/                   (Ekran ładowania)
+
+5.3. STRUKTURA FEATURE (NA PRZYKŁADZIE TRIP)
+
+lib/features/trip/
+├── screens/
+│   ├── trip_list/
+│   │   └── trips_list_screen.dart
+│   ├── trip_details/
+│   │   ├── trip_details_screen.dart
+│   │   ├── trip_details_main_screen.dart
+│   │   └── trip_details_map_screen.dart
+│   └── new_trip/
+│       ├── new_trip_screen.dart
+│       └── new_trip_map_screen.dart
+│
+├── services/
+│   ├── trip_service.dart         (Facade)
+│   ├── base_trip_service.dart
+│   ├── trip/
+│   │   ├── trip_crud_service.dart
+│   │   ├── trip_image_service.dart
+│   │   └── trip_deletion_service.dart
+│   └── marker/
+│       ├── marker_crud_service.dart
+│       ├── marker_update_service.dart
+│       └── marker_image_service.dart
+│
+├── providers/
+│   ├── all_trips_provider.dart
+│   ├── get_trip_provider.dart
+│   ├── watch_trip_provider.dart
+│   ├── trip_form_provider.dart
+│   └── trip_markers_provider.dart
+│
+├── model/
+│   ├── trip_model.dart
+│   └── marker_point_model.dart
+│
+├── utils/
+│   ├── trip_status_helper.dart
+│   ├── trip_sorting_helper.dart
+│   └── transport_helper.dart
+│
+└── widgets/
+    ├── trip_card/
+    ├── trip_details/
+    ├── trip_list/
+    ├── new_trip/
+    ├── marker_details_sheet/
+    ├── nearby_places/
+    └── shared/
+
+5.4. KONWENCJE NAZEWNICTWA
+
+Pliki: snake_case (trip_service.dart)
+Klasy: PascalCase (TripService)
+Zmienne: camelCase (tripList)
+Foldery: snake_case (nearby_places)
+Widgety: PascalCase (TripCard)
+Providery: camelCase + Provider (tripServiceProvider)
+
+================================================================================
+6. FUNKCJONALNOŚCI
+================================================================================
+
+6.1. AUTORYZACJA (AUTH)
+
+Rejestracja:
+• Imię (minimum 2 znaki)
+• Adres email (walidowany format)
+• Hasło (minimum 6 znaków)
+
+Przepływ rejestracji:
+1. Użytkownik wypełnia formularz
+2. Walidacja po stronie klienta
+3. Utworzenie konta w Firebase Auth
+4. Utworzenie dokumentu użytkownika w Firestore
+5. Automatyczne zalogowanie
+6. Przekierowanie do ekranu głównego
+
+Logowanie:
+• Email i hasło
+• Automatyczne przekierowanie zalogowanych
+• Sesja utrzymywana przez Firebase Auth
+
+Resetowanie hasła:
+• Wysłanie emaila z linkiem do resetu
+
+Wylogowanie:
+• Czyszczenie sesji
+• Przekierowanie do ekranu autoryzacji
+
+Obsługa błędów:
+• invalid-email: Nieprawidłowy format email
+• user-not-found: Nie znaleziono użytkownika
+• wrong-password: Nieprawidłowe hasło
+• email-already-in-use: Email zajęty
+• weak-password: Hasło za słabe
+• too-many-requests: Zbyt wiele prób
+
+6.2. ZARZĄDZANIE PODRÓŻAMI (TRIP)
+
+Tworzenie podróży:
+• Nazwa podróży (wymagana)
+• Data rozpoczęcia
+• Data zakończenia (opcjonalna)
+• Zdjęcie główne (opcjonalne)
+
+Typy podróży:
+• planned - zaplanowana z datą końcową
+• ongoing - spontaniczna bez daty końcowej
+
+Statusy podróży:
+• upcoming - nadchodząca (data start > teraz)
+• ongoing - w trakcie (start <= teraz <= end)
+• completed - zakończona (end < teraz)
+
+Lista podróży:
+• Wyświetlanie wszystkich podróży
+• Sortowanie po dacie
+• Filtrowanie po statusie
+• Wizualne rozróżnienie statusów
+
+Szczegóły podróży (dwie zakładki):
+1. Szczegóły:
+   • Zdjęcie nagłówkowe
+   • Nazwa i daty
+   • Status podróży
+   • Galeria zdjęć
+   • Lista markerów
+
+2. Mapa:
+   • Widok Google Maps
+   • Markery punktów
+   • Linie łączące punkty
+   • Dodawanie nowych punktów
+
+Edycja:
+• Zmiana nazwy
+• Zmiana dat
+• Zmiana zdjęcia
+• Dodawanie/usuwanie markerów
+
+Usuwanie:
+1. Potwierdzenie przez dialog
+2. Usunięcie zdjęć z Storage
+3. Usunięcie dokumentu z Firestore
+
+6.3. MAPA I MARKERY
+
+Interaktywna mapa:
+• Google Maps z pełną interakcją
+• Zoom, przesuwanie, obracanie
+• Lokalizacja użytkownika
+• Różne typy mapy (normalna, satelita, teren)
+
+Dodawanie markera:
+1. Długie naciśnięcie na mapie
+2. Automatyczne pobranie nazwy (geocoding)
+3. Zapisanie do Firestore
+
+Dane markera:
+• ID - unikalny identyfikator
+• Position - współrzędne geograficzne
+• Name - nazwa miejsca
+• Description - opis
+• ImageUrl - lista zdjęć
+• TransportMode - środek transportu
+• Expenses - wydatki
+
+Szczegóły markera (Bottom Sheet):
+1. Nagłówek - nazwa i zamknięcie
+2. Opis - edytowalny
+3. Zdjęcia - galeria z dodawaniem
+4. Transport - wybór środka transportu
+5. Wydatki - lista wydatków
+6. Pobliskie miejsca - sugestie Google Places
+
+Środki transportu:
+• Samochód
+• Pociąg
+• Autobus
+• Samolot
+• Rower
+• Pieszo
+• Statek
+
+Pobliskie miejsca:
+• Wyszukiwanie w pobliżu markera
+• Filtrowanie po kategorii
+• Szczegóły miejsca
+• Otwieranie w Google Maps
+
+Kategorie miejsc:
+• Restauracje
+• Hotele
+• Atrakcje turystyczne
+• Muzea
+• Parki
+• Kawiarnie
+• Sklepy
+
+6.4. BUDŻET I WYDATKI
+
+Typy wydatków:
+1. Wydatki podróży - ogólne wydatki
+2. Wydatki markera - przypisane do miejsca
+
+Dane wydatku:
+• Tytuł
+• Kwota
+• Płatnik (opcjonalnie)
+• Kategoria (opcjonalnie)
+• Data utworzenia
+
+Kategorie wydatków:
+• Transport
+• Zakwaterowanie
+• Jedzenie
+• Rozrywka
+• Zakupy
+• Inne
+
+Rozliczenia między uczestnikami:
+1. Sumowanie wydatków każdego uczestnika
+2. Obliczanie średniego kosztu na osobę
+3. Generowanie transakcji wyrównujących
+
+Przykład rozliczenia:
+Uczestnicy: Adam, Bartek, Celina
+Wydatki: Adam 300 PLN, Bartek 150 PLN, Celina 150 PLN
+Średnia: 200 PLN
+Rozliczenie:
+• Bartek → Adam: 50 PLN
+• Celina → Adam: 50 PLN
+
+Statystyki budżetowe:
+• Suma wszystkich wydatków
+• Wydatki na osobę
+• Wydatki według kategorii
+• Wydatki według dnia
+
+6.5. HARMONOGRAM (SCHEDULE)
+
+Plan dnia:
+• Tworzenie planu dla każdego dnia
+• Dodawanie aktywności z godziną
+• Edycja i usuwanie
+• Widok timeline
+
+Dane aktywności:
+• Tytuł
+• Opis (opcjonalnie)
+• Godzina rozpoczęcia
+• Miejsce (opcjonalnie)
+
+6.6. ZNAJOMI I WSPÓŁDZIELENIE
+
+Lista znajomych:
+• Wyświetlanie znajomych
+• Wyszukiwanie użytkowników
+• Wysyłanie zaproszeń
+• Akceptowanie/odrzucanie
+
+Stany zaproszenia:
+• pending - oczekuje
+• accepted - zaakceptowane
+• rejected - odrzucone
+
+Współdzielenie podróży:
+• Udostępnianie znajomym
+• Wspólna edycja markerów
+• Wspólne wydatki
+
+6.7. PROFIL UŻYTKOWNIKA
+
+Wyświetlanie:
+• Zdjęcie profilowe
+• Imię
+• Email
+• Statystyki (podróże, znajomi)
+
+Edycja:
+• Zmiana imienia
+• Zmiana zdjęcia profilowego
+
+Zmiana hasła:
+• Weryfikacja aktualnego hasła
+• Nowe hasło (min. 6 znaków)
+• Potwierdzenie
+
+6.8. STATYSTYKI
+
+Dostępne metryki:
+• Łączna liczba podróży
+• Podróże zakończone
+• Podróże w trakcie
+• Podróże zaplanowane
+• Łączna liczba miejsc
+• Łączne wydatki
+
+Wizualizacja:
+• Wykresy wydatków
+• Mapa odwiedzonych miejsc
+• Timeline podróży
+
+6.9. OŚ CZASU (TIMELINE)
+
+• Chronologiczny widok podróży
+• Wizualizacja na osi czasu
+• Podgląd wydarzeń
+• Animowane przejścia
+
+6.10. EKRAN GŁÓWNY (HOME)
+
+Dashboard:
+• Szybki dostęp do ostatnich podróży
+• Nadchodzące podróże
+• Statystyki podsumowujące
+• Nawigacja do głównych sekcji
+
+Szuflada nawigacyjna:
+• Strona główna
+• Moje podróże
+• Znajomi
+• Statystyki
+• Profil
+• Wyloguj
+
+================================================================================
+7. MODELE DANYCH
+================================================================================
+
+7.1. TRIP (PODRÓŻ)
+
+class Trip {
+  String id;              // Unikalny identyfikator (UUID)
+  String name;            // Nazwa podróży
+  DateTime? startDate;    // Data rozpoczęcia
+  DateTime? endDate;      // Data zakończenia
+  String? description;    // Opis podróży
+  List<String>? imageUrl; // Lista URL zdjęć
+  String? tripPhotoUrl;   // URL głównego zdjęcia
+  List<MarkerPoint> markerPoints;  // Lista punktów
+  List<ExpenseItem>? tripExpenses; // Lista wydatków
+  TripType tripType;      // Typ: planned/ongoing
+}
+
+Właściwości obliczane:
+• status - TripStatus (upcoming/ongoing/completed)
+• durationInDays - czas trwania w dniach
+
+Enumy:
+TripType: planned, ongoing
+TripStatus: upcoming, ongoing, completed
+
+7.2. MARKERPOINT (PUNKT NA MAPIE)
+
+class MarkerPoint {
+  String id;                    // Unikalny identyfikator
+  LatLng position;              // Współrzędne geograficzne
+  String? name;                 // Nazwa miejsca
+  String? description;          // Opis miejsca
+  List<String>? imageUrl;       // Lista URL zdjęć
+  String? transportMode;        // Środek transportu
+  List<ExpenseItem>? expenses;  // Wydatki w tym miejscu
+}
+
+Właściwości obliczane:
+• totalExpense - suma wydatków
+• hasExpenses - czy ma wydatki
+
+7.3. EXPENSEITEM (WYDATEK)
+
+class ExpenseItem {
+  String id;           // Unikalny identyfikator
+  String title;        // Nazwa wydatku
+  double amount;       // Kwota
+  String? payerName;   // Imię płatnika
+  String? payerUserId; // ID użytkownika płatnika
+  DateTime createdAt;  // Data utworzenia
+  String? category;    // Kategoria wydatku
+}
+
+Właściwości:
+• displayPayerName - wyświetlana nazwa płatnika
+• hasAssignedPayer - czy ma przypisanego płatnika
+
+7.4. APPUSER (UŻYTKOWNIK)
+
+class AppUser {
+  String id;           // UID z Firebase Auth
+  String email;        // Adres email
+  String name;         // Imię użytkownika
+  String? avatar;      // URL zdjęcia profilowego
+  DateTime? createdAt; // Data rejestracji
+}
+
+7.5. FRIEND (ZNAJOMY)
+
+class Friend {
+  String id;
+  String name;
+  String email;
+  String? avatar;
+}
+
+7.6. FRIENDREQUEST (ZAPROSZENIE)
+
+class FriendRequest {
+  String id;
+  String fromUserId;
+  String toUserId;
+  String fromUserName;
+  String? fromUserAvatar;
+  DateTime createdAt;
+  RequestStatus status;  // pending/accepted/rejected
+}
+
+7.7. DAYPLAN (PLAN DNIA)
+
+class DayPlan {
+  String id;
+  DateTime date;
+  List<DayPlanItem> items;
+}
+
+7.8. DAYPLANITEM (ELEMENT PLANU)
+
+class DayPlanItem {
+  String id;
+  String title;
+  String? description;
+  DateTime time;
+  String? location;
+  bool isCompleted;
+}
+
+7.9. DIAGRAM RELACJI
+
+AppUser (1) -----> (N) Trip
+Trip (1) -----> (N) MarkerPoint
+Trip (1) -----> (N) ExpenseItem (trip expenses)
+MarkerPoint (1) -----> (N) ExpenseItem (marker expenses)
+Trip (1) -----> (N) DayPlan
+DayPlan (1) -----> (N) DayPlanItem
+AppUser (N) <-----> (N) Friend
+AppUser (1) -----> (N) FriendRequest
+
+================================================================================
+8. SERWISY
+================================================================================
+
+8.1. TRIPSERVICE (FACADE)
+
+Główny serwis zarządzający podróżami. Implementuje wzorzec Facade.
+
+Deleguje do:
+• TripCrudService - podstawowe operacje CRUD
+• TripImageService - zarządzanie zdjęciami
+• TripDeletionService - usuwanie podróży
+• MarkerCrudService - operacje CRUD na markerach
+• MarkerUpdateService - aktualizacja markerów
+• MarkerImageService - zarządzanie zdjęciami markerów
+• TripExpenseService - zarządzanie wydatkami
+
+API - Operacje na podróżach:
+• saveTrip(Trip trip) - zapisanie podróży
+• getTrip(String tripId) - pobranie podróży
+• watchTrip(String tripId) - obserwowanie w czasie rzeczywistym
+• getTrips(String uid) - wszystkie podróże użytkownika
+• deleteTrip(String tripId) - usunięcie podróży
+
+API - Zdjęcia podróży:
+• uploadTripImage(File, String tripId) - upload zdjęcia
+• deleteTripImage(String imageUrl) - usunięcie zdjęcia
+• updateTripPhoto(String tripId, String? photoUrl) - aktualizacja
+
+API - Markery:
+• addMarkerToTrip(String tripId, MarkerPoint marker)
+• deleteMarkerFromTrip(String tripId, String markerId)
+• updateMarkerTransportMode(tripId, markerId, transportMode)
+• updateMarkerDescription(tripId, markerId, description)
+• updateMarkerName(tripId, markerId, name)
+
+API - Zdjęcia markerów:
+• addImageToMarker(tripId, markerId, File image)
+• deleteMarkerImage(String imageUrl)
+
+API - Wydatki:
+• updateMarkerExpenses(tripId, markerId, expenses)
+• addTripExpense(tripId, expense)
+• deleteTripExpense(tripId, expenseId)
+• updateTripExpense(tripId, expense)
+• getTripExpenses(tripId)
+
+API - Metadane:
+• updateTripDates(tripId, startDate, endDate)
+• updateTripName(tripId, name)
+
+8.2. AUTHSERVICE
+
+Obsługa autoryzacji przez Firebase Auth.
+
+Właściwości:
+• currentUser - aktualny użytkownik
+• authStateChanges - stream zmian stanu
+
+Metody:
+• login(email, password) - logowanie
+• signup(email, password, name) - rejestracja
+• logout() - wylogowanie
+• resetPassword(email) - reset hasła
+
+Obsługa błędów - mapowanie kodów Firebase na komunikaty:
+• invalid-email → "Nieprawidłowy format email"
+• user-not-found → "Nie znaleziono użytkownika"
+• wrong-password → "Nieprawidłowe hasło"
+• email-already-in-use → "Email jest już zajęty"
+• weak-password → "Hasło jest za słabe"
+• too-many-requests → "Zbyt wiele prób"
+
+8.3. TRIPEXPENSESERVICE
+
+Zarządzanie wydatkami podróży.
+
+Metody:
+• addTripExpense(tripId, expense)
+• deleteTripExpense(tripId, expenseId)
+• updateTripExpense(tripId, expense)
+• getTripExpenses(tripId)
+
+8.4. PASSWORDSERVICE
+
+Zmiana hasła użytkownika.
+
+Metoda:
+changePassword(currentPassword, newPassword):
+1. Ponowna autoryzacja z aktualnym hasłem
+2. Zmiana hasła przez Firebase Auth
+
+8.5. PROFILEIMAGESERVICE
+
+Zarządzanie zdjęciem profilowym.
+
+Metoda:
+uploadAvatar(File imageFile):
+1. Upload do Firebase Storage
+2. Aktualizacja URL w Firestore
+3. Zwrócenie URL
+
+================================================================================
+9. STATE MANAGEMENT
+================================================================================
+
+9.1. RIVERPOD - PRZEGLĄD
+
+TripPlanner wykorzystuje Riverpod do zarządzania stanem.
+
+Konfiguracja - owijanie aplikacji:
+void main() {
+  runApp(
+    ProviderScope(
+      child: MyApp(),
+    ),
+  );
+}
+
+ConsumerWidget:
+class MyWidget extends ConsumerWidget {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final value = ref.watch(myProvider);
+    return Text(value);
+  }
+}
+
+9.2. TYPY PROVIDERÓW
+
+Provider (podstawowy):
+Dla obiektów które nie zmieniają się (serwisy, konfiguracja).
+
+final tripServiceProvider = Provider<TripService>((ref) {
+  return TripService(...);
+});
+
+StateProvider:
+Dla prostych stanów (liczniki, flagi, wybory).
+
+final selectedSortingProvider = StateProvider<TripSorting>((ref) {
+  return TripSorting.byDateDesc;
+});
+
+FutureProvider:
+Dla asynchronicznych danych jednorazowych.
+
+final getTripProvider = FutureProvider.family<Trip?, String>((ref, tripId) async {
+  final tripService = ref.watch(tripServiceProvider);
+  return tripService.getTrip(tripId);
+});
+
+StreamProvider:
+Dla danych w czasie rzeczywistym (Firestore streams).
+
+final allTripsProvider = StreamProvider<List<Trip>>((ref) {
+  final tripService = ref.watch(tripServiceProvider);
+  return tripService.getTrips(userId);
+});
+
+StateNotifierProvider:
+Dla złożonej logiki stanu z wieloma akcjami.
+
+final tripFormProvider = StateNotifierProvider<TripFormNotifier, TripFormState>((ref) {
+  return TripFormNotifier();
+});
+
+9.3. PROVIDERY W TRIPPLANNER
+
+Trip Providers:
+• tripServiceProvider - serwis podróży
+• allTripsProvider - wszystkie podróże (stream)
+• getTripProvider - pojedyncza podróż (future)
+• watchTripProvider - obserwowanie podróży (stream)
+
+Form Provider:
+• tripFormProvider - stan formularza nowej podróży
+
+Markers Provider:
+• tripMarkersProvider - stan markerów na mapie
+
+9.4. UŻYCIE REF
+
+ref.watch - nasłuchuje zmian, przebudowuje widget:
+final trips = ref.watch(allTripsProvider);
+
+ref.read - jednorazowy odczyt (dla event handlerów):
+ref.read(tripFormProvider.notifier).submit();
+
+ref.listen - nasłuchuje i wykonuje side effects:
+ref.listen<TripFormState>(tripFormProvider, (previous, next) {
+  if (next.error != null) {
+    // Pokaż snackbar
+  }
+});
+
+9.5. ASYNCVALUE HANDLING
+
+final tripsAsync = ref.watch(allTripsProvider);
+
+return tripsAsync.when(
+  data: (trips) => TripList(trips: trips),
+  loading: () => CircularProgressIndicator(),
+  error: (error, stack) => Text('Error: $error'),
+);
+
+9.6. FAMILY MODIFIERS
+
+Providery parametryzowane:
+
+final watchTripProvider = StreamProvider.family<Trip, String>((ref, tripId) {
+  return tripService.watchTrip(tripId);
+});
+
+// Użycie:
+final tripAsync = ref.watch(watchTripProvider(tripId));
+
+================================================================================
+10. NAWIGACJA
+================================================================================
+
+10.1. GOROUTER - KONFIGURACJA
+
+final appRouter = GoRouter(
+  initialLocation: '/',
+  redirect: _handleRedirect,
+  refreshListenable: GoRouterRefreshStream(
+    FirebaseAuth.instance.authStateChanges(),
+  ),
+  routes: [...],
+);
+
+10.2. AUTOMATYCZNE PRZEKIEROWANIA
+
+Niezalogowany użytkownik:
+• Próba dostępu do chronionej trasy → przekierowanie do /auth
+
+Zalogowany użytkownik:
+• Próba wejścia na /auth → przekierowanie do /
+
+10.3. DEFINICJE TRAS
+
+/auth - AuthScreen (Logowanie/rejestracja)
+/ - HomeScreen (Dashboard)
+/add-trip - NewTripScreen (Tworzenie podróży)
+/my-trips - MyTripsScreen (Lista podróży)
+/friends - FriendsScreen (Znajomi)
+/statistics - StatisticsScreen (Statystyki)
+/profile - ProfileScreen (Profil)
+/profile/edit - EditProfileScreen (Edycja profilu)
+/profile/change-password - ChangePasswordScreen (Zmiana hasła)
+
+10.4. UŻYCIE W KODZIE
+
+Nawigacja do ścieżki:
+context.go('/my-trips');
+
+Push na stos:
+context.push('/add-trip');
+
+Powrót:
+context.pop();
+
+Różnica go() vs push():
+• go() - zastępuje całą historię
+• push() - dodaje do stosu
+
+10.5. PRZEKAZYWANIE PARAMETRÓW
+
+Path parameters:
+context.go('/trip/abc123');
+// Odbiór: state.pathParameters['tripId']
+
+Query parameters:
+context.go('/search?q=paris');
+// Odbiór: state.uri.queryParameters['q']
+
+Extra (obiekty):
+context.push('/trip-details', extra: trip);
+// Odbiór: state.extra as Trip
+
+10.6. SZUFLADA NAWIGACYJNA
+
+Elementy menu:
+• Strona główna (/)
+• Moje podróże (/my-trips)
+• Znajomi (/friends)
+• Statystyki (/statistics)
+• Profil (/profile)
+• Wyloguj
+
+================================================================================
+11. BAZA DANYCH
+================================================================================
+
+11.1. CLOUD FIRESTORE - PRZEGLĄD
+
+Baza danych NoSQL typu dokumentowego.
+• Synchronizacja w czasie rzeczywistym
+• Offline persistence
+• Automatyczne skalowanie
+
+11.2. STRUKTURA BAZY DANYCH
+
+users/
+└── {userId}/
+    ├── email: string
+    ├── name: string
+    ├── avatar: string
+    ├── createdAt: timestamp
+    │
+    ├── trips/
+    │   └── {tripId}/
+    │       ├── name: string
+    │       ├── startDate: timestamp
+    │       ├── endDate: timestamp
+    │       ├── description: string
+    │       ├── tripPhotoUrl: string
+    │       ├── tripType: string
+    │       ├── imageUrl: array<string>
+    │       ├── markerPoints: array<object>
+    │       └── tripExpenses: array<object>
+    │
+    ├── shared_trips/
+    │   └── {tripId}/
+    │       └── ownerId: string
+    │
+    ├── friends/
+    │   └── {friendId}/
+    │       ├── name: string
+    │       ├── email: string
+    │       └── avatar: string
+    │
+    └── friend_requests/
+        └── {requestId}/
+            ├── fromUserId: string
+            ├── toUserId: string
+            ├── fromUserName: string
+            ├── status: string
+            └── createdAt: timestamp
+
+11.3. DOKUMENT TRIP - SZCZEGÓŁY
+
+{
+  "name": "Wakacje w Grecji",
+  "startDate": Timestamp,
+  "endDate": Timestamp,
+  "description": "Opis podróży",
+  "tripPhotoUrl": "https://...",
+  "tripType": "planned",
+  "imageUrl": ["https://..."],
+  "markerPoints": [
+    {
+      "id": "marker-uuid",
+      "position": {
+        "latitude": 37.9838,
+        "longitude": 23.7275
+      },
+      "name": "Ateny",
+      "description": "Stolica Grecji",
+      "imageUrl": ["https://..."],
+      "transportMode": "plane",
+      "expenses": [
+        {
+          "id": "expense-uuid",
+          "title": "Hotel",
+          "amount": 500.00,
+          "payerName": "Jan",
+          "category": "accommodation",
+          "createdAt": "ISO 8601"
+        }
+      ]
+    }
+  ],
+  "tripExpenses": [...]
+}
+
+11.4. OPERACJE CRUD
+
+Tworzenie:
+firestore.collection('users').doc(userId)
+  .collection('trips').doc(tripId)
+  .set(trip.toJson());
+
+Odczyt pojedynczego:
+final doc = await firestore.collection('users').doc(userId)
+  .collection('trips').doc(tripId).get();
+
+Stream pojedynczego:
+firestore.collection('users').doc(userId)
+  .collection('trips').doc(tripId)
+  .snapshots();
+
+Stream kolekcji:
+firestore.collection('users').doc(userId)
+  .collection('trips')
+  .snapshots();
+
+Aktualizacja:
+firestore.collection('users').doc(userId)
+  .collection('trips').doc(tripId)
+  .update({'name': 'Nowa nazwa'});
+
+Usuwanie:
+firestore.collection('users').doc(userId)
+  .collection('trips').doc(tripId)
+  .delete();
+
+11.5. OPERACJE NA TABLICACH
+
+Dodanie elementu:
+await docRef.update({
+  'markerPoints': FieldValue.arrayUnion([newMarker.toJson()]),
+});
+
+Usunięcie elementu:
+await docRef.update({
+  'markerPoints': FieldValue.arrayRemove([marker.toJson()]),
+});
+
+Aktualizacja elementu (wymaga pobrania całej tablicy):
+1. Pobierz dokument
+2. Zmodyfikuj tablicę lokalnie
+3. Zapisz całą tablicę
+
+11.6. REGUŁY BEZPIECZEŃSTWA
+
+Użytkownicy mogą czytać/pisać tylko swoje dane:
+
+match /users/{userId} {
+  allow read, write: if request.auth != null && request.auth.uid == userId;
+
+  match /trips/{tripId} {
+    allow read, write: if request.auth != null && request.auth.uid == userId;
+  }
+
+  match /shared_trips/{tripId} {
+    allow read: if request.auth != null && request.auth.uid == userId;
+    allow write: if request.auth != null;
+  }
+}
+
+11.7. FIREBASE STORAGE - STRUKTURA
+
+storage/
+├── trips/
+│   └── {userId}/
+│       └── {tripId}/
+│           ├── main.jpg
+│           └── markers/
+│               └── {markerId}/
+│                   ├── photo1.jpg
+│                   └── photo2.jpg
+│
+└── avatars/
+    └── {userId}/
+        └── avatar.jpg
+
+================================================================================
+12. BUDOWANIE APLIKACJI
+================================================================================
+
+12.1. PRZYGOTOWANIE
+
+Sprawdzenie środowiska:
+flutter doctor
+flutter devices
+flutter clean
+flutter pub get
+
+Wersjonowanie (pubspec.yaml):
+version: 1.0.0+1
+        │     │
+        │     └── Build number
+        └── Version name
+
+12.2. ANDROID
+
+Konfiguracja podpisywania:
+
+1. Utwórz keystore:
+keytool -genkey -v -keystore ~/trip-planner-key.jks \
+  -keyalg RSA -keysize 2048 -validity 10000 \
+  -alias trip-planner
+
+2. Utwórz android/key.properties:
+storePassword=your_password
+keyPassword=your_password
+keyAlias=trip-planner
+storeFile=/path/to/trip-planner-key.jks
+
+3. Skonfiguruj android/app/build.gradle
+
+Budowanie APK:
+flutter build apk --release
+
+Lokalizacja: build/app/outputs/flutter-apk/app-release.apk
+
+APK dla konkretnej architektury:
+flutter build apk --release --split-per-abi
+
+Budowanie App Bundle (Google Play):
+flutter build appbundle --release
+
+Lokalizacja: build/app/outputs/bundle/release/app-release.aab
+
+12.3. iOS
+
+Wymagania:
+• macOS z Xcode 14+
+• Apple Developer Account
+
+Konfiguracja:
+1. Otwórz ios/Runner.xcworkspace w Xcode
+2. Signing & Capabilities:
+   • Wybierz Team
+   • Ustaw Bundle Identifier
+
+Budowanie:
+flutter build ios --release
+
+Archiwizacja dla App Store:
+1. flutter build ios --release
+2. Xcode: Product > Archive
+3. Organizer: Distribute App > App Store Connect
+
+12.4. WEB
+
+Budowanie:
+flutter build web --release
+
+Lokalizacja: build/web/
+
+Optymalizacje:
+flutter build web --release --tree-shake-icons
+flutter build web --release --web-renderer html     (mniejszy)
+flutter build web --release --web-renderer canvaskit (lepsza jakość)
+
+12.5. DEPLOYMENT
+
+Firebase Hosting (Web):
+npm install -g firebase-tools
+firebase login
+firebase init hosting
+flutter build web --release
+firebase deploy --only hosting
+
+Google Play Store:
+1. Utwórz konto Google Play Developer
+2. Utwórz aplikację w Google Play Console
+3. Upload App Bundle (.aab)
+4. Wypełnij listing
+5. Submit for Review
+
+Apple App Store:
+1. Utwórz konto Apple Developer
+2. Utwórz App ID
+3. Utwórz aplikację w App Store Connect
+4. Upload przez Xcode
+5. Wypełnij metadane
+6. Submit for Review
+
+12.6. CHECKLIST PRZED RELEASE
+
+Android:
+• Zaktualizuj version w pubspec.yaml
+• Skonfiguruj keystore i podpisywanie
+• Zbuduj w trybie release
+• Przetestuj na fizycznym urządzeniu
+• Sprawdź rozmiar APK/AAB
+• Przygotuj screenshots i opisy
+
+iOS:
+• Zaktualizuj version
+• Skonfiguruj Signing w Xcode
+• Przetestuj przez TestFlight
+• Przygotuj screenshots
+• Dodaj Privacy Policy URL
+
+Web:
+• Zbuduj z optymalizacjami
+• Skonfiguruj hosting
+• Przetestuj PWA
+• Sprawdź performance
+
+================================================================================
+KONIEC DOKUMENTACJI
+================================================================================
