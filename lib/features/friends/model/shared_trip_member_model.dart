@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trip_planner/core/utils/user_utils.dart';
 
 enum TripRole {
   owner,
@@ -47,8 +48,36 @@ class SharedTripMember {
     };
   }
 
-  String get displayName => name ?? email.split('@').first;
+  String get displayName => UserUtils.formatDisplayName(name, email);
 
   bool get canEdit => role == TripRole.owner || role == TripRole.editor;
   bool get isOwner => role == TripRole.owner;
+  bool get isEditor => role == TripRole.editor;
+  bool get isViewer => role == TripRole.viewer;
+
+  SharedTripMember copyWith({
+    String? email,
+    String? name,
+    String? avatar,
+    TripRole? role,
+    DateTime? addedAt,
+  }) {
+    return SharedTripMember(
+      uid: uid,
+      email: email ?? this.email,
+      name: name ?? this.name,
+      avatar: avatar ?? this.avatar,
+      role: role ?? this.role,
+      addedAt: addedAt ?? this.addedAt,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is SharedTripMember && other.uid == uid;
+  }
+
+  @override
+  int get hashCode => uid.hashCode;
 }

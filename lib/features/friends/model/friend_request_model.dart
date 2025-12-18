@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trip_planner/core/utils/user_utils.dart';
 import 'package:trip_planner/features/friends/model/friend_model.dart';
 
 class FriendRequest {
@@ -50,5 +51,39 @@ class FriendRequest {
     };
   }
 
-  String get displayName => fromName ?? fromEmail.split('@').first;
+  FriendRequest copyWith({
+    String? fromUid,
+    String? toUid,
+    String? fromEmail,
+    String? fromName,
+    String? fromAvatar,
+    FriendshipStatus? status,
+    DateTime? createdAt,
+  }) {
+    return FriendRequest(
+      id: id,
+      fromUid: fromUid ?? this.fromUid,
+      toUid: toUid ?? this.toUid,
+      fromEmail: fromEmail ?? this.fromEmail,
+      fromName: fromName ?? this.fromName,
+      fromAvatar: fromAvatar ?? this.fromAvatar,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  String get displayName => UserUtils.formatDisplayName(fromName, fromEmail);
+
+  bool get isPending => status == FriendshipStatus.pending;
+  bool get isAccepted => status == FriendshipStatus.accepted;
+  bool get isRejected => status == FriendshipStatus.rejected;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is FriendRequest && other.id == id;
+  }
+
+  @override
+  int get hashCode => id.hashCode;
 }

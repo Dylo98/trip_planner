@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:trip_planner/core/utils/user_utils.dart';
 
 enum FriendshipStatus {
   pending,
@@ -65,7 +66,7 @@ class Friend {
     );
   }
 
-  String get displayName => name ?? email.split('@').first;
+  String get displayName => UserUtils.formatDisplayName(name, email);
 
   bool get isAccepted => status == FriendshipStatus.accepted;
   bool get isPending => status == FriendshipStatus.pending;

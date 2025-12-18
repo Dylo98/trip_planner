@@ -1,6 +1,7 @@
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-enum PlaceCategory {
+/// Kategoria miejsca dla API Nominatim (OpenStreetMap)
+enum NominatimPlaceCategory {
   attraction('Atrakcja', '🎭'),
   historic('Zabytek', '🏛️'),
   food('Gastronomia', '🍽️'),
@@ -11,29 +12,29 @@ enum PlaceCategory {
   final String displayName;
   final String emoji;
 
-  const PlaceCategory(this.displayName, this.emoji);
+  const NominatimPlaceCategory(this.displayName, this.emoji);
 
-  static PlaceCategory fromTags(Map<String, dynamic> tags) {
+  static NominatimPlaceCategory fromTags(Map<String, dynamic> tags) {
     if (tags.containsKey('tourism')) {
       final tourism = tags['tourism'] as String?;
       if (tourism == 'museum' || tourism == 'gallery') {
-        return PlaceCategory.culture;
+        return NominatimPlaceCategory.culture;
       }
-      return PlaceCategory.attraction;
+      return NominatimPlaceCategory.attraction;
     }
     if (tags.containsKey('historic')) {
-      return PlaceCategory.historic;
+      return NominatimPlaceCategory.historic;
     }
     if (tags.containsKey('amenity')) {
       final amenity = tags['amenity'] as String?;
       if (amenity == 'restaurant' || amenity == 'cafe' || amenity == 'bar') {
-        return PlaceCategory.food;
+        return NominatimPlaceCategory.food;
       }
     }
     if (tags.containsKey('natural') || tags.containsKey('leisure')) {
-      return PlaceCategory.nature;
+      return NominatimPlaceCategory.nature;
     }
-    return PlaceCategory.unknown;
+    return NominatimPlaceCategory.unknown;
   }
 }
 
@@ -74,16 +75,16 @@ class PlaceSuggestion {
   final String? address;
   final String? photoReference;
   final double? importance;
-  final PlaceCategory category;
+  final NominatimPlaceCategory category;
   final PlaceDetails? details;
 
-  PlaceSuggestion({
+  const PlaceSuggestion({
     required this.name,
     required this.location,
     this.address,
     this.photoReference,
     this.importance,
-    this.category = PlaceCategory.unknown,
+    this.category = NominatimPlaceCategory.unknown,
     this.details,
   });
 

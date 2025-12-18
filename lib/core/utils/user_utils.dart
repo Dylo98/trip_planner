@@ -19,4 +19,13 @@ class UserUtils {
   static String getAvatarUrl(User? user) {
     return user?.photoURL ?? '';
   }
+
+  /// Generuje nazwę wyświetlaną z imienia lub emaila
+  /// Używane przez modele: Friend, FriendRequest, SharedTripMember
+  static String formatDisplayName(String? name, String email) {
+    if (name != null && name.trim().isNotEmpty) {
+      return name.trim();
+    }
+    return email.split('@').first;
+  }
 }
