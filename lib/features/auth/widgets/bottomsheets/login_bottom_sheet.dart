@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/button_style.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/auth/constants/auth_messages.dart';
 import 'package:trip_planner/features/auth/providers/auth_provider.dart';
@@ -7,6 +8,7 @@ import 'package:trip_planner/features/auth/services/auth_service.dart';
 import 'package:trip_planner/core/theme/text_style.dart';
 import 'package:trip_planner/core/theme/input_style.dart';
 import 'package:trip_planner/core/utils/validators.dart';
+import 'package:trip_planner/core/widgets/app_notifications.dart';
 import 'package:trip_planner/core/widgets/buttons/form_auth_btn.dart';
 import 'package:trip_planner/features/auth/widgets/auth_error_message.dart';
 import 'package:trip_planner/features/auth/widgets/bottomsheets/auth_bottom_sheet_wrapper.dart';
@@ -86,40 +88,67 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset hasła'),
-        content: Form(
-          key: formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                  'Podaj adres e-mail, na który wyślemy link do resetu hasła.'),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: emailController,
-                decoration: const InputDecoration(
-                  labelText: 'E-mail',
-                  border: OutlineInputBorder(),
+        insetPadding: const EdgeInsets.symmetric(horizontal: 16),
+        title: const Row(
+          children: [
+            Icon(
+              Icons.lock_reset,
+              color: AppColors.limeSliceDark,
+            ),
+            SizedBox(width: 8),
+            Text(
+              'Reset hasła',
+              style: AppTextStyles.heading3,
+            ),
+          ],
+        ),
+        content: SizedBox(
+          width: MediaQuery.of(ctx).size.width * 0.9,
+          child: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Podaj adres e-mail, na który wyślemy link do resetu hasła.',
+                  style: AppTextStyles.bodyTextSecondary,
                 ),
-                keyboardType: TextInputType.emailAddress,
-                autovalidateMode: AutovalidateMode.onUserInteraction,
-                validator: Validators.validateEmail,
-              ),
-            ],
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: emailController,
+                  decoration: AppInputStyle.inputDecoration(
+                    icon: Icons.email,
+                    labelText: 'E-mail',
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  validator: Validators.validateEmail,
+                  autofocus: true,
+                ),
+              ],
+            ),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Anuluj'),
+            child: const Text(
+              'Anuluj',
+              style: AppTextStyles.bodySmallRed,
+            ),
           ),
-          ElevatedButton(
+          GradientButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 Navigator.pop(ctx, true);
               }
             },
-            child: const Text('Wyślij'),
+            icon: const Icon(Icons.send, color: AppColors.darkGrey),
+            child: const Text(
+              'Wyślij',
+              style: AppTextStyles.buttonText,
+            ),
           ),
         ],
       ),
@@ -129,18 +158,18 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
       try {
         await ref.read(authProvider).resetPassword(emailController.text.trim());
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Link do resetu hasła został wysłany'),
-            ),
+          AppNotifications.showSuccess(
+            context: context,
+            message: 'Link do resetu hasła został wysłany',
           );
           setState(() => _errorMessage = null);
         }
       } on AuthException catch (e) {
         if (mounted) {
-          setState(() {
-            _errorMessage = e.message;
-          });
+          AppNotifications.showError(
+            context: context,
+            message: e.message,
+          );
         }
       }
     }
