@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:trip_planner/core/theme/button_style.dart';
 import 'package:trip_planner/core/theme/colors.dart';
 import 'package:trip_planner/features/auth/constants/auth_messages.dart';
 import 'package:trip_planner/features/auth/providers/auth_provider.dart';
@@ -86,7 +87,13 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
     final result = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reset hasła'),
+        title: const Row(
+          children: [
+            Icon(Icons.lock_reset, color: AppColors.limeSliceDark),
+            SizedBox(width: 8),
+            Text('Reset hasła', style: AppTextStyles.heading3),
+          ],
+        ),
         content: Form(
           key: formKey,
           child: Column(
@@ -97,9 +104,9 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: emailController,
-                decoration: const InputDecoration(
+                decoration: AppInputStyle.inputDecoration(
+                  icon: Icons.email,
                   labelText: 'E-mail',
-                  border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
                 autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -111,15 +118,21 @@ class _LoginBottomSheetState extends ConsumerState<LoginBottomSheet> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Anuluj'),
+            child: const Text(
+              'Anuluj',
+              style: AppTextStyles.bodySmallRed,
+            ),
           ),
-          ElevatedButton(
+          GradientButton(
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 Navigator.pop(ctx, true);
               }
             },
-            child: const Text('Wyślij'),
+            child: const Text(
+              'Wyślij',
+              style: AppTextStyles.buttonText,
+            ),
           ),
         ],
       ),

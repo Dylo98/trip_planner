@@ -46,6 +46,7 @@ class AuthService {
     required String name,
   }) async {
     try {
+      // ETAP 1: Walidacja danych
       if (name.trim().isEmpty) {
         throw AuthException(AuthMessages.nameEmpty);
       }
@@ -53,6 +54,7 @@ class AuthService {
         throw AuthException(AuthMessages.nameTooShort);
       }
 
+      // ETAP 2: Utworzenie konta w Firebase Auth
       final credential = await _auth.createUserWithEmailAndPassword(
         email: email.trim(),
         password: password,
@@ -63,6 +65,7 @@ class AuthService {
         throw AuthException(AuthMessages.userCreationFailed);
       }
 
+      // ETAP 3: Zapis profilu w Firestore
       await _firestore.collection('users').doc(user.uid).set({
         'email': email.trim(),
         'name': name.trim(),

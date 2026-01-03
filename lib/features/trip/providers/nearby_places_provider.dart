@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 import 'package:trip_planner/features/trip/services/google_places/google_places_service.dart';
-import 'package:trip_planner/features/trip/widgets/nearby_places/models/place_category.dart';
+import 'package:trip_planner/features/trip/model/place_category.dart';
 
 class NearbyPlacesData {
   final List<GooglePlace> places;

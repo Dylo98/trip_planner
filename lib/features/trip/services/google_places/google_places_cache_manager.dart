@@ -96,7 +96,7 @@ class GooglePlacesCacheManager {
 
       await prefs.setString(key, json.encode(data));
     } catch (e) {
-      // Błąd podczas zapisu cache - ignoruj, nie krytyczne
+      // Błąd podczas zapisu cache
     }
   }
 

@@ -7,7 +7,7 @@ import 'package:trip_planner/core/widgets/loading_indicator.dart';
 
 import 'package:trip_planner/features/trip/services/google_places/google_places_models.dart';
 
-import 'package:trip_planner/features/trip/widgets/nearby_places/providers/nearby_places_provider.dart';
+import 'package:trip_planner/features/trip/providers/nearby_places_provider.dart';
 
 import 'package:trip_planner/features/trip/widgets/nearby_places/widgets/category_filter_chips.dart/category_filter_chips.dart';
 

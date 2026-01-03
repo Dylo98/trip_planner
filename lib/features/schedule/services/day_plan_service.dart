@@ -291,11 +291,13 @@ class DayPlanService {
     }
 
     final collection = await _getDayPlansCollection(tripId);
+    final existingDocs = await collection.get();
+    final existingKeys = existingDocs.docs.map((doc) => doc.id).toSet();
     final batch = _firestore.batch();
-
     for (int i = 0; i < days; i++) {
       final date = startDate.add(Duration(days: i));
       final dateKey = DayPlan.formatDateKey(date);
+      await batch.commit();
       final docRef = collection.doc(dateKey);
 
       final existingDoc = await docRef.get();

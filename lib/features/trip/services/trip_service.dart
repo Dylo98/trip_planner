@@ -86,51 +86,23 @@ class TripService {
   late final MarkerImageService _markerImageService;
   late final TripExpenseService _tripExpenseService;
 
-  // =============================
-  // TRIPS – ZAPIS / ODCZYT PODRÓŻY
-  // =============================
-
-  /// Zapisuje podróż do Firestore
   Future<void> saveTrip(Trip trip) => _tripCrudService.saveTrip(trip);
-
-  /// Pobiera pojedynczą podróż po ID
   Future<Trip?> getTrip(String tripId) => _tripCrudService.getTrip(tripId);
-
-  /// Obserwuje zmiany w podróży w czasie rzeczywistym
   Stream<Trip> watchTrip(String tripId) => _tripCrudService.watchTrip(tripId);
-
-  /// Pobiera wszystkie podróże użytkownika jako Stream
   Stream<List<Trip>> getTrips(String uid) => _tripCrudService.getTrips(uid);
 
-  // =============================
-  // TRIPS – ZDJĘCIA
-  // =============================
-
-  /// Uploaduje zdjęcie główne podróży do Firebase Storage
   Future<String> uploadTripImage(File imageFile, String tripId) =>
       _tripImageService.uploadTripImage(imageFile, tripId);
 
-  /// Usuwa zdjęcie podróży z Firebase Storage
   Future<void> deleteTripImage(String imageUrl) =>
       _tripImageService.deleteTripImage(imageUrl);
 
-  // =============================
-  // MARKERY – DODAWANIE / USUWANIE
-  // =============================
-
-  /// Dodaje nowy marker do podróży
   Future<void> addMarkerToTrip(String tripId, MarkerPoint marker) =>
       _markerCrudService.addMarkerToTrip(tripId, marker);
 
-  /// Usuwa marker z podróży wraz ze wszystkimi jego zdjęciami
   Future<void> deleteMarkerFromTrip(String tripId, String markerId) =>
       _markerCrudService.deleteMarkerFromTrip(tripId, markerId);
 
-  // =============================
-  // MARKERY – AKTUALIZACJA
-  // =============================
-
-  /// Aktualizuje środek transportu dla markera
   Future<void> updateMarkerTransportMode({
     required String tripId,
     required String markerId,
@@ -142,7 +114,6 @@ class TripService {
         transportMode: transportMode,
       );
 
-  /// Aktualizuje listę wydatków dla markera
   Future<void> updateMarkerExpenses({
     required String tripId,
     required String markerId,
@@ -154,11 +125,6 @@ class TripService {
         expenses: expenses,
       );
 
-  // =============================
-  // MARKERY – ZDJĘCIA
-  // =============================
-
-  /// Dodaje zdjęcie do markera
   Future<void> addImageToMarker({
     required String tripId,
     required String markerId,
@@ -172,19 +138,12 @@ class TripService {
         image: image,
       );
 
-  /// Usuwa zdjęcie markera z Firebase Storage
   Future<void> deleteMarkerImage(String imageUrl) =>
       _markerImageService.deleteMarkerImage(imageUrl);
 
-  // =============================
-  // TRIPS – USUWANIE
-  // =============================
-
-  /// Usuwa podróż wraz ze wszystkimi powiązanymi zasobami
   Future<void> deleteTrip(String tripId) =>
       _tripDeletionService.deleteTrip(tripId);
 
-  /// Aktualizuje opis dla markera
   Future<void> updateMarkerDescription({
     required String tripId,
     required String markerId,
@@ -196,7 +155,6 @@ class TripService {
         description: description,
       );
 
-  /// Aktualizuje nazwę markera
   Future<void> updateMarkerName({
     required String tripId,
     required String markerId,
@@ -208,11 +166,6 @@ class TripService {
         name: name,
       );
 
-  // =============================
-  // TRIP EXPENSES – OGÓLNE WYDATKI PODRÓŻY
-  // =============================
-
-  /// Dodaje nowy wydatek ogólny do podróży
   Future<void> addTripExpense({
     required String tripId,
     required ExpenseItem expense,
@@ -222,7 +175,6 @@ class TripService {
         expense: expense,
       );
 
-  /// Usuwa wydatek ogólny z podróży
   Future<void> deleteTripExpense({
     required String tripId,
     required String expenseId,
@@ -232,7 +184,6 @@ class TripService {
         expenseId: expenseId,
       );
 
-  /// Aktualizuje wydatek ogólny w podróży
   Future<void> updateTripExpense({
     required String tripId,
     required ExpenseItem expense,
@@ -242,11 +193,9 @@ class TripService {
         expense: expense,
       );
 
-  /// Pobiera wszystkie wydatki ogólne z podróży
   Future<List<ExpenseItem>> getTripExpenses(String tripId) =>
       _tripExpenseService.getTripExpenses(tripId);
 
-  /// Aktualizuje zdjęcie główne podróży
   Future<void> updateTripPhoto(String tripId, String? photoUrl) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('User not logged in');
@@ -284,7 +233,6 @@ class TripService {
     });
   }
 
-  /// Aktualizuje daty podróży
   Future<void> updateTripDates(
     String tripId,
     DateTime startDate,
@@ -327,7 +275,6 @@ class TripService {
     });
   }
 
-  /// Aktualizuje nazwę podróży
   Future<void> updateTripName(String tripId, String name) async {
     final uid = _auth.currentUser?.uid;
     if (uid == null) throw Exception('User not logged in');
